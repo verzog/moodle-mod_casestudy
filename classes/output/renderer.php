@@ -763,6 +763,25 @@ class renderer extends plugin_renderer_base {
         // Header summary for the student so the attempt number + state is unmistakable.
         $sublocal = $submission->get_submission();
         $statuskey = 'status_' . $sublocal->status;
+
+        // Show edit/submit-draft actions only to the submission's owner viewing a draft.
+        $ownerviewingdraft = $sublocal->userid == $USER->id
+            && in_array($sublocal->status, [
+                CASESTUDY_STATUS_DRAFT,
+                CASESTUDY_STATUS_AWAITING_RESUBMISSION,
+            ], true);
+
+        $editurl = (new \moodle_url('/mod/casestudy/submission.php', [
+            'id' => $cm->id,
+            'submissionid' => $sublocal->id,
+        ]))->out(false);
+        $submitdrafturl = (new \moodle_url('/mod/casestudy/view_casestudy.php', [
+            'id' => $cm->id,
+            'submissionid' => $sublocal->id,
+            'action' => 'submit',
+            'sesskey' => sesskey(),
+        ]))->out(false);
+
         $submissiondata['attemptheader'] = [
             'attempt' => (int) $sublocal->attempt,
             'attemptlabel' => get_string('attemptheading', 'mod_casestudy', (int) $sublocal->attempt),
@@ -779,6 +798,10 @@ class renderer extends plugin_renderer_base {
                 CASESTUDY_STATUS_SATISFACTORY,
                 CASESTUDY_STATUS_UNSATISFACTORY,
             ], true),
+            'canedit' => $ownerviewingdraft,
+            'cansubmitdraft' => $ownerviewingdraft && $sublocal->status === CASESTUDY_STATUS_DRAFT,
+            'editurl' => $editurl,
+            'submitdrafturl' => $submitdrafturl,
         ];
 
         return $this->render_from_template('mod_casestudy/view_casestudy', $submissiondata);

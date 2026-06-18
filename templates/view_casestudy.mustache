@@ -57,21 +57,62 @@
 {{#attemptheader}}
 <div class="casestudy-attempt-header card mb-3">
     <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
-        <h2 class="h4 mb-0 mr-3 casestudy-attempt-header__title">
-            {{attemptlabel}}
-        </h2>
-        <span class="casestudy-attempt-header__status badge badge-{{statusclass}} px-3 py-2"
-              data-status="{{#isdraft}}draft{{/isdraft}}{{^isdraft}}{{#issubmitted}}submitted{{/issubmitted}}{{^issubmitted}}{{#isgraded}}graded{{/isgraded}}{{^isgraded}}other{{/isgraded}}{{/issubmitted}}{{/isdraft}}">
-            {{#isdraft}}
-                <i class="fa fa-pencil-alt mr-1" aria-hidden="true"></i>
-            {{/isdraft}}
-            {{^isdraft}}{{#issubmitted}}
-                <i class="fa fa-paper-plane mr-1" aria-hidden="true"></i>
-            {{/issubmitted}}{{/isdraft}}
-            {{statuslabel}}
-        </span>
+        <div class="d-flex align-items-center flex-wrap">
+            <h2 class="h4 mb-0 mr-3 casestudy-attempt-header__title">
+                {{attemptlabel}}
+            </h2>
+            <span class="casestudy-attempt-header__status badge badge-{{statusclass}} px-3 py-2"
+                  data-status="{{#isdraft}}draft{{/isdraft}}{{^isdraft}}{{#issubmitted}}submitted{{/issubmitted}}{{^issubmitted}}{{#isgraded}}graded{{/isgraded}}{{^isgraded}}other{{/isgraded}}{{/issubmitted}}{{/isdraft}}">
+                {{#isdraft}}
+                    <i class="fa fa-pencil-alt mr-1" aria-hidden="true"></i>
+                {{/isdraft}}
+                {{^isdraft}}{{#issubmitted}}
+                    <i class="fa fa-paper-plane mr-1" aria-hidden="true"></i>
+                {{/issubmitted}}{{/isdraft}}
+                {{statuslabel}}
+            </span>
+        </div>
+
+        {{#canedit}}
+            <div class="casestudy-attempt-header__actions btn-group" role="group"
+                 aria-label="{{#str}}attemptactions, mod_casestudy{{/str}}">
+                <a href="{{editurl}}" class="btn btn-outline-primary" data-action="edit-submission">
+                    <i class="fa fa-pencil-alt mr-1" aria-hidden="true"></i>
+                    {{#str}}editsubmission, mod_casestudy{{/str}}
+                </a>
+                {{#cansubmitdraft}}
+                    <a href="{{submitdrafturl}}" class="btn btn-success" data-action="submit-draft"
+                       data-confirm="{{#str}}confirmsubmitdraft, mod_casestudy{{/str}}">
+                        <i class="fa fa-paper-plane mr-1" aria-hidden="true"></i>
+                        {{#str}}submitdraft, mod_casestudy{{/str}}
+                    </a>
+                {{/cansubmitdraft}}
+            </div>
+        {{/canedit}}
     </div>
 </div>
+{{#canedit}}
+{{#js}}
+require(['core/notification', 'core/str'], function(Notification, Str) {
+    // Confirm before flipping a draft to submitted — the action is irreversible
+    // for the student (only graders can move it back to draft).
+    document.querySelectorAll('[data-action="submit-draft"]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            Str.get_strings([
+                {key: 'confirmsubmittitle', component: 'mod_casestudy'},
+                {key: 'confirmsubmitdraft', component: 'mod_casestudy'},
+                {key: 'submitdraft', component: 'mod_casestudy'}
+            ]).done(function(strings) {
+                Notification.confirm(strings[0], strings[1], strings[2], null, function() {
+                    window.location = link.getAttribute('href');
+                });
+            });
+        });
+    });
+});
+{{/js}}
+{{/canedit}}
 {{/attemptheader}}
 
 {{#usernavigation}}
