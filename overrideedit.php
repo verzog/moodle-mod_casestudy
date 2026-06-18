@@ -22,7 +22,7 @@
 use mod_casestudy\form\edit_override_form;
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->dirroot.'/mod/casestudy/lib.php');
+require_once($CFG->dirroot . '/mod/casestudy/lib.php');
 
 $cmid = optional_param('cmid', 0, PARAM_INT);
 $overrideid = optional_param('id', 0, PARAM_INT);
@@ -31,10 +31,10 @@ $action = optional_param('action', null, PARAM_ALPHA);
 $override = null;
 if ($overrideid) {
     $override = $DB->get_record('casestudy_overrides', ['id' => $overrideid], '*', MUST_EXIST);
-    list($course, $cm) = get_course_and_cm_from_instance($override->casestudyid, 'casestudy');
+    [$course, $cm] = get_course_and_cm_from_instance($override->casestudyid, 'casestudy');
     $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 } else {
-    list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'casestudy');
+    [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'casestudy');
     $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 }
 
@@ -88,7 +88,6 @@ $mform->set_data($data);
 
 if ($mform->is_cancelled()) {
     redirect($overridelisturl);
-
 } else if ($fromform = $mform->get_data()) {
     // Process the data.
     $overridedata = new stdClass();
@@ -130,9 +129,9 @@ if ($mform->is_cancelled()) {
         'context' => $context,
         'other' => [
             'casestudyid' => $casestudy->id,
-            'userid' => $overridedata->userid
+            'userid' => $overridedata->userid,
         ],
-        'relateduserid' => $overridedata->userid
+        'relateduserid' => $overridedata->userid,
     ];
 
     if (empty($overrideid)) {
@@ -163,7 +162,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->activityheader->set_attrs([
     "title" => format_string($casestudy->name, true, ['context' => $context]),
     "description" => "",
-    "hidecompletion" => true
+    "hidecompletion" => true,
 ]);
 echo $OUTPUT->header();
 

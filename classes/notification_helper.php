@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * Helper class for sending notifications
  */
 class notification_helper {
-
     /**
      * Send web notification to markers when a learner submits
      *
@@ -98,7 +97,7 @@ class notification_helper {
         // Prepare the message.
         $submissionurl = new \moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $cm->id,
-            'submissionid' => $submission->id
+            'submissionid' => $submission->id,
         ]);
 
         $message = new \core\message\message();
@@ -107,24 +106,24 @@ class notification_helper {
         $message->userfrom = $student;
         $message->subject = get_string('submissionnotificationsubject', 'mod_casestudy', [
             'student' => fullname($student),
-            'casestudy' => $casestudy->name
+            'casestudy' => $casestudy->name,
         ]);
         $message->fullmessage = get_string('submissionnotificationtext', 'mod_casestudy', [
             'student' => fullname($student),
             'casestudy' => $casestudy->name,
             'course' => $course->fullname,
-            'url' => $submissionurl->out(false)
+            'url' => $submissionurl->out(false),
         ]);
         $message->fullmessageformat = FORMAT_PLAIN;
         $message->fullmessagehtml = get_string('submissionnotificationhtml', 'mod_casestudy', [
             'student' => fullname($student),
             'casestudy' => $casestudy->name,
             'course' => $course->fullname,
-            'url' => $submissionurl->out(false)
+            'url' => $submissionurl->out(false),
         ]);
         $message->smallmessage = get_string('submissionnotificationsmall', 'mod_casestudy', [
             'student' => fullname($student),
-            'casestudy' => $casestudy->name
+            'casestudy' => $casestudy->name,
         ]);
         $message->notification = 1;
         $message->contexturl = $submissionurl->out(false);
@@ -175,14 +174,14 @@ class notification_helper {
         $message->userfrom = \core_user::get_noreply_user();
         $message->userto = $student;
         $message->subject = get_string('submissionconfirmationsubject', 'mod_casestudy', [
-            'casestudy' => $casestudy->name
+            'casestudy' => $casestudy->name,
         ]);
         $message->fullmessage = get_string('submissionconfirmationtext', 'mod_casestudy', [
             'student' => fullname($student),
             'casestudy' => $casestudy->name,
             'course' => $course->fullname,
             'timesubmitted' => userdate($submission->timesubmitted),
-            'url' => $submissionurl->out(false)
+            'url' => $submissionurl->out(false),
         ]);
         $message->fullmessageformat = FORMAT_PLAIN;
         $message->fullmessagehtml = get_string('submissionconfirmationhtml', 'mod_casestudy', [
@@ -190,10 +189,10 @@ class notification_helper {
             'casestudy' => $casestudy->name,
             'course' => $course->fullname,
             'timesubmitted' => userdate($submission->timesubmitted),
-            'url' => $submissionurl->out(false)
+            'url' => $submissionurl->out(false),
         ]);
         $message->smallmessage = get_string('submissionconfirmationsmall', 'mod_casestudy', [
-            'casestudy' => $casestudy->name
+            'casestudy' => $casestudy->name,
         ]);
         $message->notification = 1;
         $message->contexturl = $submissionurl->out(false);
@@ -242,7 +241,7 @@ class notification_helper {
         // Prepare the message.
         $submissionurl = new \moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $cm->id,
-            'submissionid' => $submission->id
+            'submissionid' => $submission->id,
         ]);
 
         $message = new \core\message\message();
@@ -252,7 +251,7 @@ class notification_helper {
         $message->userto = $student;
         $message->subject = get_string('gradenotificationsubject', 'mod_casestudy', [
             'casestudy' => $casestudy->name,
-            'status' => $statusstr
+            'status' => $statusstr,
         ]);
 
         $messagedata = [
@@ -262,7 +261,7 @@ class notification_helper {
             'status' => $statusstr,
             'feedback' => !empty($grade->feedback) ? format_text($grade->feedback, $grade->feedbackformat) : '',
             'grader' => $casestudy->hidegrader ? get_string('grader', 'mod_casestudy') : fullname($grader),
-            'url' => $submissionurl->out(false)
+            'url' => $submissionurl->out(false),
         ];
 
         $message->fullmessage = get_string('gradenotificationtext', 'mod_casestudy', $messagedata);
@@ -270,7 +269,7 @@ class notification_helper {
         $message->fullmessagehtml = get_string('gradenotificationhtml', 'mod_casestudy', $messagedata);
         $message->smallmessage = get_string('gradenotificationsmall', 'mod_casestudy', [
             'casestudy' => $casestudy->name,
-            'status' => $statusstr
+            'status' => $statusstr,
         ]);
         $message->notification = 1;
         $message->contexturl = $submissionurl->out(false);
@@ -360,8 +359,11 @@ class notification_helper {
         global $DB;
 
         // Get completion rules.
-        $completionrules = $DB->get_records('casestudy_completion_rules',
-            ['casestudyid' => $casestudy->id, 'enabled' => 1], 'sortorder ASC');
+        $completionrules = $DB->get_records(
+            'casestudy_completion_rules',
+            ['casestudyid' => $casestudy->id, 'enabled' => 1],
+            'sortorder ASC'
+        );
 
         if (empty($completionrules)) {
             return false; // No completion criteria set, don't send report.
@@ -380,13 +382,13 @@ class notification_helper {
         $message->userto = $user;
         $message->subject = get_string('learnerreportsubject', 'mod_casestudy', [
             'casestudy' => $casestudy->name,
-            'course' => $course->shortname
+            'course' => $course->shortname,
         ]);
         $message->fullmessage = self::format_learner_report_text($reportdata, $casestudy, $course, $user, $viewurl);
         $message->fullmessageformat = FORMAT_PLAIN;
         $message->fullmessagehtml = self::format_learner_report_html($reportdata, $casestudy, $course, $user, $viewurl);
         $message->smallmessage = get_string('learnerreportsmall', 'mod_casestudy', [
-            'casestudy' => $casestudy->name
+            'casestudy' => $casestudy->name,
         ]);
         $message->notification = 1;
         $message->contexturl = $viewurl->out(false);
@@ -416,7 +418,7 @@ class notification_helper {
                 $current = $DB->count_records('casestudy_submissions', [
                     'casestudyid' => $casestudy->id,
                     'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY
+                    'status' => CASESTUDY_STATUS_SATISFACTORY,
                 ]);
 
                 $completed = ($current >= $rule->count);
@@ -428,9 +430,8 @@ class notification_helper {
                     'label' => get_string('totalsatisfactory', 'mod_casestudy'),
                     'current' => $current,
                     'required' => $rule->count,
-                    'completed' => $completed
+                    'completed' => $completed,
                 ];
-
             } else if ($rule->ruletype == CASESTUDY_COMPLETION_CATEGORY && !empty($rule->fieldid)) {
                 // Category-based completion.
                 $field = $DB->get_record('casestudy_fields', ['id' => $rule->fieldid]);
@@ -443,8 +444,12 @@ class notification_helper {
                 // Resolve category value.
                 $actualvalue = null;
                 if (!empty($rule->categoryvalue)) {
-                    $fields = $DB->get_records('casestudy_fields',
-                        ['casestudyid' => $casestudy->id, 'category' => 1], 'sortorder ASC', 'id, param1');
+                    $fields = $DB->get_records(
+                        'casestudy_fields',
+                        ['casestudyid' => $casestudy->id, 'category' => 1],
+                        'sortorder ASC',
+                        'id, param1'
+                    );
 
                     $optionindex = 1;
                     foreach ($fields as $f) {
@@ -481,7 +486,8 @@ class notification_helper {
                     ];
                 }
 
-                $current = $DB->count_records_sql("
+                $current = $DB->count_records_sql(
+                    "
                     SELECT COUNT(DISTINCT s.id)
                     FROM {casestudy_submissions} s
                     JOIN {casestudy_content} c ON s.id = c.submissionid
@@ -507,14 +513,14 @@ class notification_helper {
                     'label' => $label,
                     'current' => $current,
                     'required' => $rule->count,
-                    'completed' => $completed
+                    'completed' => $completed,
                 ];
             }
         }
 
         return [
             'criteria' => $criteria,
-            'overallcomplete' => $overallcomplete
+            'overallcomplete' => $overallcomplete,
         ];
     }
 
@@ -532,7 +538,7 @@ class notification_helper {
         $text = get_string('learnerreporthello', 'mod_casestudy', fullname($user)) . "\n\n";
         $text .= get_string('learnerreportintro', 'mod_casestudy', [
             'casestudy' => $casestudy->name,
-            'course' => $course->fullname
+            'course' => $course->fullname,
         ]) . "\n\n";
 
         $text .= "-------------------------------------------\n";
@@ -542,7 +548,8 @@ class notification_helper {
         foreach ($reportdata['criteria'] as $criterion) {
             $status = $criterion['completed'] ? '[✓] ' . get_string('completed', 'completion')
                                                : '[ ] ' . get_string('todo', 'completion');
-            $text .= sprintf("%s: %d / %d %s\n",
+            $text .= sprintf(
+                "%s: %d / %d %s\n",
                 $criterion['label'],
                 $criterion['current'],
                 $criterion['required'],
@@ -580,7 +587,7 @@ class notification_helper {
         $html .= '<p>' . get_string('learnerreporthello', 'mod_casestudy', fullname($user)) . '</p>';
         $html .= '<p>' . get_string('learnerreportintro', 'mod_casestudy', [
             'casestudy' => $casestudy->name,
-            'course' => $course->fullname
+            'course' => $course->fullname,
         ]) . '</p>';
 
         $html .= '<h3>' . get_string('completionstatus', 'mod_casestudy') . '</h3>';

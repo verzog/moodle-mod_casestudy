@@ -31,7 +31,6 @@ require_once($CFG->dirroot . '/mod/casestudy/backup/moodle2/restore_casestudy_st
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_casestudy_activity_task extends restore_activity_task {
-
     /**
      * Define (add) particular settings this activity can have
      */
@@ -70,12 +69,16 @@ class restore_casestudy_activity_task extends restore_activity_task {
     public static function define_decode_rules() {
         $rules = [];
 
-        $rules[] = new restore_decode_rule('CASESTUDYVIEWBYID',
-                                           '/mod/casestudy/view.php?id=$1',
-                                           'course_module');
-        $rules[] = new restore_decode_rule('CASESTUDYINDEX',
-                                           '/mod/casestudy/index.php?id=$1',
-                                           'course');
+        $rules[] = new restore_decode_rule(
+            'CASESTUDYVIEWBYID',
+            '/mod/casestudy/view.php?id=$1',
+            'course_module'
+        );
+        $rules[] = new restore_decode_rule(
+            'CASESTUDYINDEX',
+            '/mod/casestudy/index.php?id=$1',
+            'course'
+        );
 
         return $rules;
     }

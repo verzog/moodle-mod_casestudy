@@ -1,4 +1,3 @@
-
 <?php
 // Copyright (c) Skin Cancer College Australasia.
 // All rights reserved.
@@ -21,7 +20,6 @@
  */
 
 class casestudy_selector_form extends moodleform {
-
     protected function definition() {
         $mform = $this->_form;
         $options = $this->_customdata['options'];
@@ -31,30 +29,35 @@ class casestudy_selector_form extends moodleform {
 
         // Previous/Next submission buttons
         if ($this->has_previous_submission()) {
-            $navigationgroup[] = $mform->createElement('html', 'previoussubmission',
+            $navigationgroup[] = $mform->createElement(
+                'html',
+                'previoussubmission',
                 get_string('previoussubmission', 'mod_casestudy'),
-                ['class' => 'btn btn-secondary']);
+                ['class' => 'btn btn-secondary']
+            );
         }
 
         $navigationgroup[] = $mform->createElement('autocomplete', 'submissionid', '', $options);
 
         if ($this->has_next_submission()) {
-            $navigationgroup[] = $mform->createElement('html', 'nextsubmission',
+            $navigationgroup[] = $mform->createElement(
+                'html',
+                'nextsubmission',
                 get_string('nextsubmission', 'mod_casestudy'),
-                ['class' => 'btn btn-secondary']);
+                ['class' => 'btn btn-secondary']
+            );
         }
 
         if (!empty($navigationgroup)) {
             $mform->addGroup($navigationgroup, 'navigation', get_string('navigation', 'mod_casestudy'), ' ', false);
         }
-
     }
 
      /**
-     * Check if there's a previous submission for navigation
-     *
-     * @return bool
-     */
+      * Check if there's a previous submission for navigation
+      *
+      * @return bool
+      */
     protected function has_previous_submission() {
         $casestudyid = $this->optional_param('casestudyid', 0, PARAM_INT);
         $submissionid = $this->optional_param('submissionid', 0, PARAM_INT);
@@ -92,7 +95,6 @@ class casestudy_selector_form extends moodleform {
  * @copyright  2025 Skin Cancer College Australasia
  */
 class template_editor_form extends moodleform {
-
     protected function definition() {
 
         $mform = $this->_form;
@@ -113,9 +115,9 @@ class template_editor_form extends moodleform {
         $mform->setDefault('templatecontent', ['text' => $data['templatecontent'], 'format' => FORMAT_HTML]);
 
         // } else {
-        //     $mform->addElement('textarea', 'templatecontent', get_string('templatecontent', 'mod_casestudy'), ['rows' => 20, 'cols' => 75, 'style' => 'width: 100%;']);
-        //     $mform->setType('templatecontent', PARAM_RAW);
-        //     $mform->setDefault('templatecontent', $data['templatecontent']);
+        // $mform->addElement('textarea', 'templatecontent', get_string('templatecontent', 'mod_casestudy'), ['rows' => 20, 'cols' => 75, 'style' => 'width: 100%;']);
+        // $mform->setType('templatecontent', PARAM_RAW);
+        // $mform->setDefault('templatecontent', $data['templatecontent']);
         // }
 
         if ($data['disableeditor']) {

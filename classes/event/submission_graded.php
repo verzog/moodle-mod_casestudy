@@ -31,7 +31,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class submission_graded extends \core\event\base {
-
     /**
      * Init method.
      *
@@ -76,7 +75,7 @@ class submission_graded extends \core\event\base {
     public function get_url() {
         return new \moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $this->contextinstanceid,
-            'submissionid' => $this->other['submissionid']
+            'submissionid' => $this->other['submissionid'],
         ]);
     }
 
@@ -120,8 +119,8 @@ class submission_graded extends \core\event\base {
                 'casestudyid' => $casestudy->id,
                 'submissionid' => $submission->id,
                 'grade' => $grade->grade ?? null,
-                'feedback' => isset($grade->feedback) ? 1 : 0
-            ]
+                'feedback' => isset($grade->feedback) ? 1 : 0,
+            ],
         ];
         $event = self::create($data);
         $event->add_record_snapshot('casestudy_gradess', $grade);

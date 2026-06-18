@@ -32,7 +32,6 @@ use core\output\local\dropdown\dialog;
 
 
 class submission_actionmenu implements renderable, templatable {
-
     /** @var \mod_casestudy\local\casestudy The casestudy instance. */
     protected $casestudy;
 
@@ -91,7 +90,7 @@ class submission_actionmenu implements renderable, templatable {
      *
      * @param array $filters The filters to disable.
      */
-    public function disable_filters($filters) : void {
+    public function disable_filters($filters): void {
         $this->disabledfilters = $filters;
     }
 
@@ -104,7 +103,6 @@ class submission_actionmenu implements renderable, templatable {
     public function export_for_template(\core\output\renderer_base $output): array {
         global $PAGE;
 
-
         $userid = optional_param('userid', null, PARAM_INT);
         // If the user ID is set, it indicates that a user has been selected. In this case, override the user search
         // string with the full name of the selected user.
@@ -116,7 +114,6 @@ class submission_actionmenu implements renderable, templatable {
         $groupid = groups_get_course_group($this->casestudy->get_course(), true);
 
         if (!in_array('user', $this->disabledfilters)) {
-
             $userselector = new user_selector(
                 course: $this->casestudy->get_course(),
                 resetlink: $resetlink,
@@ -152,14 +149,18 @@ class submission_actionmenu implements renderable, templatable {
             $templatecontext['initialselector'] = $initialselector->export_for_template($output);
         }
 
-
-        if (!in_array('group', $this->disabledfilters)
-            && groups_get_activity_groupmode($this->casestudy->get_cm(), $this->casestudy->get_course())) {
+        if (
+            !in_array('group', $this->disabledfilters)
+            && groups_get_activity_groupmode($this->casestudy->get_cm(), $this->casestudy->get_course())
+        ) {
             $gs = new group_selector($PAGE->context);
             $templatecontext['groupselector'] = $gs->export_for_template($output);
 
             $PAGE->requires->js_call_amd(
-                'core_course/actionbar/group', 'init', [$resetlink->out(false), $this->casestudy->get_cm()->id]);
+                'core_course/actionbar/group',
+                'init',
+                [$resetlink->out(false), $this->casestudy->get_cm()->id]
+            );
         }
 
         if (!in_array('status', $this->disabledfilters)) {
@@ -227,13 +228,11 @@ class submission_actionmenu implements renderable, templatable {
 
         $filters = $this->casestudy->get_status_filters();
 
-
         $url = new \moodle_url('/mod/casestudy/view.php', [
             'id' => $this->casestudy->get_cm()->id, 'action' => 'grading',
         ]);
 
         foreach ($filters as $filter) {
-
             if ($filter['key'] === 'none') {
                 // The 'none' filter is not a real filter.
                 $filter['key'] = '';

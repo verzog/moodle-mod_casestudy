@@ -29,7 +29,6 @@ require_once($CFG->libdir . '/formslib.php');
  * Form for editing Case Study fields
  */
 class field_edit_form extends \moodleform {
-
     /** @var \mod_casestudy\field_manager Field manager instance */
     private $fieldmanager;
 
@@ -75,23 +74,31 @@ class field_edit_form extends \moodleform {
         $mform->setType('type', PARAM_ALPHA);
 
         // Field type display (read-only)
-        $mform->addElement('static', 'fieldtype_display', get_string('fieldtype', 'mod_casestudy'),
-                          get_string('fieldtype_' . $this->fieldtype, 'mod_casestudy'));
+        $mform->addElement(
+            'static',
+            'fieldtype_display',
+            get_string('fieldtype', 'mod_casestudy'),
+            get_string('fieldtype_' . $this->fieldtype, 'mod_casestudy')
+        );
 
         // Basic field properties
-        $mform->addElement('text', 'name', get_string('fieldname', 'mod_casestudy'), array('size' => 50));
+        $mform->addElement('text', 'name', get_string('fieldname', 'mod_casestudy'), ['size' => 50]);
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
         $mform->addHelpButton('name', 'fieldname', 'mod_casestudy');
 
         // Shortname field description
-        $mform->addElement('text', 'shortname', get_string('fieldshortname', 'mod_casestudy'), array('size' => 50));
+        $mform->addElement('text', 'shortname', get_string('fieldshortname', 'mod_casestudy'), ['size' => 50]);
         $mform->setType('shortname', PARAM_ALPHANUMEXT);
         $mform->addRule('shortname', get_string('required'), 'required', null, 'client');
         $mform->addHelpButton('shortname', 'fieldshortname', 'mod_casestudy');
 
-        $mform->addElement('textarea', 'description', get_string('fielddescription', 'mod_casestudy'),
-                          array('rows' => 3, 'cols' => 50));
+        $mform->addElement(
+            'textarea',
+            'description',
+            get_string('fielddescription', 'mod_casestudy'),
+            ['rows' => 3, 'cols' => 50]
+        );
         $mform->setType('description', PARAM_TEXT);
         $mform->addHelpButton('description', 'fielddescription', 'mod_casestudy');
 
@@ -118,8 +125,10 @@ class field_edit_form extends \moodleform {
         }
 
         // Action buttons
-        $this->add_action_buttons(true,
-            $this->editing ? get_string('updatefield', 'mod_casestudy') : get_string('addfield', 'mod_casestudy'));
+        $this->add_action_buttons(
+            true,
+            $this->editing ? get_string('updatefield', 'mod_casestudy') : get_string('addfield', 'mod_casestudy')
+        );
     }
 
     /**
@@ -134,8 +143,10 @@ class field_edit_form extends \moodleform {
 
         // Validate field name uniqueness
         if (!empty($data['shortname'])) {
-            $existing = $this->fieldmanager->get_field_by_shortname($data['shortname'],
-                                                              $this->editing ? $data['fieldid'] : null);
+            $existing = $this->fieldmanager->get_field_by_shortname(
+                $data['shortname'],
+                $this->editing ? $data['fieldid'] : null
+            );
             if ($existing) {
                 $errors['shortname'] = get_string('error_field_name_exists', 'mod_casestudy');
             }

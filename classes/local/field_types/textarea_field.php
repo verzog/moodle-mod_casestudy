@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * Text area field implementation - Example of parameter handling
  */
 class textarea_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -56,18 +55,15 @@ class textarea_field extends base_field {
      */
     public function render_form_element($mform, $elementname, $value = null) {
 
-
-
         $dimensions = $this->get_param('param1', []);
 
         $attributes = [
             'rows' => isset($dimensions['height']) ? $dimensions['height'] : 4,
-            'cols' => isset($dimensions['width']) ? $dimensions['width'] : 50
+            'cols' => isset($dimensions['width']) ? $dimensions['width'] : 50,
         ];
 
         $mform->addElement('textarea', $elementname, $this->fielddata->name, $attributes);
         $mform->setType($elementname, PARAM_TEXT);
-
 
         // Set default value
         if ($value !== null) {
@@ -130,7 +126,7 @@ class textarea_field extends base_field {
         if (isset($config['param1']) && is_array($config['param1'])) {
             $dimensions = [
                 'width' => (int) $config['param1']['width'] ?? null,
-                'height' => (int) $config['param1']['height'] ?? null
+                'height' => (int) $config['param1']['height'] ?? null,
             ];
             $field->param1 = json_encode($dimensions);
         }
@@ -170,12 +166,12 @@ class textarea_field extends base_field {
 
         return [
             'param1[width]',
-            'param1[height]'
+            'param1[height]',
         ];
     }
 
 
-    public function get_param($paramname, $default = null, array $defaults=[]) {
+    public function get_param($paramname, $default = null, array $defaults = []) {
 
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {
             return $default;
@@ -203,7 +199,6 @@ class textarea_field extends base_field {
         if (isset($dimensions['height'])) {
             $defaults[$prefix . 'param1[height]'] = $dimensions['height'];
         }
-
     }
 
     /**

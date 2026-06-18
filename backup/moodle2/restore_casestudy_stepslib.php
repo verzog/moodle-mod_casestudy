@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_casestudy_activity_structure_step extends restore_activity_structure_step {
-
     /**
      * Define the structure of the restore workflow.
      *
@@ -43,18 +42,28 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         // Define each element separated.
         $paths[] = new restore_path_element('casestudy', '/activity/casestudy');
         $paths[] = new restore_path_element('casestudy_field', '/activity/casestudy/fields/field');
-        $paths[] = new restore_path_element('casestudy_completion_rule',
-                                           '/activity/casestudy/completion_rules/completion_rule');
+        $paths[] = new restore_path_element(
+            'casestudy_completion_rule',
+            '/activity/casestudy/completion_rules/completion_rule'
+        );
 
         if ($userinfo) {
-            $paths[] = new restore_path_element('casestudy_override',
-                                               '/activity/casestudy/overrides/override');
-            $paths[] = new restore_path_element('casestudy_submission',
-                                               '/activity/casestudy/submissions/submission');
-            $paths[] = new restore_path_element('casestudy_content',
-                                               '/activity/casestudy/submissions/submission/contents/content');
-            $paths[] = new restore_path_element('casestudy_grade',
-                                               '/activity/casestudy/submissions/submission/grades/grade');
+            $paths[] = new restore_path_element(
+                'casestudy_override',
+                '/activity/casestudy/overrides/override'
+            );
+            $paths[] = new restore_path_element(
+                'casestudy_submission',
+                '/activity/casestudy/submissions/submission'
+            );
+            $paths[] = new restore_path_element(
+                'casestudy_content',
+                '/activity/casestudy/submissions/submission/contents/content'
+            );
+            $paths[] = new restore_path_element(
+                'casestudy_grade',
+                '/activity/casestudy/submissions/submission/grades/grade'
+            );
         }
 
         return $this->prepare_activity_structure($paths);

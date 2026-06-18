@@ -51,13 +51,13 @@ class backup_casestudy_activity_task extends backup_activity_task {
     public static function encode_content_links($content) {
         global $CFG;
 
-        $base = preg_quote($CFG->wwwroot,"/");
+        $base = preg_quote($CFG->wwwroot, "/");
 
-        $search="/(".$base."\/mod\/casestudy\/index.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@CASESTUDYINDEX*$2@$', $content);
+        $search = "/(" . $base . "\/mod\/casestudy\/index.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@CASESTUDYINDEX*$2@$', $content);
 
-        $search="/(".$base."\/mod\/casestudy\/view.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@CASESTUDYVIEWBYID*$2@$', $content);
+        $search = "/(" . $base . "\/mod\/casestudy\/view.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@CASESTUDYVIEWBYID*$2@$', $content);
 
         return $content;
     }

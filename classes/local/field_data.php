@@ -24,17 +24,15 @@ namespace mod_casestudy\local;
 use stdClass;
 
 class field_data {
-
-
     public $params = ['content1', 'content2', 'content3', 'content4'];
 
     protected $result = null;
 
-    public function __construct(?stdClass $data=null) {
+    public function __construct(?stdClass $data = null) {
         $this->result = $data;
     }
 
-    public static function create(?stdClass $data=null) : field_data {
+    public static function create(?stdClass $data = null): field_data {
         return new field_data($data);
     }
 
@@ -71,7 +69,7 @@ class field_data {
         return null;
     }
 
-    public function to_record() : stdClass {
+    public function to_record(): stdClass {
 
         if (!property_exists($this->result, 'content')) {
             throw new \coding_exception('Field data must have content property to be converted to record.');
@@ -79,5 +77,4 @@ class field_data {
 
         return $this->result ?? new stdClass();
     }
-
 }

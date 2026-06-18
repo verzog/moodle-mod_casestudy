@@ -27,7 +27,6 @@ use mod_casestudy\local\helper;
 use stdClass;
 
 class submission implements \renderable, \templatable {
-
     public static $instance;
 
     protected casestudy $casestudy;
@@ -53,7 +52,6 @@ class submission implements \renderable, \templatable {
 
         $this->submission = helper::get_submission($submissionid);
         $this->cm = $cm ?: get_coursemodule_from_instance('casestudy', $this->submission->casestudyid, 0, false, MUST_EXIST);
-
     }
 
     /**
@@ -96,8 +94,12 @@ class submission implements \renderable, \templatable {
         $user = core_user::get_user($submission->userid);
 
         // Get fields and submission content.
-        $content = $DB->get_records('casestudy_content',
-            array('submissionid' => $submission->id), '', 'fieldid, content, contentformat');
+        $content = $DB->get_records(
+            'casestudy_content',
+            ['submissionid' => $submission->id],
+            '',
+            'fieldid, content, contentformat'
+        );
 
         $casestudyinfo = [
             'submission' => $submission,
@@ -155,4 +157,3 @@ class submission implements \renderable, \templatable {
         return $templatecontext;
     }
 }
-

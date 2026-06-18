@@ -28,7 +28,7 @@ $messageproviders = [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_DISALLOWED,
         ],
-        'capability' => 'mod/casestudy:grade'
+        'capability' => 'mod/casestudy:grade',
     ],
 
     // Email confirmation sent to learner when they submit.
@@ -53,7 +53,7 @@ $messageproviders = [
             'popup' => MESSAGE_DISALLOWED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
-        'capability' => 'mod/casestudy:grade'
+        'capability' => 'mod/casestudy:grade',
     ],
 
     // Learner progress report sent to students showing completion status.

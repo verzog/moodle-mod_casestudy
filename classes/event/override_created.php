@@ -29,7 +29,6 @@ namespace mod_casestudy\event;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class override_created extends \core\event\base {
-
     /**
      * Init method.
      */

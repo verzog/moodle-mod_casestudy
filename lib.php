@@ -145,27 +145,27 @@ function casestudy_update_instance(stdClass $casestudy, mod_casestudy_mod_form $
 function casestudy_delete_instance($id) {
     global $DB;
 
-    if (! $casestudy = $DB->get_record('casestudy', array('id' => $id))) {
+    if (! $casestudy = $DB->get_record('casestudy', ['id' => $id])) {
         return false;
     }
 
     // Delete all dependent records
-    $DB->delete_records('casestudy_overrides', array('casestudyid' => $id));
-    $DB->delete_records('casestudy_completion_rules', array('casestudyid' => $id));
+    $DB->delete_records('casestudy_overrides', ['casestudyid' => $id]);
+    $DB->delete_records('casestudy_completion_rules', ['casestudyid' => $id]);
 
     // Delete submissions and their content/feedback
-    $submissions = $DB->get_records('casestudy_submissions', array('casestudyid' => $id));
+    $submissions = $DB->get_records('casestudy_submissions', ['casestudyid' => $id]);
     foreach ($submissions as $submission) {
-        $DB->delete_records('casestudy_content', array('submissionid' => $submission->id));
-        $DB->delete_records('casestudy_grades', array('submissionid' => $submission->id));
+        $DB->delete_records('casestudy_content', ['submissionid' => $submission->id]);
+        $DB->delete_records('casestudy_grades', ['submissionid' => $submission->id]);
     }
-    $DB->delete_records('casestudy_submissions', array('casestudyid' => $id));
+    $DB->delete_records('casestudy_submissions', ['casestudyid' => $id]);
 
     // Delete fields
-    $DB->delete_records('casestudy_fields', array('casestudyid' => $id));
+    $DB->delete_records('casestudy_fields', ['casestudyid' => $id]);
 
     // Delete the instance itself
-    $DB->delete_records('casestudy', array('id' => $casestudy->id));
+    $DB->delete_records('casestudy', ['id' => $casestudy->id]);
 
     casestudy_grade_item_delete($casestudy);
 
@@ -190,8 +190,13 @@ function casestudy_user_outline($course, $user, $mod, $casestudy) {
     $result->info = '';
     $result->time = 0;
 
-    if ($submissions = $DB->get_records('casestudy_submissions',
-            array('casestudyid' => $casestudy->id, 'userid' => $user->id), 'timemodified DESC')) {
+    if (
+        $submissions = $DB->get_records(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudy->id, 'userid' => $user->id],
+            'timemodified DESC'
+        )
+    ) {
         $submission = reset($submissions);
         $result->info = get_string('submitted', 'mod_casestudy');
         $result->time = $submission->timemodified;
@@ -213,8 +218,13 @@ function casestudy_user_outline($course, $user, $mod, $casestudy) {
 function casestudy_user_complete($course, $user, $mod, $casestudy) {
     global $DB;
 
-    if ($submissions = $DB->get_records('casestudy_submissions',
-            array('casestudyid' => $casestudy->id, 'userid' => $user->id), 'timemodified DESC')) {
+    if (
+        $submissions = $DB->get_records(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudy->id, 'userid' => $user->id],
+            'timemodified DESC'
+        )
+    ) {
         echo '<div class="casestudy-user-complete">';
         echo '<h4>' . get_string('submissions', 'mod_casestudy') . '</h4>';
         foreach ($submissions as $submission) {
@@ -277,7 +287,7 @@ function casestudy_print_recent_activity($course, $viewfullnames, $timestart) {
  * @param int $groupid check for a particular group's activity only, defaults to 0 (all groups)
  * @return void adds items into $activities and increases $index
  */
-function casestudy_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid=0, $groupid=0) {
+function casestudy_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
 }
 
 /**
@@ -310,7 +320,7 @@ function casestudy_cron() {
  * @return mixed true if the feature is supported, null if unknown
  */
 function casestudy_supports($feature) {
-    switch($feature) {
+    switch ($feature) {
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_SHOW_DESCRIPTION:
@@ -347,9 +357,9 @@ function casestudy_supports($feature) {
  * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function casestudy_grade_item_update($casestudy, $grades=null) {
+function casestudy_grade_item_update($casestudy, $grades = null) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     $item = ['itemname' => clean_param($casestudy->name, PARAM_NOTAGS), 'idnumber' => $casestudy->cmidnumber];
 
@@ -380,9 +390,9 @@ function casestudy_grade_item_update($casestudy, $grades=null) {
  */
 function casestudy_grade_item_delete($casestudy) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/casestudy', $casestudy->course, 'mod', 'casestudy', $casestudy->id, 0, null, array('deleted'=>1));
+    return grade_update('mod/casestudy', $casestudy->course, 'mod', 'casestudy', $casestudy->id, 0, null, ['deleted' => 1]);
 }
 
 /**
@@ -392,12 +402,12 @@ function casestudy_grade_item_delete($casestudy) {
  * @param int $userid optional user id, 0 means all users
  * @return array array of grades, false if none
  */
-function casestudy_get_user_grades($casestudy, $userid=0) {
+function casestudy_get_user_grades($casestudy, $userid = 0) {
     global $CFG, $DB;
 
-    $grades = array();
+    $grades = [];
 
-    $params = array('casestudyid' => $casestudy->id);
+    $params = ['casestudyid' => $casestudy->id];
     if ($userid) {
         $params['userid'] = $userid;
     }
@@ -428,7 +438,7 @@ function casestudy_get_user_grades($casestudy, $userid=0) {
     // Check if due date has passed - add unsatisfactory grades for ungraded students with submissions
     if (!empty($casestudy->timeclose) && $casestudy->timeclose > 0 && time() > $casestudy->timeclose) {
         // Get all users with submissions but no grades
-        $ungradedparams = array('casestudyid' => $casestudy->id);
+        $ungradedparams = ['casestudyid' => $casestudy->id];
         if ($userid) {
             $ungradedparams['userid'] = $userid;
         }
@@ -474,9 +484,9 @@ function casestudy_get_user_grades($casestudy, $userid=0) {
  * @param int $userid specific user only, 0 means all
  * @param bool $nullifnone
  */
-function casestudy_update_grades($casestudy, $userid=0, $nullifnone=true) {
+function casestudy_update_grades($casestudy, $userid = 0, $nullifnone = true) {
     global $CFG, $DB;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     if ($grades = casestudy_get_user_grades($casestudy, $userid)) {
         casestudy_grade_item_update($casestudy, $grades);
@@ -550,8 +560,10 @@ function casestudy_update_completion_criteria($casestudy) {
 
         foreach ($casestudy->categoryrule_enabled as $index => $enabled) {
             // Only save if enabled and has a valid field selected.
-            if ($enabled && !empty($casestudy->categoryrule_fieldid[$index]) &&
-                $casestudy->categoryrule_fieldid[$index] != 0) {
+            if (
+                $enabled && !empty($casestudy->categoryrule_fieldid[$index]) &&
+                $casestudy->categoryrule_fieldid[$index] != 0
+            ) {
                 $rule = new stdClass();
                 $rule->casestudyid = $casestudy->id;
                 $rule->enabled = 1;
@@ -596,8 +608,11 @@ function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
 
     // Manage Fields - always available
     $casestudynode->add(
-        get_string('managefields', 'mod_casestudy'), new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
-        navigation_node::TYPE_SETTING, null, 'managefields',
+        get_string('managefields', 'mod_casestudy'),
+        new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
+        navigation_node::TYPE_SETTING,
+        null,
+        'managefields',
         new pix_icon('i/customfield', get_string('managefields', 'mod_casestudy')),
     );
 
@@ -640,7 +655,7 @@ function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
  * @param bool $forcedownload
  * @param array $options
  */
-function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array()) {
+function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = []) {
     global $DB, $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -708,7 +723,6 @@ function mod_casestudy_inplace_editable($itemtype, $itemid, $newvalue) {
     global $DB, $PAGE;
 
     if ($itemtype === 'casestudyname') {
-
         $record = $DB->get_record('casestudy_fields', ['id' => $itemid], '*', MUST_EXIST);
 
         $cm = get_coursemodule_from_instance('casestudy', $record->casestudyid, 0, false, MUST_EXIST);
@@ -726,9 +740,16 @@ function mod_casestudy_inplace_editable($itemtype, $itemid, $newvalue) {
         // Prepare the element for the output.
         $record->name = $newvalue;
 
-        return new \core\output\inplace_editable('mod_casestudy', 'casestudyname', $record->id, true,
-             \html_writer::tag('strong', format_string($record->name)), $record->name, get_string('casestudyname', 'casestudy'),
-            get_string('newvaluefor', 'casestudy', format_string($record->name)));
+        return new \core\output\inplace_editable(
+            'mod_casestudy',
+            'casestudyname',
+            $record->id,
+            true,
+            \html_writer::tag('strong', format_string($record->name)),
+            $record->name,
+            get_string('casestudyname', 'casestudy'),
+            get_string('newvaluefor', 'casestudy', format_string($record->name))
+        );
     }
 
     return '';
@@ -790,7 +811,7 @@ function casestudy_get_effective_settings($casestudy, $userid = 0) {
     // Check if there's an override for this user.
     $override = $DB->get_record('casestudy_overrides', [
         'casestudyid' => $casestudy->id,
-        'userid' => $userid
+        'userid' => $userid,
     ]);
 
     if ($override) {
@@ -849,10 +870,9 @@ function casestudy_get_remaining_submissions($casestudy, $userid = 0) {
     // Count existing submissions.
     $count = $DB->count_records('casestudy_submissions', [
         'casestudyid' => $casestudy->id,
-        'userid' => $userid
+        'userid' => $userid,
     ]);
 
     $remaining = $effective->maxsubmissions - $count;
     return max(0, $remaining);
 }
-

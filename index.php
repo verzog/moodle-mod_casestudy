@@ -19,24 +19,24 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(dirname(__FILE__).'/lib.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT);
 
-$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
 
 require_course_login($course);
 
 $coursecontext = context_course::instance($course->id);
 
-$event = \mod_casestudy\event\course_module_instance_list_viewed::create(array(
-    'context' => $coursecontext
-));
+$event = \mod_casestudy\event\course_module_instance_list_viewed::create([
+    'context' => $coursecontext,
+]);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
-$PAGE->set_url('/mod/casestudy/index.php', array('id' => $id));
+$PAGE->set_url('/mod/casestudy/index.php', ['id' => $id]);
 $PAGE->set_title(format_string($course->fullname));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($coursecontext);
@@ -47,38 +47,41 @@ $modulenameplural = get_string('modulenameplural', 'mod_casestudy');
 echo $OUTPUT->heading($modulenameplural);
 
 if (! $casestudies = get_all_instances_in_course('casestudy', $course)) {
-    notice(get_string('nocasestudies', 'mod_casestudy'), new moodle_url('/course/view.php', array('id' => $course->id)));
+    notice(get_string('nocasestudies', 'mod_casestudy'), new moodle_url('/course/view.php', ['id' => $course->id]));
 }
 
 $table = new html_table();
 $table->attributes['class'] = 'generaltable mod_index';
 
 if ($course->format == 'weeks') {
-    $table->head  = array(get_string('week'), get_string('name'));
-    $table->align = array('center', 'left');
+    $table->head  = [get_string('week'), get_string('name')];
+    $table->align = ['center', 'left'];
 } else if ($course->format == 'topics') {
-    $table->head  = array(get_string('topic'), get_string('name'));
-    $table->align = array('center', 'left');
+    $table->head  = [get_string('topic'), get_string('name')];
+    $table->align = ['center', 'left'];
 } else {
-    $table->head  = array(get_string('name'));
-    $table->align = array('left');
+    $table->head  = [get_string('name')];
+    $table->align = ['left'];
 }
 
 foreach ($casestudies as $casestudy) {
     if (!$casestudy->visible) {
         $link = html_writer::link(
-            new moodle_url('/mod/casestudy/view.php', array('id' => $casestudy->coursemodule)),
-                format_string($casestudy->name, true), array('class' => 'dimmed'));
+            new moodle_url('/mod/casestudy/view.php', ['id' => $casestudy->coursemodule]),
+            format_string($casestudy->name, true),
+            ['class' => 'dimmed']
+        );
     } else {
         $link = html_writer::link(
-            new moodle_url('/mod/casestudy/view.php', array('id' => $casestudy->coursemodule)),
-                format_string($casestudy->name, true));
+            new moodle_url('/mod/casestudy/view.php', ['id' => $casestudy->coursemodule]),
+            format_string($casestudy->name, true)
+        );
     }
 
     if ($course->format == 'weeks' or $course->format == 'topics') {
-        $table->data[] = array($casestudy->section, $link);
+        $table->data[] = [$casestudy->section, $link];
     } else {
-        $table->data[] = array($link);
+        $table->data[] = [$link];
     }
 }
 

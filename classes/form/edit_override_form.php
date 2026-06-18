@@ -39,7 +39,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class edit_override_form extends moodleform {
-
     /** @var cm_info course module object. */
     protected $cm;
 
@@ -64,9 +63,13 @@ class edit_override_form extends moodleform {
      * @param context_module $context the case study context.
      * @param stdClass|null $override the override being edited, if it already exists.
      */
-    public function __construct(moodle_url $submiturl,
-            cm_info $cm, stdClass $casestudy, context_module $context,
-            ?stdClass $override) {
+    public function __construct(
+        moodle_url $submiturl,
+        cm_info $cm,
+        stdClass $casestudy,
+        context_module $context,
+        ?stdClass $override
+    ) {
 
         $this->cm = $cm;
         $this->casestudy = $casestudy;
@@ -92,8 +95,12 @@ class edit_override_form extends moodleform {
         if ($this->userid) {
             $user = $DB->get_record('user', ['id' => $this->userid], '*', MUST_EXIST);
             $userchoices = [$this->userid => fullname($user)];
-            $mform->addElement('select', 'userid',
-                    get_string('overrideuser', 'casestudy'), $userchoices);
+            $mform->addElement(
+                'select',
+                'userid',
+                get_string('overrideuser', 'casestudy'),
+                $userchoices
+            );
             $mform->freeze('userid');
         } else {
             // Prepare the list of users who can submit.
@@ -101,8 +108,12 @@ class edit_override_form extends moodleform {
 
             // Exclude users who already have overrides.
             if (!empty($users)) {
-                $existingoverrideusers = $DB->get_records('casestudy_overrides',
-                    ['casestudyid' => $this->casestudy->id], '', 'userid');
+                $existingoverrideusers = $DB->get_records(
+                    'casestudy_overrides',
+                    ['casestudyid' => $this->casestudy->id],
+                    '',
+                    'userid'
+                );
                 foreach ($existingoverrideusers as $existing) {
                     unset($users[$existing->userid]);
                 }
@@ -118,8 +129,12 @@ class edit_override_form extends moodleform {
                 $userchoices[$id] = fullname($user);
             }
 
-            $mform->addElement('searchableselector', 'userid',
-                    get_string('overrideuser', 'casestudy'), $userchoices);
+            $mform->addElement(
+                'searchableselector',
+                'userid',
+                get_string('overrideuser', 'casestudy'),
+                $userchoices
+            );
             $mform->addRule('userid', get_string('required'), 'required', null, 'client');
         }
 
@@ -127,8 +142,12 @@ class edit_override_form extends moodleform {
         $mform->addElement('checkbox', 'enabletimeclose', get_string('enableenddate', 'casestudy'));
         $mform->addHelpButton('enabletimeclose', 'overrideenddate', 'casestudy');
 
-        $mform->addElement('date_time_selector', 'timeclose',
-                get_string('casestudycloses', 'casestudy'), ['optional' => false]);
+        $mform->addElement(
+            'date_time_selector',
+            'timeclose',
+            get_string('casestudycloses', 'casestudy'),
+            ['optional' => false]
+        );
         $mform->setDefault('timeclose', $this->casestudy->timeclose);
         $mform->disabledIf('timeclose', 'enabletimeclose');
 
@@ -140,17 +159,27 @@ class edit_override_form extends moodleform {
         for ($i = 1; $i <= 10; $i++) {
             $attemptsoptions[$i] = $i;
         }
-        $mform->addElement('select', 'maxattempts',
-                get_string('totalattempts', 'casestudy'), $attemptsoptions);
+        $mform->addElement(
+            'select',
+            'maxattempts',
+            get_string('totalattempts', 'casestudy'),
+            $attemptsoptions
+        );
         $mform->setDefault('maxattempts', $this->casestudy->maxattempts > 0 ? $this->casestudy->maxattempts : 1);
         $mform->disabledIf('maxattempts', 'enablemaxattempts');
 
         // Submit buttons.
         $buttonarray = [];
-        $buttonarray[] = $mform->createElement('submit', 'submitbutton',
-                get_string('saveoverride', 'casestudy'));
-        $buttonarray[] = $mform->createElement('submit', 'againbutton',
-                get_string('saveoverrideandstay', 'casestudy'));
+        $buttonarray[] = $mform->createElement(
+            'submit',
+            'submitbutton',
+            get_string('saveoverride', 'casestudy')
+        );
+        $buttonarray[] = $mform->createElement(
+            'submit',
+            'againbutton',
+            get_string('saveoverrideandstay', 'casestudy')
+        );
         $buttonarray[] = $mform->createElement('cancel');
 
         $mform->addGroup($buttonarray, 'buttonbar', '', [' '], false);
@@ -170,8 +199,10 @@ class edit_override_form extends moodleform {
 
         // Check for duplicate override if creating a new one.
         if (empty($this->overrideid) && !empty($data['userid'])) {
-            $existing = $DB->get_record('casestudy_overrides',
-                ['casestudyid' => $this->casestudy->id, 'userid' => $data['userid']]);
+            $existing = $DB->get_record(
+                'casestudy_overrides',
+                ['casestudyid' => $this->casestudy->id, 'userid' => $data['userid']]
+            );
             if ($existing) {
                 $errors['userid'] = get_string('useroverrideexists', 'casestudy');
             }

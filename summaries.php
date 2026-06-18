@@ -30,7 +30,7 @@ $id = required_param('id', PARAM_INT); // Course module ID.
 $groupid = optional_param('group', 0, PARAM_INT); // Group ID for filtering.
 $userid = optional_param('userid', 0, PARAM_INT); // User ID for filtering.
 
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'casestudy');
+[$course, $cm] = get_course_and_cm_from_cmid($id, 'casestudy');
 $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, false, $cm);

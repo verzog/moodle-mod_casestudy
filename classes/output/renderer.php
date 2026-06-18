@@ -35,7 +35,6 @@ use mod_casestudy\local\submission;
  * Case Study renderer class
  */
 class renderer extends plugin_renderer_base {
-
     /**
      * Render management interface for teachers
      *
@@ -50,7 +49,7 @@ class renderer extends plugin_renderer_base {
         $templatecontext = [
             'hasfields' => $hasfields,
             'cmid' => $cm->id,
-            'managementbuttons' => $this->get_management_buttons($cm, $hasfields)
+            'managementbuttons' => $this->get_management_buttons($cm, $hasfields),
         ];
 
         return $this->render_from_template('mod_casestudy/management_interface', $templatecontext);
@@ -70,8 +69,17 @@ class renderer extends plugin_renderer_base {
      * @param bool $preventaccess Whether to completely hide content (for not opened/closed)
      * @return string HTML output
      */
-    public function student_interface($casestudy, $cm, $fields, $submissions, $cansubmitmore, $casestudyinstance = null,
-                                     $availabilitymessage = '', $availabilitystatus = '', $preventaccess = false) {
+    public function student_interface(
+        $casestudy,
+        $cm,
+        $fields,
+        $submissions,
+        $cansubmitmore,
+        $casestudyinstance = null,
+        $availabilitymessage = '',
+        $availabilitystatus = '',
+        $preventaccess = false
+    ) {
         global $USER, $DB;
 
         // Use casestudy object if no separate instance provided
@@ -84,7 +92,12 @@ class renderer extends plugin_renderer_base {
         $tableoutput = '';
         if (!$preventaccess) {
             $table = new \mod_casestudy\local\table\submission_table(
-                'student-submissions-' . $cm->id, $cm, \context_module::instance($cm->id), 0, '');
+                'student-submissions-' . $cm->id,
+                $cm,
+                \context_module::instance($cm->id),
+                0,
+                ''
+            );
             ob_start();
             $table->out(25, true);
             $tableoutput = ob_get_clean();
@@ -134,7 +147,6 @@ class renderer extends plugin_renderer_base {
         ob_start();
         $table->out(25, true);
         $tableoutput = ob_get_clean();
-
 
         $baseurl = new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]);
         $casestudy = \mod_casestudy\local\casestudy::instance($cm->instance);
@@ -242,7 +254,7 @@ class renderer extends plugin_renderer_base {
         // Inlcude URls.
         $url = new \moodle_url('/mod/casestudy/fields/edit.php', ['id' => $cm->id]);
 
-        $fieldtypes = array_map(function($type) use ($url) {
+        $fieldtypes = array_map(function ($type) use ($url) {
             $url->param('type', $type['value']);
             $type['url'] = $url->out(false);
             return $type;
@@ -286,7 +298,7 @@ class renderer extends plugin_renderer_base {
      */
     public function render_no_fields_message($canmanage) {
         $templatecontext = [
-            'canmanage' => $canmanage
+            'canmanage' => $canmanage,
         ];
 
         return $this->render_from_template('mod_casestudy/no_fields_message', $templatecontext);
@@ -306,28 +318,28 @@ class renderer extends plugin_renderer_base {
             $buttons[] = [
                 'url' => new \moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
                 'label' => get_string('managefields', 'mod_casestudy'),
-                'class' => 'btn btn-primary'
+                'class' => 'btn btn-primary',
             ];
         } else {
             $buttons[] = [
                 'url' => new \moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
                 'label' => get_string('managefields', 'mod_casestudy'),
-                'class' => 'btn btn-secondary'
+                'class' => 'btn btn-secondary',
             ];
             $buttons[] = [
                 'url' => new \moodle_url('/mod/casestudy/submission.php', ['id' => $cm->id]),
                 'label' => get_string('viewsubmissions', 'mod_casestudy'),
-                'class' => 'btn btn-secondary'
+                'class' => 'btn btn-secondary',
             ];
             $buttons[] = [
                 'url' => new \moodle_url('/mod/casestudy/overrides.php', ['id' => $cm->id]),
                 'label' => get_string('overrides', 'mod_casestudy'),
-                'class' => 'btn btn-secondary'
+                'class' => 'btn btn-secondary',
             ];
             $buttons[] = [
                 'url' => new \moodle_url('/mod/casestudy/reports.php', ['id' => $cm->id]),
                 'label' => get_string('reports', 'mod_casestudy'),
-                'class' => 'btn btn-secondary'
+                'class' => 'btn btn-secondary',
             ];
         }
 
@@ -345,7 +357,8 @@ class renderer extends plugin_renderer_base {
         global $DB;
 
         // Get completion rules from the new casestudy_completion_rules table
-        $completionrules = $DB->get_records('casestudy_completion_rules',
+        $completionrules = $DB->get_records(
+            'casestudy_completion_rules',
             ['casestudyid' => $casestudy->id, 'enabled' => 1],
             'sortorder ASC'
         );
@@ -366,7 +379,7 @@ class renderer extends plugin_renderer_base {
                 $current = $DB->count_records('casestudy_submissions', [
                     'casestudyid' => $casestudy->id,
                     'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY
+                    'status' => CASESTUDY_STATUS_SATISFACTORY,
                 ]);
 
                 $criteria[] = [
@@ -374,7 +387,7 @@ class renderer extends plugin_renderer_base {
                     'current' => $current,
                     'required' => $rule->count,
                     'completed' => $current >= $rule->count,
-                    'iscategory' => false
+                    'iscategory' => false,
                 ];
             }
 
@@ -391,7 +404,8 @@ class renderer extends plugin_renderer_base {
                 $actualvalue = null;
                 if (!empty($rule->categoryvalue)) {
                     // Rebuild the global index-to-value mapping to find the actual value
-                    $fields = $DB->get_records('casestudy_fields',
+                    $fields = $DB->get_records(
+                        'casestudy_fields',
                         ['casestudyid' => $casestudy->id, 'category' => 1],
                         'sortorder ASC',
                         'id, param1'
@@ -415,7 +429,8 @@ class renderer extends plugin_renderer_base {
                 // Build query based on whether we need a specific value or any value
                 if (!empty($actualvalue)) {
                     // Count submissions with specific category value
-                    $current = $DB->count_records_sql("
+                    $current = $DB->count_records_sql(
+                        "
                         SELECT COUNT(DISTINCT s.id)
                           FROM {casestudy_submissions} s
                           JOIN {casestudy_content} c ON s.id = c.submissionid
@@ -429,14 +444,15 @@ class renderer extends plugin_renderer_base {
                             'userid' => $userid,
                             'status' => CASESTUDY_STATUS_SATISFACTORY,
                             'fieldid' => $rule->fieldid,
-                            'content' => $actualvalue
+                            'content' => $actualvalue,
                         ]
                     );
 
                     $label = $field->name . ' (' . format_string($actualvalue) . ')';
                 } else {
                     // Count submissions with any value in this category field
-                    $current = $DB->count_records_sql("
+                    $current = $DB->count_records_sql(
+                        "
                         SELECT COUNT(DISTINCT s.id)
                           FROM {casestudy_submissions} s
                           JOIN {casestudy_content} c ON s.id = c.submissionid
@@ -450,7 +466,7 @@ class renderer extends plugin_renderer_base {
                             'casestudyid' => $casestudy->id,
                             'userid' => $userid,
                             'status' => CASESTUDY_STATUS_SATISFACTORY,
-                            'fieldid' => $rule->fieldid
+                            'fieldid' => $rule->fieldid,
                         ]
                     );
 
@@ -462,7 +478,7 @@ class renderer extends plugin_renderer_base {
                     'current' => $current,
                     'required' => $rule->count,
                     'completed' => $current >= $rule->count,
-                    'iscategory' => true
+                    'iscategory' => true,
                 ];
             }
         }
@@ -479,7 +495,7 @@ class renderer extends plugin_renderer_base {
             'hascompletion' => true,
             'criteria' => $criteria,
             'hascategoryaggregation' => $categorycount > 1,
-            'aggregationmode' => $aggregationmode
+            'aggregationmode' => $aggregationmode,
         ];
     }
 
@@ -504,7 +520,7 @@ class renderer extends plugin_renderer_base {
                    AND (parentid IS NULL OR parentid = 0)";
         $totalentries = $DB->count_records_sql($sql, [
             'casestudyid' => $casestudy->id,
-            'userid' => $userid
+            'userid' => $userid,
         ]);
 
         $info = [];
@@ -514,7 +530,7 @@ class renderer extends plugin_renderer_base {
         $info[] = [
             'icon' => 'list',
             'label' => get_string('currententries', 'mod_casestudy'),
-            'value' => $entriesvalue
+            'value' => $entriesvalue,
         ];
 
         // Add max submissions information if limited (use effective settings for overrides)
@@ -526,14 +542,14 @@ class renderer extends plugin_renderer_base {
                 $info[] = [
                     'icon' => 'check-circle',
                     'label' => get_string('submissionsremaining', 'mod_casestudy'),
-                    'value' => get_string('limitreached', 'mod_casestudy')
+                    'value' => get_string('limitreached', 'mod_casestudy'),
                 ];
             } else {
                 // Show remaining count
                 $info[] = [
                     'icon' => 'file-text',
                     'label' => get_string('submissionsremaining', 'mod_casestudy'),
-                    'value' => $remaining . ' / ' . $effective->maxsubmissions
+                    'value' => $remaining . ' / ' . $effective->maxsubmissions,
                 ];
             }
         }
@@ -543,7 +559,7 @@ class renderer extends plugin_renderer_base {
             $info[] = [
                 'icon' => 'repeat',
                 'label' => get_string('maxattempts', 'mod_casestudy'),
-                'value' => $effective->maxattempts
+                'value' => $effective->maxattempts,
             ];
         }
 
@@ -552,7 +568,7 @@ class renderer extends plugin_renderer_base {
             $info[] = [
                 'icon' => 'calendar-check',
                 'label' => get_string('startdate', 'mod_casestudy'),
-                'value' => userdate($casestudy->timeopen, get_string('strftimedatetime', 'langconfig'))
+                'value' => userdate($casestudy->timeopen, get_string('strftimedatetime', 'langconfig')),
             ];
         }
 
@@ -561,13 +577,13 @@ class renderer extends plugin_renderer_base {
             $info[] = [
                 'icon' => 'calendar-times',
                 'label' => get_string('duedate', 'mod_casestudy'),
-                'value' => userdate($casestudy->timeclose, get_string('strftimedatetime', 'langconfig'))
+                'value' => userdate($casestudy->timeclose, get_string('strftimedatetime', 'langconfig')),
             ];
         }
 
         return [
             'hasinfo' => !empty($info),
-            'items' => $info
+            'items' => $info,
         ];
     }
 
@@ -585,7 +601,7 @@ class renderer extends plugin_renderer_base {
             ['value' => 'radio', 'label' => get_string('fieldtype_radio', 'mod_casestudy')],
             ['value' => 'checkbox', 'label' => get_string('fieldtype_checkbox', 'mod_casestudy')],
             ['value' => 'file', 'label' => get_string('fieldtype_file', 'mod_casestudy')],
-            ['value' => 'sectionheading', 'label' => get_string('fieldtype_sectionheading', 'mod_casestudy')]
+            ['value' => 'sectionheading', 'label' => get_string('fieldtype_sectionheading', 'mod_casestudy')],
         ];
     }
 
@@ -600,43 +616,43 @@ class renderer extends plugin_renderer_base {
             [
                 'value' => 'text',
                 'label' => get_string('fieldtype_text', 'mod_casestudy'),
-                'icon' => 'font'
+                'icon' => 'font',
             ],
             [
                 'value' => 'textarea',
                 'label' => get_string('fieldtype_textarea', 'mod_casestudy'),
-                'icon' => 'align-left'
+                'icon' => 'align-left',
             ],
             [
                 'value' => 'richtext',
                 'label' => get_string('fieldtype_richtext', 'mod_casestudy'),
-                'icon' => 'edit'
+                'icon' => 'edit',
             ],
             [
                 'value' => 'dropdown',
                 'label' => get_string('fieldtype_dropdown', 'mod_casestudy'),
-                'icon' => 'caret-down'
+                'icon' => 'caret-down',
             ],
             [
                 'value' => 'radio',
                 'label' => get_string('fieldtype_radio', 'mod_casestudy'),
-                'icon' => 'dot-circle'
+                'icon' => 'dot-circle',
             ],
             [
                 'value' => 'checkbox',
                 'label' => get_string('fieldtype_checkbox', 'mod_casestudy'),
-                'icon' => 'check-square'
+                'icon' => 'check-square',
             ],
             [
                 'value' => 'file',
                 'label' => get_string('fieldtype_file', 'mod_casestudy'),
-                'icon' => 'file'
+                'icon' => 'file',
             ],
             [
                 'value' => 'sectionheading',
                 'label' => get_string('fieldtype_sectionheading', 'mod_casestudy'),
-                'icon' => 'header'
-            ]
+                'icon' => 'header',
+            ],
         ];
     }
 
@@ -701,7 +717,6 @@ class renderer extends plugin_renderer_base {
         $baseurl = new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]);
         $additionalactions = [];
 
-
         // Actions menu.
         $actionmenu = new submission_actionmenu($casestudy, $baseurl, [], $additionalactions);
         $actionmenu->disable_filters(['group', 'status', 'user', 'initials']);
@@ -764,7 +779,7 @@ class renderer extends plugin_renderer_base {
         if ($groupid) {
             $groupmembers = groups_get_members($groupid, 'u.id');
             if (!empty($groupmembers)) {
-                list($insql, $inparams) = $DB->get_in_or_equal(array_keys($groupmembers), SQL_PARAMS_NAMED);
+                [$insql, $inparams] = $DB->get_in_or_equal(array_keys($groupmembers), SQL_PARAMS_NAMED);
                 $sql .= " AND s.userid $insql";
                 $params = array_merge($params, $inparams);
             } else {
@@ -791,7 +806,7 @@ class renderer extends plugin_renderer_base {
             'isfirst' => $currentindex === 0,
             'islast' => $currentindex === count($submissions) - 1,
             'larrow' => $OUTPUT->larrow(),
-            'rarrow' => $OUTPUT->rarrow()
+            'rarrow' => $OUTPUT->rarrow(),
         ];
 
         return $this->render_from_template('mod_casestudy/grading_navigation', $templatecontext);
@@ -829,7 +844,6 @@ class renderer extends plugin_renderer_base {
             ];
 
             if (!empty($grade)) {
-
                 $status = $submission->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION
                     ? get_string('requestresubmission', 'mod_casestudy') : $statuslist[$submission->status];
                 $grader = $DB->get_record('user', ['id' => $grade->graderid]);

@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * Short text field implementation
  */
 class text_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -60,12 +59,11 @@ class text_field extends base_field {
 
         $attributes = [
             'size' => 50,
-            'maxlength' => 255
+            'maxlength' => 255,
         ];
 
         $mform->addElement('text', $elementname, $this->fielddata->name, $attributes);
         $mform->setType($elementname, PARAM_TEXT);
-
 
         // Set default value
         if ($value !== null) {
@@ -114,7 +112,7 @@ class text_field extends base_field {
      * @param mixed $value Raw input value
      * @return mixed Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
         $value = clean_param($value, PARAM_TEXT);
         $fielddata = field_data::create((object) ['content' => $value]);
 

@@ -19,16 +19,16 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(dirname(__FILE__).'/lib.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module ID.
 $submissionid = required_param('submissionid', PARAM_INT); // Casestudy submission ID.
 
 // Get course module and related data.
 $cm = get_coursemodule_from_id('casestudy', $id, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$casestudy = $DB->get_record('casestudy', array('id' => $cm->instance), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+$casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
@@ -57,7 +57,7 @@ if (!$canview) {
     throw new moodle_exception('nopermissions', 'error');
 }
 
-$PAGE->set_url('/mod/casestudy/view_casestudy.php', array('id' => $cm->id, 'submissionid' => $submissionid));
+$PAGE->set_url('/mod/casestudy/view_casestudy.php', ['id' => $cm->id, 'submissionid' => $submissionid]);
 $PAGE->set_title(format_string($casestudy->name));
 $PAGE->set_context($context);
 
@@ -65,13 +65,14 @@ $PAGE->set_context($context);
 $cangrade = has_capability('mod/casestudy:grade', $context);
 
 $PAGE->add_body_class(
-    $cangrade ? 'casestudy-submission-grading' : 'casestudy-submission-preview');
+    $cangrade ? 'casestudy-submission-grading' : 'casestudy-submission-preview'
+);
 
 // Get fields and submission content.
-$content = $DB->get_records('casestudy_content', array('submissionid' => $submission->id), '', 'fieldid, content, contentformat');
+$content = $DB->get_records('casestudy_content', ['submissionid' => $submission->id], '', 'fieldid, content, contentformat');
 
 // Get user info.
-$user = $DB->get_record('user', array('id' => $submission->userid));
+$user = $DB->get_record('user', ['id' => $submission->userid]);
 
 // Check editing permissions.
 $canedit = ($submission->userid == $USER->id &&

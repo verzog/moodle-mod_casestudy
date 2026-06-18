@@ -134,21 +134,21 @@ class file_field extends base_field {
         $valuespan = \html_writer::start_div('casestudy-files-wrapper d-flex flex-direction-row');
 
         $includeinstruction = false;
-        $areafiles = $this->get_areafiles('field_'.$this->fieldid, $submissionid, 'mod_casestudy', $this->fieldmanager->get_context(), true);
+        $areafiles = $this->get_areafiles('field_' . $this->fieldid, $submissionid, 'mod_casestudy', $this->fieldmanager->get_context(), true);
         foreach ($areafiles as $file) {
-
             if ($file['image']) {
-
                 $image = \html_writer::img($file['url'], basename($file['url']), ['class' => 'responsive-img']);
 
-                $background = \html_writer::span('<i class="icon fa fa-magnifying-glass-plus fa-fw "></i>',
-                    'casestudy-file-enlarge-image', ['data-toggle' => 'casestudy-file-modal']);
+                $background = \html_writer::span(
+                    '<i class="icon fa fa-magnifying-glass-plus fa-fw "></i>',
+                    'casestudy-file-enlarge-image',
+                    ['data-toggle' => 'casestudy-file-modal']
+                );
 
                 $valuespan .= \html_writer::tag('div', $background . $image, ['class' => 'casestudy-field-file-image mb-2 mr-2',
-                    'data-modal' => 'lightbox', 'data-modal-content' => $image, 'data-modal-title' => format_string($this->fielddata->name)
+                    'data-modal' => 'lightbox', 'data-modal-content' => $image, 'data-modal-title' => format_string($this->fielddata->name),
                 ]);
                 $includeinstruction = true;
-
             } else {
                 $valuespan .= \html_writer::link($file['url'], urldecode(basename($file['url'])), ['target' => '_blank']) . '<br>';
             }
@@ -171,7 +171,7 @@ class file_field extends base_field {
      * @param mixed $value Raw input value
      * @return mixed Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
         // File processing would typically involve handling the filemanager data
         // and storing files in the appropriate file area
         return field_data::create((object) ['content' => $value]);
@@ -232,7 +232,7 @@ class file_field extends base_field {
         if (isset($config['param1']) && is_array($config['param1'])) {
             $field->param1 = json_encode([
                 'min' => (int)($config['param1']['min'] ?? 0),
-                'max' => (int)($config['param1']['max'] ?? 1)
+                'max' => (int)($config['param1']['max'] ?? 1),
             ]);
         }
 
@@ -268,7 +268,7 @@ class file_field extends base_field {
             5242880 => '5 MB',
             10485760 => '10 MB',
             52428800 => '50 MB',
-            104857600 => '100 MB'
+            104857600 => '100 MB',
         ];
         $mform->addElement('select', 'param2', get_string('maxfilesize', 'mod_casestudy'), $sizeoptions);
         $mform->addHelpButton('param2', 'maxfilesize', 'mod_casestudy');
@@ -306,7 +306,6 @@ class file_field extends base_field {
         if (!empty($fileconfig['acceptedtypes']) && is_array($fileconfig['acceptedtypes'])) {
             $defaults[$prefix . 'param3'] = implode("\n", $fileconfig['acceptedtypes']);
         }
-
     }
 
     /**
@@ -405,7 +404,7 @@ class file_field extends base_field {
             'minfiles' => isset($filecount['min']) ? (int)$filecount['min'] : 0,
             'maxfiles' => isset($filecount['max']) ? (int)$filecount['max'] : 1,
             'maxbytes' => (int)$maxbytes,
-            'acceptedtypes' => is_array($acceptedtypes) ? $acceptedtypes : ['*']
+            'acceptedtypes' => is_array($acceptedtypes) ? $acceptedtypes : ['*'],
         ];
     }
 
@@ -432,11 +431,17 @@ class file_field extends base_field {
      * @param bool $multiple If true then returns array of file urls, else returns single file url.
      * @return string|array File Path of the given fileareas, If not false.
      */
-    public function get_areafiles($filearea, $itemid=0, $component='mod_casestudy', $context=null, $multiple=false) {
+    public function get_areafiles($filearea, $itemid = 0, $component = 'mod_casestudy', $context = null, $multiple = false) {
         $files = get_file_storage()->get_area_files(
-            $context->id, $component, $filearea, $itemid, 'itemid, filepath, filename', false);
+            $context->id,
+            $component,
+            $filearea,
+            $itemid,
+            'itemid, filepath, filename',
+            false
+        );
 
-        if (empty($files) ) {
+        if (empty($files)) {
             return $multiple ? [] : '';
         }
 
@@ -465,7 +470,7 @@ class file_field extends base_field {
      * @param context_module $context Context instance
      * @return void
      */
-    public function save_area_files($draftitemid, $itemid=0, $filearea='submission_files', $context=null) {
+    public function save_area_files($draftitemid, $itemid = 0, $filearea = 'submission_files', $context = null) {
         $fileconfig = $this->get_file_config();
 
         $options = [

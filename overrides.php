@@ -20,11 +20,11 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->dirroot.'/mod/casestudy/lib.php');
+require_once($CFG->dirroot . '/mod/casestudy/lib.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 
-list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'casestudy');
+[$course, $cm] = get_course_and_cm_from_cmid($cmid, 'casestudy');
 $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 $context = context_module::instance($cm->id);
 
@@ -62,7 +62,7 @@ $table->head = [
     get_string('student', 'casestudy'),
     get_string('overridesettings', 'casestudy'),
     '',
-    get_string('action')
+    get_string('action'),
 ];
 $table->colclasses = ['colname', 'colsetting', 'colvalue', 'colaction'];
 $table->attributes['class'] = 'generaltable overridetable';
@@ -92,26 +92,32 @@ foreach ($overrides as $override) {
     // Prepare the information about who this override applies to.
     $usercell = new html_table_cell();
     $usercell->rowspan = count($fields);
-    $usercell->text = html_writer::link(new moodle_url($userurl, ['id' => $override->userid]),
-            fullname($override));
+    $usercell->text = html_writer::link(
+        new moodle_url($userurl, ['id' => $override->userid]),
+        fullname($override)
+    );
 
     // Prepare the actions.
     $iconstr = '';
 
     // Edit.
     $editurlstr = $overrideediturl->out(true, ['id' => $override->id]);
-    $iconstr = '<a title="' . get_string('edit') . '" href="'. $editurlstr . '">' .
+    $iconstr = '<a title="' . get_string('edit') . '" href="' . $editurlstr . '">' .
             $OUTPUT->pix_icon('t/edit', get_string('edit')) . '</a> ';
 
     // Duplicate.
-    $copyurlstr = $overrideediturl->out(true,
-            ['id' => $override->id, 'action' => 'duplicate']);
+    $copyurlstr = $overrideediturl->out(
+        true,
+        ['id' => $override->id, 'action' => 'duplicate']
+    );
     $iconstr .= '<a title="' . get_string('copy') . '" href="' . $copyurlstr . '">' .
             $OUTPUT->pix_icon('t/copy', get_string('copy')) . '</a> ';
 
     // Delete.
-    $deleteurlstr = $overridedeleteurl->out(true,
-            ['id' => $override->id, 'sesskey' => sesskey()]);
+    $deleteurlstr = $overridedeleteurl->out(
+        true,
+        ['id' => $override->id, 'sesskey' => sesskey()]
+    );
     $iconstr .= '<a title="' . get_string('delete') . '" href="' . $deleteurlstr . '">' .
             $OUTPUT->pix_icon('t/delete', get_string('delete')) . '</a> ';
 
@@ -174,7 +180,7 @@ echo $OUTPUT->heading(get_string('useroverrides', 'casestudy'));
 if ($addenabled) {
     $addurl = new moodle_url('/mod/casestudy/overrideedit.php', [
         'cmid' => $cm->id,
-        'action' => 'adduser'
+        'action' => 'adduser',
     ]);
     echo $OUTPUT->single_button($addurl, get_string('addoverride', 'casestudy'), 'get');
 }

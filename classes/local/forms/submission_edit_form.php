@@ -29,7 +29,6 @@ require_once($CFG->libdir . '/formslib.php');
  * Form for editing Case Study submissions
  */
 class submission_edit_form extends \moodleform {
-
     /** @var array Array of field objects */
     private $fields;
 
@@ -80,8 +79,12 @@ class submission_edit_form extends \moodleform {
 
         // Instructions for students
         if (!$this->editing) {
-            $mform->addElement('static', 'instructions', '',
-                              get_string('submission_instructions', 'mod_casestudy'));
+            $mform->addElement(
+                'static',
+                'instructions',
+                '',
+                get_string('submission_instructions', 'mod_casestudy')
+            );
         }
 
         // Add dynamic fields based on configured fields
@@ -89,23 +92,25 @@ class submission_edit_form extends \moodleform {
             $fieldclass = $this->fieldmanager->get_field_type_class($field->type, $field, null);
 
             if ($fieldclass) {
-
                 // Render the actual form element
                 $fieldclass->render_form_element($mform, 'field_' . $field->id);
                  // Add field description as static element if it exists
                 if (!empty($field->description) && $field->type !== 'sectionheading') {
-                    $mform->addElement('static', 'desc_' . $field->id, '',
-                                     '<div class="field-description">' . format_text($field->description) . '</div>');
+                    $mform->addElement(
+                        'static',
+                        'desc_' . $field->id,
+                        '',
+                        '<div class="field-description">' . format_text($field->description) . '</div>'
+                    );
                 }
             }
         }
 
         // Acceptance checkbox if required.
-        if (!empty($this->cm->requireacceptance) ) {
+        if (!empty($this->cm->requireacceptance)) {
             $mform->addElement('checkbox', 'acceptance', get_string('acceptance', 'mod_casestudy'));
             $mform->setType('acceptance', PARAM_INT);
         }
-
 
         // Draft save button (always visible).
         $buttonarray = [];
@@ -132,7 +137,7 @@ class submission_edit_form extends \moodleform {
             $buttonarray[] = $mform->createElement('cancel');
         }
 
-        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
         $mform->closeHeaderBefore('buttonar');
     }
 
@@ -226,7 +231,7 @@ class submission_edit_form extends \moodleform {
                         // Update the content in the database
                         $contentrecord = $DB->get_record('casestudy_content', [
                             'submissionid' => $submissionid,
-                            'fieldid' => $field->id
+                            'fieldid' => $field->id,
                         ]);
 
                         if ($contentrecord) {
@@ -260,7 +265,6 @@ class submission_edit_form extends \moodleform {
                 }
             }
         }
-
     }
 
     /**
@@ -340,7 +344,6 @@ class submission_edit_form extends \moodleform {
             $this->definition_after_data();
         }
 
-
         $renderer =& $this->_form->defaultRenderer();
         $renderer->startForm($this->_form);
 
@@ -360,5 +363,4 @@ class submission_edit_form extends \moodleform {
 
         echo $renderer->toHTML();
     }
-
 }

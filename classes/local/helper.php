@@ -20,7 +20,6 @@
  */
 namespace mod_casestudy\local;
 class helper {
-
     public static function get_casestudy(int $casestudyid) {
         global $DB, $PAGE;
         static $casestudy = null;
@@ -30,9 +29,9 @@ class helper {
         }
 
         if ($casestudyid) {
-            $casestudy = $DB->get_record('casestudy', array('id' => $casestudyid), '*', MUST_EXIST);
+            $casestudy = $DB->get_record('casestudy', ['id' => $casestudyid], '*', MUST_EXIST);
         } else if ($PAGE->cm && $PAGE->cm->modname === 'casestudy') {
-            $casestudy = $DB->get_record('casestudy', array('id' => $PAGE->cm->instance), '*', MUST_EXIST);
+            $casestudy = $DB->get_record('casestudy', ['id' => $PAGE->cm->instance], '*', MUST_EXIST);
         } else {
             throw new \coding_exception('casestudyid must be provided if not on a casestudy activity page');
         }
@@ -49,7 +48,7 @@ class helper {
         }
 
         if ($submissionid) {
-            return $DB->get_record('casestudy_submissions', array('id' => $submissionid), '*', MUST_EXIST);
+            return $DB->get_record('casestudy_submissions', ['id' => $submissionid], '*', MUST_EXIST);
         } else {
             throw new \coding_exception('submissionid must be provided to get_submission');
         }
@@ -61,38 +60,38 @@ class helper {
      * @param string $status Status string
      * @return string CSS class
      */
-    public static function get_status_info($status, $type='') {
+    public static function get_status_info($status, $type = '') {
 
         switch ($status) {
             case CASESTUDY_STATUS_NEW:
-                $result = ['class' =>'secondary', 'statusclass' => 'badge-secondary', 'iconclass' => 'fa-plus' ];
+                $result = ['class' => 'secondary', 'statusclass' => 'badge-secondary', 'iconclass' => 'fa-plus' ];
                 break;
             case CASESTUDY_STATUS_DRAFT:
-                $result = ['class' =>'secondary', 'statusclass' => 'badge-secondary', 'iconclass' => 'fa-edit' ];
+                $result = ['class' => 'secondary', 'statusclass' => 'badge-secondary', 'iconclass' => 'fa-edit' ];
                 break;
             case CASESTUDY_STATUS_SUBMITTED:
-                $result = ['class' =>'primary', 'statusclass' => 'badge-primary', 'iconclass' => 'fa-paper-plane'];
+                $result = ['class' => 'primary', 'statusclass' => 'badge-primary', 'iconclass' => 'fa-paper-plane'];
                 break;
             case CASESTUDY_STATUS_IN_REVIEW:
-                $result = ['class' =>'info', 'statusclass' => 'badge-warning', 'iconclass' => 'fa-search'];
+                $result = ['class' => 'info', 'statusclass' => 'badge-warning', 'iconclass' => 'fa-search'];
                 break;
             case CASESTUDY_STATUS_AWAITING_RESUBMISSION:
-                $result = ['class' =>'warning', 'statusclass' => 'badge-info', 'iconclass' => 'fa-clock'];
+                $result = ['class' => 'warning', 'statusclass' => 'badge-info', 'iconclass' => 'fa-clock'];
                 break;
             case CASESTUDY_STATUS_RESUBMITTED:
-                $result = ['class' =>'primary', 'statusclass' => 'badge-primary', 'iconclass' => 'fa-redo'];
+                $result = ['class' => 'primary', 'statusclass' => 'badge-primary', 'iconclass' => 'fa-redo'];
                 break;
             case CASESTUDY_STATUS_RESUBMITTED_INREVIEW:
-                $result = ['class' =>'info', 'statusclass' => 'badge-warning', 'iconclass' => 'fa-search'];
+                $result = ['class' => 'info', 'statusclass' => 'badge-warning', 'iconclass' => 'fa-search'];
                 break;
             case CASESTUDY_STATUS_SATISFACTORY:
-                $result = ['class' =>'success', 'statusclass' => 'badge-success', 'iconclass' => 'fa-check'];
+                $result = ['class' => 'success', 'statusclass' => 'badge-success', 'iconclass' => 'fa-check'];
                 break;
             case CASESTUDY_STATUS_UNSATISFACTORY:
-                $result = ['class' =>'danger', 'statusclass' =>  'badge-danger', 'iconclass' => 'fa-times'];
+                $result = ['class' => 'danger', 'statusclass' => 'badge-danger', 'iconclass' => 'fa-times'];
                 break;
             default:
-                $result = ['class' =>'secondary', 'statusclass' => 'badge-light', 'iconclass' => 'fa-question'];
+                $result = ['class' => 'secondary', 'statusclass' => 'badge-light', 'iconclass' => 'fa-question'];
         }
 
         return $type ? $result[$type] : $result;
@@ -111,5 +110,4 @@ class helper {
             CASESTUDY_STATUS_UNSATISFACTORY => get_string('status_unsatisfactory', 'mod_casestudy'),
         ];
     }
-
 }

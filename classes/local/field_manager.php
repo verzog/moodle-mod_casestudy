@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * Manages CRUD operations for case study fields
  */
 class field_manager {
-
     /** @var int The case study activity ID */
     private $casestudyid;
 
@@ -40,7 +39,7 @@ class field_manager {
         'radio',
         'checkbox',
         'file',
-        'sectionheading'
+        'sectionheading',
     ];
 
     protected static $instance = null;
@@ -164,7 +163,7 @@ class field_manager {
 
         return $DB->get_record('casestudy_fields', [
             'id' => $fieldid,
-            'casestudyid' => $this->casestudyid
+            'casestudyid' => $this->casestudyid,
         ]);
     }
 
@@ -201,8 +200,11 @@ class field_manager {
         $fields = $this->get_fields();
         $this->reorder_fields(array_column($fields, 'id'));
 
-        $maxorder = $DB->get_field('casestudy_fields', 'MAX(sortorder)',
-                                  ['casestudyid' => $this->casestudyid]);
+        $maxorder = $DB->get_field(
+            'casestudy_fields',
+            'MAX(sortorder)',
+            ['casestudyid' => $this->casestudyid]
+        );
 
         return ($maxorder ? $maxorder : 0) + 1;
     }
@@ -224,7 +226,7 @@ class field_manager {
         // Find the field above this one.
         $prevfield = $DB->get_record('casestudy_fields', [
             'casestudyid' => $this->casestudyid,
-            'sortorder' => $field->sortorder - 1
+            'sortorder' => $field->sortorder - 1,
         ]);
 
         if ($prevfield) {
@@ -250,8 +252,11 @@ class field_manager {
             return false;
         }
 
-        $maxorder = $DB->get_field('casestudy_fields', 'MAX(sortorder)',
-                                  ['casestudyid' => $this->casestudyid]);
+        $maxorder = $DB->get_field(
+            'casestudy_fields',
+            'MAX(sortorder)',
+            ['casestudyid' => $this->casestudyid]
+        );
 
         if ($field->sortorder >= $maxorder) {
             return false;
@@ -260,7 +265,7 @@ class field_manager {
         // Find the field below this one.
         $nextfield = $DB->get_record('casestudy_fields', [
             'casestudyid' => $this->casestudyid,
-            'sortorder' => $field->sortorder + 1
+            'sortorder' => $field->sortorder + 1,
         ]);
 
         if ($nextfield) {
@@ -285,7 +290,7 @@ class field_manager {
         foreach ($fieldids as $fieldid) {
             $DB->set_field('casestudy_fields', 'sortorder', $sortorder, [
                 'id' => $fieldid,
-                'casestudyid' => $this->casestudyid
+                'casestudyid' => $this->casestudyid,
             ]);
             $sortorder++;
         }
@@ -303,7 +308,7 @@ class field_manager {
 
         return $DB->get_records('casestudy_fields', [
             'casestudyid' => $this->casestudyid,
-            'category' => 1
+            'category' => 1,
         ], 'sortorder ASC');
     }
 
@@ -331,11 +336,10 @@ class field_manager {
      * @param string $type Field type
      * @return object|false Field class instance or false if not found
      */
-    public function get_field_type_class($type, $fieldid=null) {
+    public function get_field_type_class($type, $fieldid = null) {
         $classname = "\\mod_casestudy\\local\\field_types\\{$type}_field";
 
         if (!class_exists($classname)) {
-
             return false;
         }
 
@@ -351,7 +355,7 @@ class field_manager {
         global $DB;
 
         $max = $DB->get_field('casestudy_fields', 'MAX(sortorder)', [
-            'casestudyid' => $this->casestudyid
+            'casestudyid' => $this->casestudyid,
         ]);
 
         return $max ? $max + 1 : 1;
@@ -384,10 +388,12 @@ class field_manager {
         $counter = 1;
 
         // Check if shortname exists and increment until we find a unique one
-        while ($DB->record_exists('casestudy_fields', [
+        while (
+            $DB->record_exists('casestudy_fields', [
             'casestudyid' => $clonefield->casestudyid,
-            'shortname' => $shortname
-        ])) {
+            'shortname' => $shortname,
+            ])
+        ) {
             $counter++;
             $shortname = $baseshortname . $counter;
         }
@@ -437,8 +443,10 @@ class field_manager {
                 if (isset($config['maxfiles']) && $config['maxfiles'] <= 0) {
                     $errors[] = get_string('error_invalid_maxfiles', 'mod_casestudy');
                 }
-                if (isset($config['minfiles']) && isset($config['maxfiles']) &&
-                    $config['minfiles'] > $config['maxfiles']) {
+                if (
+                    isset($config['minfiles']) && isset($config['maxfiles']) &&
+                    $config['minfiles'] > $config['maxfiles']
+                ) {
                     $errors[] = get_string('error_minfiles_greater_maxfiles', 'mod_casestudy');
                 }
                 break;
@@ -446,6 +454,4 @@ class field_manager {
 
         return $errors;
     }
-
-
 }
