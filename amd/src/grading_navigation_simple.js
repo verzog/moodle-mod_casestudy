@@ -49,6 +49,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/form-autocomplete', 'co
 
         /**
          * Populate the select dropdown
+         *
+         * @param {Array} data Submissions returned from the web service.
+         * @param {Number} selectedId Submission id to mark as selected.
          */
         function populateSelect(data, selectedId) {
             var select = region.find('[data-action=change-user]');
@@ -115,6 +118,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/form-autocomplete', 'co
 
         /**
          * Update the count display
+         *
+         * @param {Number} current 1-based index of the currently selected submission.
+         * @param {Number} total Total number of submissions.
          */
         function updateCount(current, total) {
             str.get_string('xofy', 'mod_casestudy', {x: current, y: total}).done(function(s) {
@@ -124,6 +130,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/form-autocomplete', 'co
 
         /**
          * Navigate to a submission
+         *
+         * @param {Number} submissionId Submission id to navigate to.
          */
         function navigateToSubmission(submissionId) {
             var url = new URL(window.location.href);

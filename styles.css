@@ -113,7 +113,7 @@
 
 .field-display.field-textarea,
 .field-display.field-file {
-    margin-top: 2rem !important;
+    margin-top: 2rem;
 }
 
 .casestudy-submission-view .card-title {
@@ -123,7 +123,7 @@
 }
 
 .casestudy-submission-view .card-body {
-    box-shadow: 0px 0px 10px 0px #a7b2c3;
+    box-shadow: 0 0 10px 0 #a7b2c3;
     border-radius: 10px;
 }
 
@@ -208,7 +208,7 @@
 
 #casestudy-gradeform-container form .felement,
 #casestudy-gradeform-container form .checkbox {
-    width: 100% !important;
+    width: 100%;
     flex: 0 0 100%;
     max-width: 100%;
 }

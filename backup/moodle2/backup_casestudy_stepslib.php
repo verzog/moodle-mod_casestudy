@@ -152,6 +152,7 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
         $field->annotate_files('mod_casestudy', 'description', 'id');
         $content->annotate_files('mod_casestudy', 'content', 'id');
         $grade->annotate_files('mod_casestudy', 'feedback', 'id');
+        $submission->annotate_files('mod_casestudy', 'submission_richtext', 'id');
 
         // Return the root element (casestudy), wrapped into standard activity structure.
         return $this->prepare_activity_structure($casestudy);

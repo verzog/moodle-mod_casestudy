@@ -280,5 +280,6 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         $this->add_related_files('mod_casestudy', 'description', 'casestudy_field');
         $this->add_related_files('mod_casestudy', 'content', 'casestudy_content');
         $this->add_related_files('mod_casestudy', 'feedback', 'casestudy_grade');
+        $this->add_related_files('mod_casestudy', 'submission_richtext', 'casestudy_submission');
     }
 }
