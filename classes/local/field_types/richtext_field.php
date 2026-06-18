@@ -23,8 +23,6 @@ namespace mod_casestudy\local\field_types;
 
 use mod_casestudy\local\field_data;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Rich text field implementation using Moodle's HTML editor
  */

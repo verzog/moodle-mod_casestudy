@@ -21,8 +21,6 @@
 
 namespace mod_casestudy\local\field_types;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Text area field implementation - Example of parameter handling
  */

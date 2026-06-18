@@ -26,8 +26,6 @@ use mod_casestudy\local\field_types\fieldtype;
 use stdClass;
 use tool_admin_presets\local\action\export;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Abstract base class for all field types
  */

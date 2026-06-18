@@ -21,8 +21,6 @@
 
 namespace mod_casestudy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Helper class for sending notifications
  */

@@ -24,8 +24,6 @@ namespace mod_casestudy;
 use mod_casestudy\local\casestudy;
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 class template_manager {
     /**
      * List of supported template types.

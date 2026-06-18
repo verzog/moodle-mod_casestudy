@@ -23,8 +23,6 @@ namespace mod_casestudy\local;
 
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Manages case study submissions and attempts
  */

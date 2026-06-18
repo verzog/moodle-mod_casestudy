@@ -490,7 +490,7 @@ function casestudy_update_grades($casestudy, $userid = 0, $nullifnone = true) {
 
     if ($grades = casestudy_get_user_grades($casestudy, $userid)) {
         casestudy_grade_item_update($casestudy, $grades);
-    } else if ($userid and $nullifnone) {
+    } else if ($userid && $nullifnone) {
         $grade = new stdClass();
         $grade->userid   = $userid;
         $grade->rawgrade = null;
@@ -703,8 +703,9 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
             send_file_not_found();
         }
 
-        // Send the file with security (force download for non-web files).
-        send_stored_file($file, 0, 0, true, $options);
+        // Send the file. Force download only when the caller asked for it (e.g. download links);
+        // leave images and other web-renderable files to display inline.
+        send_stored_file($file, null, 0, $forcedownload, $options);
     } else {
         send_file_not_found();
     }
