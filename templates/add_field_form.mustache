@@ -38,11 +38,6 @@
 <div class="text-center mb-4">
     <button type="button"
             class="btn btn-primary btn-lg rounded-circle casestudy-add-field-btn"
-            data-bs-toggle="popover"
-            data-bs-placement="bottom"
-            data-bs-html="true"
-            data-bs-trigger="click"
-            data-bs-container="body"
             title="{{#str}}addfield, mod_casestudy{{/str}}"
             style="width: 60px; height: 60px; font-size: 24px;"
             >
@@ -71,9 +66,15 @@ require(['theme_boost/popover'], function(PopoverModule) {
     if (!trigger || !Popover) {
         return;
     }
-    var content = document.getElementById('field-type-popover');
+    // Dispose any pre-existing instance so our config (content, sanitize) wins over the
+    // empty-content popover theme_boost/loader may have already auto-attached.
+    var existing = Popover.getInstance ? Popover.getInstance(trigger) : null;
+    if (existing && typeof existing.dispose === 'function') {
+        existing.dispose();
+    }
+    var contentNode = document.getElementById('field-type-popover');
     new Popover(trigger, {
-        content: content ? content.innerHTML : '',
+        content: contentNode ? contentNode.innerHTML : '',
         html: true,
         placement: 'bottom',
         trigger: 'click',
@@ -82,5 +83,6 @@ require(['theme_boost/popover'], function(PopoverModule) {
     });
 });
 {{/js}}
+
 
 
