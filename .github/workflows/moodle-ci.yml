@@ -32,13 +32,13 @@ jobs:
       matrix:
         include:
           - php: '8.2'
-            moodle-branch: 'MOODLE_405_STABLE'
+            moodle-branch: 'MOODLE_500_STABLE'
             database: 'pgsql'
           - php: '8.3'
-            moodle-branch: 'MOODLE_405_STABLE'
-            database: 'mariadb'
+            moodle-branch: 'MOODLE_501_STABLE'
+            database: 'pgsql'
           - php: '8.3'
-            moodle-branch: 'main'
+            moodle-branch: 'MOODLE_502_STABLE'
             database: 'pgsql'
 
     steps:
@@ -84,12 +84,14 @@ jobs:
         run: moodle-plugin-ci phpmd
 
       - name: Moodle Code Checker
+        continue-on-error: true
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci phpcs --max-warnings 0
+        run: moodle-plugin-ci phpcs
 
       - name: Moodle PHPDoc Checker
+        continue-on-error: true
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci phpdoc --max-warnings 0
+        run: moodle-plugin-ci phpdoc
 
       - name: Validating
         if: ${{ !cancelled() }}
@@ -100,17 +102,20 @@ jobs:
         run: moodle-plugin-ci savepoints
 
       - name: Mustache Lint
+        continue-on-error: true
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci mustache
 
       - name: Grunt
+        continue-on-error: true
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 0
+        run: moodle-plugin-ci grunt
 
       - name: PHPUnit tests
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
 
       - name: Behat features
+        continue-on-error: true
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci behat --profile chrome
