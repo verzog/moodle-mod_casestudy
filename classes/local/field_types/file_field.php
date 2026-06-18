@@ -176,6 +176,40 @@ class file_field extends base_field {
     }
 
     /**
+     * Prepare form data for set_data so the filemanager element receives a fresh draft area
+     * populated from the permanent field_<id>@submissionid area.
+     *
+     * Without this, base_field::get_form_value would hand the filemanager the previous draft
+     * itemid stored on save, but Moodle does not re-populate a draft when a non-zero itemid is
+     * passed — so files from the last save would silently disappear when reopening the draft.
+     *
+     * @param array $submissiondata Form data (passed by reference)
+     * @param object $value casestudy_content record for this field
+     * @param string $fieldname Form element name (e.g. field_42)
+     */
+    public function get_form_value(&$submissiondata, $value, $fieldname) {
+        $fileconfig = $this->get_file_config();
+        $options = [
+            'subdirs' => 0,
+            'maxfiles' => $fileconfig['maxfiles'],
+            'maxbytes' => $fileconfig['maxbytes'],
+            'accepted_types' => $fileconfig['acceptedtypes'],
+        ];
+
+        $draftitemid = file_get_submitted_draft_itemid($fieldname);
+        file_prepare_draft_area(
+            $draftitemid,
+            $this->fieldmanager->get_context()->id,
+            'mod_casestudy',
+            'field_' . $this->fieldid,
+            $value->submissionid ?? 0,
+            $options
+        );
+
+        $submissiondata[$fieldname] = $draftitemid;
+    }
+
+    /**
      * Validate field input
      *
      * @param mixed $value Input value (draft item ID for file fields)
