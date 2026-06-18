@@ -143,11 +143,8 @@ class file_field extends base_field {
                     ['data-toggle' => 'casestudy-file-modal']
                 );
 
-                $valuespan .= \html_writer::tag('div', $background . $image, [
-                    'class' => 'casestudy-field-file-image mb-2 mr-2',
-                    'data-modal' => 'lightbox',
-                    'data-modal-image-src' => $file['url'],
-                    'data-modal-title' => format_string($this->fielddata->name),
+                $valuespan .= \html_writer::tag('div', $background . $image, ['class' => 'casestudy-field-file-image mb-2 mr-2',
+                    'data-modal' => 'lightbox', 'data-modal-content' => $image, 'data-modal-title' => format_string($this->fielddata->name),
                 ]);
                 $includeinstruction = true;
             } else {

@@ -468,25 +468,3 @@ h3.popover-header {
     opacity: 0.5;
     pointer-events: none;
 }
-
-/* Lightbox affordance: anything tagged by the field_file AMD module gets a
-   zoom cursor on hover so the click target is discoverable. */
-.casestudy-lightbox-target {
-    cursor: zoom-in;
-    transition: filter 0.15s ease-in-out;
-}
-
-.casestudy-lightbox-target:hover {
-    filter: brightness(0.9);
-}
-
-/* The lightbox modal body should let the image use the available width on
-   every page (previously this rule only applied inside the dedicated
-   view_casestudy.php page id). */
-.modal.modal-lightbox .modal-body .casestudy-lightbox-image,
-.modal.modal-lightbox .modal-body .casestudy-lightbox-image-wrapper {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-}

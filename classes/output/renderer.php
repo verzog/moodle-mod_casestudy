@@ -804,11 +804,6 @@ class renderer extends plugin_renderer_base {
             'submitdrafturl' => $submitdrafturl,
         ];
 
-        // Wire the lightbox AMD so every image inside the submission body
-        // (file-field thumbnails AND inline rich-text images) is clickable to
-        // enlarge. The module is idempotent across renders.
-        $this->page->requires->js_call_amd('mod_casestudy/field_file', 'init');
-
         return $this->render_from_template('mod_casestudy/view_casestudy', $submissiondata);
     }
 
