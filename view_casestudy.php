@@ -24,6 +24,7 @@ require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module ID.
 $submissionid = required_param('submissionid', PARAM_INT); // Casestudy submission ID.
+$action = optional_param('action', '', PARAM_ALPHA);
 
 // Get course module and related data.
 $cm = get_coursemodule_from_id('casestudy', $id, 0, false, MUST_EXIST);
@@ -77,6 +78,32 @@ $user = $DB->get_record('user', ['id' => $submission->userid]);
 // Check editing permissions.
 $canedit = ($submission->userid == $USER->id &&
     ($submission->status == CASESTUDY_STATUS_DRAFT || $submission->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION));
+
+// Handle the "submit draft" action from the in-page button.
+if ($action === 'submit') {
+    require_sesskey();
+    if ($submission->userid != $USER->id) {
+        throw new moodle_exception('nopermissions', 'error');
+    }
+    if ($submission->status !== CASESTUDY_STATUS_DRAFT) {
+        throw new moodle_exception('cannoteditsubmitted', 'mod_casestudy');
+    }
+
+    $manager = new \mod_casestudy\local\submission_manager($casestudy->id, $casestudy, $cm);
+    if ($manager->submit_casestudy($submission->id)) {
+        $redirecturl = new moodle_url('/mod/casestudy/view_casestudy.php', [
+            'id' => $cm->id,
+            'submissionid' => $submission->id,
+        ]);
+        redirect(
+            $redirecturl,
+            get_string('submissionsubmitted', 'mod_casestudy'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    }
+    throw new moodle_exception('errorsubmitting', 'mod_casestudy');
+}
 
 
 echo $OUTPUT->header();
