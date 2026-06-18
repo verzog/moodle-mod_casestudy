@@ -12,22 +12,30 @@
 // is provided "as is", without warranty of any kind, express or implied.
 
 /**
- * local library functions for casestudy module
+ * Local library functions for casestudy module.
  *
  * @package    mod_casestudy
  * @copyright  © Skin Cancer College Australasia
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
+use mod_casestudy\local\submission_manager;
+
+/**
+ * Submission picker form used on grading pages (previous/next + autocomplete jump).
+ */
 class casestudy_selector_form extends moodleform {
+    /**
+     * Define the form structure (previous/next buttons, submission picker autocomplete).
+     */
     protected function definition() {
         $mform = $this->_form;
         $options = $this->_customdata['options'];
 
-        // Navigation buttons container
+        // Navigation buttons container.
         $navigationgroup = [];
 
-        // Previous/Next submission buttons
+        // Previous / next submission buttons.
         if ($this->has_previous_submission()) {
             $navigationgroup[] = $mform->createElement(
                 'html',
@@ -53,11 +61,11 @@ class casestudy_selector_form extends moodleform {
         }
     }
 
-     /**
-      * Check if there's a previous submission for navigation
-      *
-      * @return bool
-      */
+    /**
+     * Check if there's a previous submission for navigation.
+     *
+     * @return bool
+     */
     protected function has_previous_submission() {
         $casestudyid = $this->optional_param('casestudyid', 0, PARAM_INT);
         $submissionid = $this->optional_param('submissionid', 0, PARAM_INT);
@@ -71,7 +79,7 @@ class casestudy_selector_form extends moodleform {
     }
 
     /**
-     * Check if there's a next submission for navigation
+     * Check if there's a next submission for navigation.
      *
      * @return bool
      */
@@ -85,46 +93,5 @@ class casestudy_selector_form extends moodleform {
 
         $manager = submission_manager::instance($casestudyid);
         return $manager->get_next_submission_for_grading($submissionid) !== null;
-    }
-}
-
-/**
- * Template editor form.
- *
- * @package    mod_casestudy
- * @copyright  2025 Skin Cancer College Australasia
- */
-class template_editor_form extends moodleform {
-    protected function definition() {
-
-        $mform = $this->_form;
-        $data = $this->_customdata;
-
-        $mform->addElement('hidden', 'templatename', $data['templatename']);
-        $mform->setType('templatename', PARAM_ALPHA);
-
-        // if ($data['usehtmleditor']) {
-
-        $editoroptions = [
-            'subdirs' => false,
-            'maxfiles' => 0,
-            'context' => $data['context'],
-        ];
-        $mform->addElement('editor', 'templatecontent', get_string('templatecontent', 'mod_casestudy'), null, $editoroptions);
-        $mform->setType('templatecontent', PARAM_RAW);
-        $mform->setDefault('templatecontent', ['text' => $data['templatecontent'], 'format' => FORMAT_HTML]);
-
-        // } else {
-        // $mform->addElement('textarea', 'templatecontent', get_string('templatecontent', 'mod_casestudy'), ['rows' => 20, 'cols' => 75, 'style' => 'width: 100%;']);
-        // $mform->setType('templatecontent', PARAM_RAW);
-        // $mform->setDefault('templatecontent', $data['templatecontent']);
-        // }
-
-        if ($data['disableeditor']) {
-            $mform->hardFreeze('templatecontent');
-        }
-
-        // Add action buttons.
-        $this->add_action_buttons(true, get_string('savetemplate', 'mod_casestudy'));
     }
 }

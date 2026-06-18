@@ -31,6 +31,12 @@ use moodle_url;
 use core\output\local\dropdown\dialog;
 
 
+/**
+ * Renderable for the tertiary navigation action menu on submission pages.
+ *
+ * Wraps the view selector, initials filter and any additional action buttons into a single
+ * mustache-friendly context.
+ */
 class submission_actionmenu implements renderable, templatable {
     /** @var \mod_casestudy\local\casestudy The casestudy instance. */
     protected $casestudy;

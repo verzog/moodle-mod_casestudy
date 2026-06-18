@@ -26,15 +26,31 @@ use mod_casestudy\local\field_manager;
 use mod_casestudy\local\helper;
 use stdClass;
 
+/**
+ * Renderable domain wrapper around a {casestudy_submissions} row.
+ *
+ * Exposes the submission to mustache via {@see export_for_template} and caches per-id instances
+ * for the duration of a request to keep template rendering cheap.
+ */
 class submission implements \renderable, \templatable {
+    /** @var self[] In-process instance cache keyed by submission id. */
     public static $instance;
 
+    /** @var casestudy Activity wrapper this submission belongs to. */
     protected casestudy $casestudy;
 
+    /** @var \stdClass Raw {casestudy_submissions} row. */
     protected $submission;
 
+    /** @var \cm_info|\stdClass Course module record. */
     protected $cm;
 
+    /**
+     * Return a cached submission wrapper for the given id, building one on first call.
+     *
+     * @param int $submissionid Submission id.
+     * @return self
+     */
     public static function instance(int $submissionid): submission {
 
         if (empty(self::$instance[$submissionid])) {

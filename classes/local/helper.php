@@ -19,7 +19,17 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 namespace mod_casestudy\local;
+
+/**
+ * Static utility helpers used across the plugin (record fetches, status maps).
+ */
 class helper {
+    /**
+     * Fetch a {casestudy} row with a small request-scoped cache.
+     *
+     * @param int $casestudyid Activity instance id, or 0 to use the current $PAGE->cm.
+     * @return \stdClass
+     */
     public static function get_casestudy(int $casestudyid) {
         global $DB, $PAGE;
         static $casestudy = null;
@@ -39,6 +49,12 @@ class helper {
         return $casestudy;
     }
 
+    /**
+     * Fetch a {casestudy_submissions} row by id.
+     *
+     * @param int $submissionid Submission id.
+     * @return \stdClass|false
+     */
     public static function get_submission(int $submissionid) {
         global $DB;
         static $submission = null;
@@ -97,6 +113,11 @@ class helper {
         return $type ? $result[$type] : $result;
     }
 
+    /**
+     * Return the full map of submission statuses to localised display labels.
+     *
+     * @return array Map of CASESTUDY_STATUS_* constant => label.
+     */
     public static function get_status_list() {
         return [
             CASESTUDY_STATUS_NEW => get_string('status_new', 'mod_casestudy'),

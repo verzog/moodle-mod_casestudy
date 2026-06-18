@@ -24,6 +24,13 @@ namespace mod_casestudy;
 use mod_casestudy\local\casestudy;
 use stdClass;
 
+/**
+ * Manages the lifecycle of the activity's editable templates
+ * (single view, submission form, custom CSS).
+ *
+ * Reads and writes the singletemplate / formtemplate / csstemplate columns on {casestudy}
+ * and delegates default-template generation to {@see template}.
+ */
 class template_manager {
     /**
      * List of supported template types.

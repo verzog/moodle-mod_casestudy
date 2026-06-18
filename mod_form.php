@@ -370,6 +370,13 @@ class mod_casestudy_mod_form extends moodleform_mod {
         return [$satisfactoryconditiongroupel, $completionsatisfactorygroupel, $completioncategoryel];
     }
 
+    /**
+     * Suppress the standard grade-based completion elements; this activity uses its own
+     * satisfactory-submission rules instead.
+     *
+     * @param string $modname Module short name.
+     * @param bool $rating Whether ratings are involved (ignored).
+     */
     public function add_completiongrade_elements(
         string $modname,
         bool $rating = false

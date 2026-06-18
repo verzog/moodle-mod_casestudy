@@ -32,6 +32,7 @@ require_once($CFG->libdir . '/formslib.php');
  * Dynamic grading form for case study submissions
  */
 class grading_form extends \core_form\dynamic_form {
+    /** @var \mod_casestudy\local\casestudy Activity wrapper, set in process_dynamic_submission. */
     protected $casestudyobj;
 
     /**
