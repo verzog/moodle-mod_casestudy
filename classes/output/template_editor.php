@@ -26,15 +26,33 @@ use templatable;
 use renderer_base;
 use moodle_url;
 
+/**
+ * Renderable that powers the template-editor admin page (single-view, form, CSS variants).
+ */
 class template_editor implements renderable, templatable {
+    /** @var \mod_casestudy\template_manager Backing manager. */
     private $manager;
+
+    /** @var string Template variant being edited ('singletemplate', 'formtemplate', 'csstemplate'). */
     private $templatename;
 
+    /**
+     * Build a renderable for the given template variant.
+     *
+     * @param \mod_casestudy\template_manager $manager Backing manager.
+     * @param string $templatename Template variant being edited.
+     */
     public function __construct($manager, $templatename) {
         $this->manager = $manager;
         $this->templatename = $templatename;
     }
 
+    /**
+     * Build the context for the template_editor mustache template.
+     *
+     * @param renderer_base $output Renderer used for child rendering.
+     * @return array Mustache context.
+     */
     public function export_for_template(renderer_base $output) {
         global $PAGE;
 
@@ -62,6 +80,12 @@ class template_editor implements renderable, templatable {
         return $data;
     }
 
+    /**
+     * Build the tag-toolbar context (categorised tags + reset URL).
+     *
+     * @param renderer_base $output Renderer.
+     * @return array Toolbar context.
+     */
     private function get_toolbar_data(renderer_base $output) {
         // Get tags based on template type
         $tags = $this->manager->get_available_tags($this->templatename);
@@ -92,6 +116,12 @@ class template_editor implements renderable, templatable {
         return $toolbar;
     }
 
+    /**
+     * Prepare editor configuration for both the template content and the (read-only) default view.
+     *
+     * @param bool $usehtmleditor True for non-CSS templates so the HTML editor enhances the textarea.
+     * @return array Editor context.
+     */
     private function get_editors_data($usehtmleditor) {
         global $PAGE;
 
@@ -116,6 +146,15 @@ class template_editor implements renderable, templatable {
         return $result;
     }
 
+    /**
+     * Build a single editor descriptor consumed by the mustache template.
+     *
+     * @param \texteditor|null $editor Active text editor instance (null for the read-only case).
+     * @param string $name Form element name.
+     * @param string $title Editor heading.
+     * @param string $content Initial editor content.
+     * @return array Editor descriptor.
+     */
     private function generate_editor_data($editor, $name, $title, $content) {
         $editordata = [
             'name' => $name,

@@ -129,8 +129,6 @@ class renderer extends plugin_renderer_base {
      * @return string HTML output
      */
     public function grader_interface($cm) {
-        global $PAGE;
-
         $output = '';
 
         // Use dynamic submissions table for all submissions (graders can see all)
@@ -189,7 +187,7 @@ class renderer extends plugin_renderer_base {
      * @return string HTML output
      */
     public function summaries_interface($cm, $groupid = 0, $userid = 0) {
-        global $DB, $PAGE;
+        global $DB;
 
         $output = '';
 
@@ -657,9 +655,21 @@ class renderer extends plugin_renderer_base {
     }
 
 
-    public function submission_action_menu(\mod_casestudy\local\casestudy $casestudy, $baseurl, $initials = [], $additionalactions = []) {
-        global $PAGE;
-
+    /**
+     * Render the tertiary navigation action menu shown across submission/grading pages.
+     *
+     * @param \mod_casestudy\local\casestudy $casestudy Activity wrapper.
+     * @param \moodle_url $baseurl Page URL the menu links should anchor against.
+     * @param array $initials Optional initials-filter selection.
+     * @param array $additionalactions Extra action items to append (e.g. download).
+     * @return string HTML.
+     */
+    public function submission_action_menu(
+        \mod_casestudy\local\casestudy $casestudy,
+        $baseurl,
+        $initials = [],
+        $additionalactions = []
+    ) {
         $actionmenu = new submission_actionmenu($casestudy, $baseurl, $initials, $additionalactions);
         return $this->render($actionmenu);
     }
@@ -756,7 +766,7 @@ class renderer extends plugin_renderer_base {
      * @return string HTML
      */
     protected function render_user_navigation($cm, $casestudy, $currentsubmission) {
-        global $DB, $OUTPUT;
+        global $DB;
 
         // Get all submissions for this case study
         $context = \context_module::instance($cm->id);
@@ -805,8 +815,8 @@ class renderer extends plugin_renderer_base {
             'totalcount' => count($submissions),
             'isfirst' => $currentindex === 0,
             'islast' => $currentindex === count($submissions) - 1,
-            'larrow' => $OUTPUT->larrow(),
-            'rarrow' => $OUTPUT->rarrow(),
+            'larrow' => $this->output->larrow(),
+            'rarrow' => $this->output->rarrow(),
         ];
 
         return $this->render_from_template('mod_casestudy/grading_navigation', $templatecontext);
@@ -868,25 +878,23 @@ class renderer extends plugin_renderer_base {
      * @return string|null HTML preview or null
      */
     protected function get_advanced_grading_preview($cm, $submissionid) {
-        global $PAGE;
-
         $context = \context_module::instance($cm->id);
         $gradingmanager = get_grading_manager($context, 'mod_casestudy', 'submissions');
 
-        // Check if advanced grading is enabled
+        // Check if advanced grading is enabled.
         if ($gradingmethod = $gradingmanager->get_active_method()) {
             $controller = $gradingmanager->get_controller($gradingmethod);
 
             if ($controller->is_form_defined()) {
-                // Check if there's an existing grading instance
+                // Check if there's an existing grading instance.
                 $existinginstance = $controller->get_current_instance(0, $submissionid);
 
                 if ($existinginstance) {
-                    // Show existing grading
-                    return $controller->render_grade($PAGE, $submissionid, null, false, true);
+                    // Show existing grading.
+                    return $controller->render_grade($this->page, $submissionid, null, false, true);
                 } else {
-                    // Show preview of the grading form
-                    return $controller->render_preview($PAGE);
+                    // Show preview of the grading form.
+                    return $controller->render_preview($this->page);
                 }
             }
         }

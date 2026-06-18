@@ -21,6 +21,14 @@
 namespace mod_casestudy\local\field_types;
 
 use mod_casestudy\local\field_manager;
+
+/**
+ * Contract implemented by every case study field type (text, file, richtext, etc.).
+ *
+ * Defines the rendering, validation, persistence and template-fallback hooks the manager
+ * calls into. Concrete implementations live alongside this interface and typically extend
+ * {@see base_field} for the default behaviours.
+ */
 interface fieldtype {
     /**
      * Get field type identifier

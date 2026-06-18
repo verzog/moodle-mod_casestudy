@@ -604,7 +604,10 @@ class notification_helper {
             $html .= '<tr>';
             $html .= '<td style="padding: 10px; border: 1px solid #ddd;">' . $criterion['label'] . '</td>';
             $html .= '<td style="padding: 10px; text-align: center; border: 1px solid #ddd;"><strong>' . $criterion['current'] . '</strong> / ' . $criterion['required'] . '</td>';
-            $html .= '<td style="padding: 10px; text-align: center; border: 1px solid #ddd; background-color: ' . $statusbg . ';">' . $statusicon . ($statusicon ? ' ' : '') . $statustext . '</td>';
+            $cellstyle = 'padding: 10px; text-align: center; border: 1px solid #ddd; background-color: ' . $statusbg . ';';
+            $html .= '<td style="' . $cellstyle . '">'
+                . $statusicon . ($statusicon ? ' ' : '') . $statustext
+                . '</td>';
             $html .= '</tr>';
         }
 
@@ -620,7 +623,9 @@ class notification_helper {
             $html .= '</div>';
         }
 
-        $html .= '<p><a href="' . $viewurl->out(false) . '" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">'
+        $linkstyle = 'display: inline-block; padding: 10px 20px; background-color: #007bff;'
+            . ' color: #fff; text-decoration: none; border-radius: 5px;';
+        $html .= '<p><a href="' . $viewurl->out(false) . '" style="' . $linkstyle . '">'
                . get_string('viewcasestudy', 'mod_casestudy') . '</a></p>';
 
         $html .= '</div>';

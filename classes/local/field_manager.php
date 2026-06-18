@@ -40,6 +40,7 @@ class field_manager {
         'sectionheading',
     ];
 
+    /** @var self[] In-process instance cache keyed by casestudyid. */
     protected static $instance = null;
 
     /**
@@ -52,6 +53,12 @@ class field_manager {
     }
 
 
+    /**
+     * Return a cached field manager for the given activity, building one on first call.
+     *
+     * @param int $casestudyid Activity instance id.
+     * @return self
+     */
     public static function instance($casestudyid) {
 
         if (self::$instance === null && self::$instance?->casestudyid !== $casestudyid) {
@@ -145,6 +152,11 @@ class field_manager {
     }
 
 
+    /**
+     * Lazily resolve and cache the module context for the activity this manager belongs to.
+     *
+     * @return \context_module
+     */
     public function get_context() {
         $cm = get_coursemodule_from_instance('casestudy', $this->casestudyid);
         return \context_module::instance($cm->id);
