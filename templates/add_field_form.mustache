@@ -65,7 +65,7 @@
 
 {{#js}}
 require(['theme_boost/popover'], function(PopoverModule) {
-    // theme_boost/popover exports the Bootstrap 5 Popover class.
+    // The theme_boost/popover module exports the Bootstrap 5 Popover class.
     var Popover = PopoverModule.Popover || PopoverModule.default || PopoverModule;
     var trigger = document.querySelector('.casestudy-add-field-btn');
     if (!trigger || !Popover) {
