@@ -106,18 +106,51 @@ class grading_form extends \core_form\dynamic_form {
             }
         }
 
-        // Advanced grading or traditional grade selection
-        $isadvancedgrading = $this->add_grading_elements();
+        // Advanced grading or traditional grade selection. Returns the active
+        // grading mode plus, for scales, the scale items so we can render them
+        // as buttons below (one button per scale option).
+        $gradinginfo = $this->add_grading_elements();
+        $mode = $gradinginfo['mode'] ?? 'none';
+        $scaleitems = $gradinginfo['scaleitems'] ?? [];
 
         $mform->addElement('hidden', 'submitaction');
         $mform->setType('submitaction', PARAM_ALPHA);
 
+        // Hidden carrier for the chosen scale grade value when a scale button is clicked.
+        // (The 'grade' hidden element itself is added by add_grading_elements in scale mode.)
+
         // Only show action buttons if user can grade (not finished or is admin).
         if (!$isfinished || $canregrade) {
-            // Action buttons group
+            // Scale-mode only: render one submit button per scale item. Clicking
+            // one sets the hidden grade value (via JS in the template) and
+            // submits the form. The highest scale item is treated as the
+            // passing/satisfactory choice; all others are unsatisfactory.
+            if ($mode === 'scale' && !empty($scaleitems)) {
+                $maxkey = max(array_keys($scaleitems));
+                $buttonshtml = '<div class="casestudy-scale-buttons mb-3" data-region="casestudy-scale-buttons">';
+                foreach ($scaleitems as $key => $label) {
+                    $ispassing = ($key === $maxkey);
+                    $btnclass = $ispassing ? 'btn btn-success' : 'btn btn-danger';
+                    $buttonshtml .= \html_writer::tag(
+                        'button',
+                        s($label),
+                        [
+                            'type' => 'submit',
+                            'name' => 'markscale',
+                            'value' => (int)$key,
+                            'class' => $btnclass,
+                            'data-scale-value' => (int)$key,
+                            'data-scale-passing' => $ispassing ? '1' : '0',
+                        ]
+                    );
+                }
+                $buttonshtml .= '</div>';
+                $mform->addElement('html', $buttonshtml);
+            }
+
             $actiongroup = [];
 
-            // Save feedback
+            // Save feedback.
             $actiongroup[] = $mform->createElement(
                 'submit',
                 'savefeedback',
@@ -125,7 +158,7 @@ class grading_form extends \core_form\dynamic_form {
                 ['class' => 'grade-primary']
             );
 
-            // Save and request resubmission
+            // Save and request resubmission.
             $actiongroup[] = $mform->createElement(
                 'submit',
                 'saverequestresubmission',
@@ -133,23 +166,7 @@ class grading_form extends \core_form\dynamic_form {
                 ['class' => 'grade-warning']
             );
 
-            // Mark as satisfactory
-            $actiongroup[] = $mform->createElement(
-                'submit',
-                'marksatisfactory',
-                get_string('marksatisfactory', 'mod_casestudy'),
-                ['class' => 'grade-success']
-            );
-
-            // Mark as unsatisfactory
-            $actiongroup[] = $mform->createElement(
-                'submit',
-                'markunsatisfactory',
-                get_string('markunsatisfactory', 'mod_casestudy'),
-                ['class' => 'grade-danger']
-            );
-
-            // Cancel
+            // Cancel.
             $actiongroup[] = $mform->createElement(
                 'cancel',
                 'cancel',

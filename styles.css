@@ -222,7 +222,7 @@
 }
 
 .casestudy-submission-view:not(.submit-user-view) .left-section {
-    width: 50%;
+    width: 66.6667%;
 }
 .casestudy-submission-view.submit-user-view .left-section {
     width: 100%;
@@ -234,7 +234,30 @@
 }
 
 .casestudy-submission-view .right-section {
-    width: 50%;
+    width: 33.3333%;
+}
+
+/* Prevent any image inside a submission view / template card from overflowing
+   its bootstrap container. File-field thumbnails and inline rich-text images
+   must always shrink to the column width. */
+.casestudy-submission-view img,
+.casestudy-submission-content img,
+.casestudy-template-output img,
+.casestudy-submission-single img,
+.field-display img,
+.field-wrapper img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Scale-option grading buttons: render the scale items as a tidy row. */
+.casestudy-scale-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.casestudy-scale-buttons .btn {
+    min-width: 8rem;
 }
 
 /* Templates */

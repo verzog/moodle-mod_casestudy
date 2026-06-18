@@ -202,13 +202,14 @@ class casestudy {
 
         // Add the grading elements to the form
         if (!$userid) {
-            return false;
+            return ['mode' => 'none', 'scaleitems' => []];
         }
 
         $grade = $this->get_user_grade($userid, true, $submissionid);
         $gradinginstance = $this->get_grading_instance($userid, $grade, false);
 
-        $hasgrading = false;
+        $mode = 'none';
+        $scaleitems = [];
         if ($gradinginstance) {
             $mform->addElement(
                 'grading',
@@ -217,7 +218,7 @@ class casestudy {
                 ['gradinginstance' => $gradinginstance]
             );
             $mform->setType('advancedgrading', PARAM_RAW);
-            $hasgrading = true;
+            $mode = 'advanced';
         } else {
             // Fallback to traditional grading if advanced grading is not available.
             // Use simple direct grading.
@@ -232,26 +233,21 @@ class casestudy {
                     $mform->addElement('static', 'gradedisabled', $name, $strgradelocked);
                     $mform->addHelpButton('gradedisabled', 'gradeoutofhelp', 'assign');
                 }
-                $hasgrading = true;
-            } else {
-                $grademenu = [-1 => get_string("nograde")] + make_grades_menu($this->casestudy->grade);
-                if (count($grademenu) > 1) {
-                    $gradingelement = $mform->addElement('select', 'grade', get_string('gradenoun') . ':', $grademenu);
-
-                    // The grade is already formatted with format_float so it needs to be converted back to an integer.
-                    if (!empty($data->grade)) {
-                        $data->grade = (int)unformat_float($data->grade);
-                    }
+                $mode = 'point';
+            } else if ($this->casestudy->grade < 0) {
+                // Scale-based grading: the scale items become buttons in the form,
+                // so we don't add a select element here. Just capture the items.
+                $scaleitems = make_grades_menu($this->casestudy->grade);
+                if (!empty($scaleitems)) {
+                    // Hidden input holds the chosen scale value when a scale button is clicked.
+                    $mform->addElement('hidden', 'grade');
                     $mform->setType('grade', PARAM_INT);
-                    $hasgrading = true;
-                    if ($gradingdisabled) {
-                        $gradingelement->freeze();
-                    }
+                    $mode = 'scale';
                 }
             }
         }
 
-        return $hasgrading;
+        return ['mode' => $mode, 'scaleitems' => $scaleitems];
     }
 
     /**
@@ -346,11 +342,25 @@ class casestudy {
         // Just save feedback without changing grade/status.
         $this->save_feedback($submission, $feedback, $grade, $data->saverequestresubmission, $form);
 
+        // Scale-button submissions arrive as submitaction='markscale' with the
+        // chosen scale item id in $data->grade. The highest scale item maps to
+        // satisfactory; everything else maps to unsatisfactory.
+        $scalestatus = null;
+        if (($data->submitaction ?? '') === 'markscale' && $this->casestudy->grade < 0) {
+            $scaleitems = make_grades_menu($this->casestudy->grade);
+            if (!empty($scaleitems)) {
+                $maxkey = max(array_keys($scaleitems));
+                $chosen = isset($data->grade) ? (int)$data->grade : 0;
+                $scalestatus = ($chosen === $maxkey)
+                    ? CASESTUDY_STATUS_SATISFACTORY
+                    : CASESTUDY_STATUS_UNSATISFACTORY;
+            }
+        }
+
         $status = match ($data->submitaction) {
             'savefeedback' => !empty($submission->parentid) ? CASESTUDY_STATUS_RESUBMITTED_INREVIEW : CASESTUDY_STATUS_IN_REVIEW,
             'saverequestresubmission' => CASESTUDY_STATUS_AWAITING_RESUBMISSION,
-            'marksatisfactory' => CASESTUDY_STATUS_SATISFACTORY,
-            'markunsatisfactory' => CASESTUDY_STATUS_UNSATISFACTORY,
+            'markscale' => $scalestatus ?? CASESTUDY_STATUS_IN_REVIEW,
             default => CASESTUDY_STATUS_IN_REVIEW,
         };
 
