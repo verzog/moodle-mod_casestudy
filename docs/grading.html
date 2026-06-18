@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grading Guide — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html" class="active"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Grading Guide
+  </div>
+
+  <div class="content">
+    <h1>Grading Guide</h1>
+    <p class="page-intro">
+      This guide explains how teachers and graders review student submissions, provide feedback,
+      and mark them as satisfactory or request resubmission.
+    </p>
+
+    <div class="callout note">
+      <span class="callout-icon">🔑</span>
+      <div class="callout-body"><strong>Required capability:</strong> <code>mod/casestudy:grade</code> — Teacher or Manager role.</div>
+    </div>
+
+    <!-- Accessing -->
+    <h2>Accessing submissions</h2>
+
+    <h3>From the activity page</h3>
+    <p>Open the Case Study activity. As a teacher you see all student submissions (or your group's submissions if group mode is on). Click any submission to open the grading view.</p>
+
+    <figure class="screenshot">
+     <img src="images/grading_submission_list.png" alt="Teacher view of the submission list with student names, submission times, and statuses">
+      <figcaption>Teacher view — submission list with statuses</figcaption>
+    </figure>
+
+    <!-- Grading interface -->
+    <h2>The grading interface</h2>
+    <p>Clicking a submission opens a split view:</p>
+    <ol>
+      <li><strong>Submission view</strong> — the student's answers, formatted per the view template</li>
+      <li><strong>Grading panel</strong> — feedback editor, grade input, and action buttons</li>
+    </ol>
+
+    <figure class="screenshot">
+      <img src="images/grading_interface.png" alt="The grading view showing the student's submission on the left and the grading panel on the right">
+      <figcaption>The grading view — student submission (left) and grading panel (right)</figcaption>
+    </figure>
+
+    <!-- Grader information -->
+    <h2>Grader information panel</h2>
+    <p>If marking criteria or rubric text was added in the activity's <strong>Grader Information</strong> field, it appears in a panel visible only to graders — students never see this content.</p>
+
+    <!-- Grading panel options -->
+    <h2>Grading panel options</h2>
+
+    <h3>Feedback / Marker Comments</h3>
+    <p>A rich text editor for detailed written feedback. Supports formatting, links, and file uploads. Students see this when viewing their graded submission.</p>
+
+    <figure class="screenshot">
+      <img src="images/grading_feedback_editor.png" alt="The feedback editor with formatting toolbar and file attachment options">
+      <figcaption>Feedback editor — write detailed, formatted feedback for the student</figcaption>
+    </figure>
+
+    <h3>Notify Student</h3>
+    <p>A checkbox that determines whether the student receives an email when you save the grade.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>State</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>Ticked (default)</td><td>Student receives an email notification when you click any save button</td></tr>
+          <tr><td>Unticked</td><td>No email — student sees the result next time they log in and view the activity</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The default state is controlled by the activity setting <strong>Default for "Notify Student"</strong>.</p>
+
+    <h3>Grade</h3>
+    <p>If the activity is graded (e.g., out of 100 or using a scale), a grade input appears here. The grade is pushed to the Moodle gradebook when you save.</p>
+
+    <!-- Grading actions -->
+    <h2>Grading actions</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Button</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Save Feedback</strong></td><td>Saves feedback and/or grade without changing the submission status. Use when you want to save progress without making a final decision.</td></tr>
+          <tr><td><strong>Save &amp; Request Resubmission</strong></td><td>Saves feedback and changes status to <span class="badge badge-orange">Awaiting Resubmission</span>. The student can then create a new version.</td></tr>
+          <tr><td><strong>Mark Satisfactory</strong></td><td>Changes status to <span class="badge badge-green">Satisfactory</span> and saves feedback. This is a <strong>final decision</strong>.</td></tr>
+          <tr><td><strong>Mark Unsatisfactory</strong></td><td>Changes status to <span class="badge badge-red">Unsatisfactory</span> and saves feedback. This is a <strong>final decision</strong>.</td></tr>
+          <tr><td><strong>Cancel</strong></td><td>Discards unsaved changes and returns to the submission list.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">Once a submission is marked <strong>Satisfactory</strong> or <strong>Unsatisfactory</strong>, the grading buttons are hidden unless you have the <strong>Regrade</strong> permission (<code>mod/casestudy:regrade</code>). Contact your administrator if you need to change a final grade.</div>
+    </div>
+
+    <!-- Navigation -->
+    <h2>Navigating between submissions</h2>
+    <p>At the top of the grading panel:</p>
+    <ul>
+      <li><strong>← Previous / Next →</strong> arrows to move to the adjacent submission</li>
+      <li>A <strong>dropdown selector</strong> to jump directly to any student's submission</li>
+      <li>A counter showing <strong>"X of Y submissions"</strong></li>
+    </ul>
+    <p>The navigation list shows all submitted, in-review, awaiting-resubmission, resubmitted, and previously graded submissions. Drafts are not shown.</p>
+
+    <figure class="screenshot">
+      <img src="images/attempt-navigate.png" alt="The feedback editor with formatting toolbar and file attachment options">
+      <figcaption>Navigation arrows and dropdown selector in the grading panel</figcaption>
+    </figure>
+
+    <!-- Requesting resubmission -->
+    <h2>Requesting a resubmission</h2>
+    <ol class="steps">
+      <li>Write specific feedback explaining clearly what the student needs to change or improve.</li>
+      <li>Click <strong>Save &amp; Request Resubmission</strong>.</li>
+    </ol>
+    <p>The submission status changes to <span class="badge badge-orange">Awaiting Resubmission</span> and:</p>
+    <ul>
+      <li>The student is notified by email (if <strong>Notify Student</strong> is ticked)</li>
+      <li>The student can create a new attempt, optionally pre-filled with previous data</li>
+      <li>The original submission is preserved and linked to the resubmission</li>
+    </ul>
+
+    <!-- Resubmissions -->
+    <h2>Reviewing resubmissions</h2>
+    <p>When a student resubmits, the new attempt appears in the list with status <span class="badge badge-blue">Resubmitted</span>. The navigation dropdown shows attempt numbers so you can compare the original and revised versions.</p>
+
+    <!-- Group filtering -->
+    <h2>Group filtering</h2>
+    <p>If the course uses groups, a group selector appears at the top of the submission list. Select a group to filter to only that group's students. This also affects the weekly email reports you receive — markers only receive data for their groups.</p>
+
+    <div class="page-nav">
+      <a class="prev" href="overrides.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">User Overrides</span>
+        </span>
+      </a>
+      <a class="next" href="notifications.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Notifications &amp; Reports</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

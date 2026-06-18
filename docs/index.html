@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Study Plugin — Documentation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav>
+      <a href="index.html" class="active"><span class="nav-icon">🏠</span> Overview</a>
+    </nav>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav>
+      <a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a>
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a>
+  </div>
+
+  <div class="content">
+    <h1>Case Study Plugin <span class="page-badge">v1.0</span></h1>
+
+    <p class="page-intro">
+      The <strong>Case Study</strong> activity gives teachers a flexible, field-driven submission form
+      that students fill in and submit for grading. Markers review submissions through a
+      <em>satisfactory / resubmission</em> workflow, and course completion can be tied to the
+      number of accepted submissions.
+    </p>
+
+    <!-- Quick role cards -->
+    <h2>Choose your guide</h2>
+    <div class="card-grid">
+      <a class="card" href="setup.html">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Activity Settings</div>
+        <div class="card-desc">Configure deadlines, grading, notifications, and submission rules.</div>
+        <div class="card-role">Editing Teacher · Admin</div>
+      </a>
+      <a class="card" href="fields.html">
+        <div class="card-icon">🗂️</div>
+        <div class="card-title">Field Management</div>
+        <div class="card-desc">Add text, dropdowns, file uploads, and other input fields to the submission form.</div>
+        <div class="card-role">Editing Teacher · Admin</div>
+      </a>
+      <a class="card" href="grading.html">
+        <div class="card-icon">📝</div>
+        <div class="card-title">Grading Guide</div>
+        <div class="card-desc">Review submissions, write feedback, and mark as satisfactory or request resubmission.</div>
+        <div class="card-role">Teacher · Grader</div>
+      </a>
+      <a class="card" href="students.html">
+        <div class="card-icon">🎓</div>
+        <div class="card-title">Student Guide</div>
+        <div class="card-desc">Create, save, and submit case study entries. View grader feedback.</div>
+        <div class="card-role">Student</div>
+      </a>
+      <a class="card" href="completion.html">
+        <div class="card-icon">✅</div>
+        <div class="card-title">Completion Rules</div>
+        <div class="card-desc">Set criteria for when the activity counts as complete in the course.</div>
+        <div class="card-role">Editing Teacher · Admin</div>
+      </a>
+      <a class="card" href="overrides.html">
+        <div class="card-icon">🔓</div>
+        <div class="card-title">User Overrides</div>
+        <div class="card-desc">Grant individual students extended deadlines or additional submission attempts.</div>
+        <div class="card-role">Editing Teacher</div>
+      </a>
+      <a class="card" href="templates.html">
+        <div class="card-icon">🎨</div>
+        <div class="card-title">Templates</div>
+        <div class="card-desc">Customise the submission form layout, view layout, and apply custom CSS.</div>
+        <div class="card-role">Editing Teacher</div>
+      </a>
+      <a class="card" href="notifications.html">
+        <div class="card-icon">🔔</div>
+        <div class="card-title">Notifications &amp; Reports</div>
+        <div class="card-desc">Understand automatic emails and weekly scheduled reports.</div>
+        <div class="card-role">Teacher · Admin</div>
+      </a>
+    </div>
+
+    <!-- Workflow -->
+    <h2>How it works</h2>
+    <div class="workflow">
+<pre>
+Teacher sets up                Student submits              Teacher grades
+──────────────────             ──────────────────           ──────────────────────
+ • Add activity         ──►    • Fills in fields     ──►    • Opens submission
+ • Add fields                  • Saves as draft              • Writes feedback
+ • Configure settings          • Clicks Submit               • Marks Satisfactory
+                                                               ──── or ────
+                                                              • Requests Resubmission
+                               ◄── Student notified ────────────────────────────
+                                                ↕
+                               Student resubmits (if requested)
+</pre>
+    </div>
+
+    <!-- Key concepts -->
+    <h2>Key concepts</h2>
+
+    <h3>Submission statuses</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-grey">Draft</span></td><td>Saved but not yet submitted. Only the student can see it.</td></tr>
+          <tr><td><span class="badge badge-blue">Submitted</span></td><td>Student finalised submission. Awaiting grader review.</td></tr>
+          <tr><td><span class="badge badge-blue">In Review</span></td><td>A grader has opened the submission and is marking it.</td></tr>
+          <tr><td><span class="badge badge-orange">Awaiting Resubmission</span></td><td>Grader has requested the student revise and resubmit.</td></tr>
+          <tr><td><span class="badge badge-blue">Resubmitted</span></td><td>Student has submitted a revised version.</td></tr>
+          <tr><td><span class="badge badge-green">Satisfactory</span></td><td>Grader accepted the submission. ✓</td></tr>
+          <tr><td><span class="badge badge-red">Unsatisfactory</span></td><td>Grader did not accept the submission.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Field types at a glance</h3>
+    <div class="field-type-list">
+      <span class="field-type-pill">Text</span>
+      <span class="field-type-pill">Textarea</span>
+      <span class="field-type-pill">Rich Text</span>
+      <span class="field-type-pill">Dropdown</span>
+      <span class="field-type-pill">Radio</span>
+      <span class="field-type-pill">Checkbox</span>
+      <span class="field-type-pill">File Upload</span>
+      <span class="field-type-pill">Section Heading</span>
+    </div>
+    <p>See <a href="fields.html">Field Management</a> for full details and per-type configuration options.</p>
+
+    <div class="page-nav">
+      <span></span>
+      <a class="next" href="setup.html">
+        <span>
+          <span class="nav-label">Next</span>
+          <span class="nav-title">Activity Settings →</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

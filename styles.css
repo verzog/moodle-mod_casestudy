@@ -1,0 +1,365 @@
+/* Case Study module styles */
+
+.casestudy-management {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.casestudy-student-interface {
+    margin-top: 20px;
+}
+
+.casestudy-completion-summary table {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #bbdefb;
+    width: fit-content;
+}
+
+.casestudy-completion-summary .completion-criteria {
+    font-weight: bold;
+}
+
+.completion-criterion {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.casestudy-submissions-list {
+    margin-top: 20px;
+}
+
+.casestudy-submissions-list table {
+    margin-top: 10px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-draft {
+    background-color: #6c757d;
+    color: white;
+}
+
+.status-submitted {
+    background-color: #007bff;
+    color: white;
+}
+
+.status-in-review {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.status-awaiting-resubmission {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-resubmitted {
+    background-color: #007bff;
+    color: white;
+}
+
+.status-satisfactory {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-unsatisfactory {
+    background-color: #dc3545;
+    color: white;
+}
+
+.casestudy-field-management {
+    margin: 20px 0;
+}
+
+.field-type-selector {
+    margin: 10px 0;
+}
+
+.field-form {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.casestudy-user-complete .submission {
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid #007bff;
+    background-color: #f8f9fa;
+}
+
+.field-text label.casestudy-field-label,
+.field-dropdown label.casestudy-field-label,
+.field-radio label.casestudy-field-label,
+.field-checkbox label.casestudy-field-label {
+    width: 20%;
+}
+
+.field-display.field-textarea,
+.field-display.field-file {
+    margin-top: 2rem !important;
+}
+
+.casestudy-submission-view .card-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 2.5rem;
+}
+
+.casestudy-submission-view .card-body {
+    box-shadow: 0px 0px 10px 0px #a7b2c3;
+    border-radius: 10px;
+}
+
+#page-mod-casestudy-fields-manage .popover .popover-field-types.list-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.mform .d-flex .fitem {
+    /* margin: .1rem .25rem .1rem 0 !important; */
+}
+
+.casestudy-submission-content .field-file .responsive-img {
+    max-width: 200px;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+
+}
+
+#page-mod-casestudy-view_casestudy .modal .modal-body .responsive-img {
+    width: 100%;
+}
+
+.casestudy-submission-view .casestudy-field-file-image {
+    position: relative;
+    max-width: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.casestudy-submission-view .casestudy-field-file-image:hover span.casestudy-file-enlarge-image {
+    display: flex;
+    cursor: pointer;
+}
+
+.casestudy-submission-view span.casestudy-file-enlarge-image {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    align-items: center;
+}
+
+/* file field modal lightbox. */
+.modal-header.modal-lightbox {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    background: none;
+    color: #ccc;
+    padding: 0;
+    border-radius: 15px;
+    z-index: 1;
+}
+
+
+.modal .modal-header.modal-lightbox .btn-close {
+    margin: 0 4px 0;
+    padding: 0.1rem 0.1rem;
+    text-shadow: 1px 2px 1px #fff;
+}
+
+.modal-lightbox .modal-body {
+    padding: 0;
+}
+
+/* Hide the modal footer when the lightbox is displayed */
+/* Learning tools style rules overrides the default one. */
+.modal-lightbox .modal-footer.hidden {
+    display: none;
+}
+
+/* Limited width. */
+/* body#page-mod-casestudy-view_casestudy #page.drawers .main-inner {
+    max-width: 830px;
+    margin: 0 auto;
+} */
+
+#casestudy-gradeform-container form .felement,
+#casestudy-gradeform-container form .checkbox {
+    width: 100% !important;
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+#casestudy-gradeform-container form .tox .tox-toolbar__group {
+    padding-left: 2px;
+}
+
+.card.grading-form-card {
+    height: 100%;
+}
+
+.casestudy-submission-view:not(.submit-user-view) .left-section {
+    width: 50%;
+}
+.casestudy-submission-view.submit-user-view .left-section {
+    width: 100%;
+}
+
+/* When no grading form present (e.g., draft submissions), make left section full width */
+.casestudy-submission-view:not(:has(.right-section)) .left-section {
+    width: 100%;
+}
+
+.casestudy-submission-view .right-section {
+    width: 50%;
+}
+
+/* Templates */
+.casestudy-submission-single {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.submission-header {
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.submission-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.submission-meta {
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.submission-content {
+    margin: 20px 0;
+}
+
+.field-wrapper {
+    margin-bottom: 15px;
+}
+
+.submission-grade {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.submission-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.submission-actions .btn {
+    margin-right: 10px;
+}
+
+/* EO Templates */
+
+/* User navigation controls in grading form */
+.casestudy-user-navigation-wrapper {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+
+.casestudy-user-navigation-wrapper .d-flex {
+    gap: 0.75rem;
+}
+
+.casestudy-user-navigation-wrapper .flex-grow-1 {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.casestudy-user-navigation-wrapper select {
+    width: 100%;
+}
+
+.casestudy-user-navigation-wrapper [data-action="previous-user"],
+.casestudy-user-navigation-wrapper [data-action="next-user"] {
+    flex-shrink: 0;
+    min-width: 44px;
+    height: 38px;
+    padding: 0.375rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.casestudy-user-navigation-wrapper [data-action="previous-user"][disabled],
+.casestudy-user-navigation-wrapper [data-action="next-user"][disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.casestudy-user-navigation-wrapper [data-region="user-count-summary"] {
+    display: block;
+    margin-top: 0.25rem;
+    color: #6c757d;
+}
+
+/* Autocomplete select styling */
+.casestudy-user-navigation-wrapper .form-autocomplete-selection {
+    width: 100%;
+}
+
+/* Ensure proper spacing in grading form */
+#casestudy-gradeform-container .casestudy-user-navigation-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+}
+.path-mod-casestudy .tertiary-navigation .navitem {
+    width: auto;
+}
+.path-mod-casestudy .tertiary-navigation .navitem-divider {
+    padding: 0;
+}
+
+#page-mod-casestudy-submission  fieldset .fcontainer {
+    padding-top: 15px;
+}
+
+#page-mod-casestudy-submission .mform fieldset:first-of-type {
+    padding-top: .5rem;
+    border-top: 1px solid #dee2e6;
+}

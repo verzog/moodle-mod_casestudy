@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Field Management — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html" class="active"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Field Management
+  </div>
+
+  <div class="content">
+    <h1>Field Management</h1>
+    <p class="page-intro">
+      Fields define every question and input students fill in when making a submission.
+      You can create as many fields as you need, choose from 8 field types, and arrange
+      them in any order. Fields must be configured <strong>before students can submit</strong>.
+    </p>
+
+    <div class="callout note">
+      <span class="callout-icon">🔑</span>
+      <div class="callout-body"><strong>Required capability:</strong> <code>mod/casestudy:managefields</code> — Editing Teacher or Manager role.</div>
+    </div>
+
+    <!-- Accessing -->
+    <h2>Accessing field management</h2>
+    <p>Open the Case Study activity, then click <strong>Manage Fields</strong> in the activity navigation menu (or secondary navigation).</p>
+
+    <figure class="screenshot">
+      <img src="images/fields_nav_link.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>The Manage Fields link appears in the activity navigation</figcaption>
+    </figure>
+
+    <!-- Management table -->
+    <h2>Fields management table</h2>
+    <p>The table lists all configured fields in the order students will see them.</p>
+
+    <figure class="screenshot">
+      <img src="images/fields_manage_table.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>The fields management table — drag rows to reorder</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Column</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>✥ (drag handle)</td><td>Drag to reorder — order is saved automatically (no Save button needed)</td></tr>
+          <tr><td>Name</td><td>Label shown to students</td></tr>
+          <tr><td>Short Name</td><td>Internal identifier used in templates (e.g., <code>{field_shortname}</code>)</td></tr>
+          <tr><td>Type</td><td>Field type: text, dropdown, file, etc.</td></tr>
+          <tr><td>Required</td><td>Whether the field must be filled before submitting</td></tr>
+          <tr><td>Category</td><td>Whether the field is used for completion rules</td></tr>
+          <tr><td>Actions</td><td>Edit / Clone / Delete</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Reordering fields</h3>
+    <p>Drag a row by its ✥ handle to change its position. The new order is saved immediately via AJAX.</p>
+
+    <h3>Cloning a field</h3>
+    <p>Click <strong>Clone</strong> to duplicate a field with the same type and configuration. The clone gets a new unique short name automatically. Useful for repeating similar field patterns.</p>
+
+    <h3>Deleting a field</h3>
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body"><strong>Warning:</strong> Deleting a field permanently removes it <em>and all student data stored in it</em>. This cannot be undone. Confirm carefully before proceeding.</div>
+    </div>
+
+    <!-- Adding -->
+    <h2>Adding a field</h2>
+    <p>Click <strong>Add field</strong>. Select a field type from the list, then configure the field on the next screen.</p>
+
+    <figure class="screenshot">
+      <img src="images/fields_add_type.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Choose a field type when adding a new field</figcaption>
+    </figure>
+
+    <!-- Common settings -->
+    <h2>Common settings (all field types)</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Field Name</strong></td><td>Yes</td><td>The label students see next to the input</td></tr>
+          <tr><td><strong>Short Name</strong></td><td>Yes</td><td>Unique identifier</td></tr>
+          <tr><td><strong>Field Description</strong></td><td>No</td><td>Help text shown beneath the field to clarify what students should enter</td></tr>
+          <tr><td><strong>Required</strong></td><td>—</td><td>If ticked, students cannot submit without filling this field</td></tr>
+          <tr><td><strong>Category Field</strong></td><td>—</td><td>If ticked, this field's values can be used as completion categories (see <a href="completion.html">Completion Rules</a>)</td></tr>
+          <tr><td><strong>Show in List View</strong></td><td>—</td><td>If ticked, this field value appears in the summaries / list table</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">Not all common options are available for every field type — see the per-type details below.</div>
+    </div>
+
+    <!-- Field types -->
+    <h2>Field types</h2>
+
+    <!-- TEXT -->
+    <h3>📝 Text — single line input</h3>
+    <p>A plain text field for short answers: names, codes, titles, etc.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_text.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Text field — edit form</figcaption>
+    </figure>
+    <p><strong>Supports:</strong> Required · Show in list view</p>
+
+    <hr>
+
+    <!-- TEXTAREA -->
+    <h3>📄 Textarea — multi-line plain text</h3>
+    <p>A resizable text area for longer free-form answers.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_textarea.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Textarea field — edit form</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Width (columns)</td><td>Optional. Default visible width of the text area.</td></tr>
+          <tr><td>Height (rows)</td><td>Optional. Default visible height of the text area.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Supports:</strong> Required · Show in list view</p>
+
+    <hr>
+
+    <!-- RICHTEXT -->
+    <h3>✨ Rich Text — HTML editor</h3>
+    <p>A full Moodle HTML editor for formatted text, images, links, and embedded files.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_richtext.png" alt="Fieldtype richtext" class="screenshot" />
+      <figcaption>Rich Text field — edit form</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Editor Rows</td><td>Default height in rows (minimum 1, default 10)</td></tr>
+          <tr><td>Maximum File Size (bytes)</td><td>Maximum size for embedded files. <code>0</code> = use site default.</td></tr>
+          <tr><td>Maximum Files</td><td>Maximum number of files. <code>-1</code> = unlimited.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Supports:</strong> Required · Show in list view</p>
+    <p><strong>Does not support:</strong> Category (formatted content is too complex for category matching)</p>
+
+    <hr>
+
+    <!-- DROPDOWN -->
+    <h3>🔽 Dropdown — single select list</h3>
+    <p>A drop-down menu where students pick exactly one option from a list you define.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_dropdown.png" alt="Fieldtype dropdown" class="screenshot" />
+      <figcaption>Dropdown field — enter one option per line</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Options</td><td>One option per line — these are the choices shown to students</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Supports:</strong> Required · Category · Show in list view</p>
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">Use <strong>Dropdown</strong> or <strong>Radio</strong> when you want the selected value to drive <a href="completion.html">completion rules</a> — e.g., "require 2 satisfactory submissions in the Business Analysis category".</div>
+    </div>
+
+    <hr>
+
+    <!-- RADIO -->
+    <h3>🔘 Radio — radio button group</h3>
+    <p>Like Dropdown but displayed as visible radio buttons. Students pick exactly one option.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_radio.png" alt="Fieldtype radio" class="screenshot" />
+      <figcaption>Radio field — one option per line</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Options</td><td>One option per line</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Supports:</strong> Required · Category · Show in list view</p>
+
+    <hr>
+
+    <!-- CHECKBOX -->
+    <h3>☑️ Checkbox — multiple selections</h3>
+    <p>A group of checkboxes where students can tick one or more options.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_checkbox.png" alt="Fieldtype checkbox" class="screenshot" />
+      <figcaption>Checkbox field — one option per line</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Options</td><td>One option per line</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Supports:</strong> Required · Category · Show in list view</p>
+
+    <hr>
+
+    <!-- FILE -->
+    <h3>📎 File — file upload</h3>
+    <p>Allows students to upload one or more files as part of their submission.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_file.png" alt="Fieldtype file" class="screenshot" />
+      <figcaption>File field — configure size, count, and accepted types</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Minimum Files</td><td>Minimum required. <code>0</code> = none required (default)</td></tr>
+          <tr><td>Maximum Files</td><td>Maximum allowed. <code>0</code> = unlimited</td></tr>
+          <tr><td>Maximum File Size (bytes)</td><td>Per-file size limit. <code>0</code> = no limit</td></tr>
+          <tr><td>Accepted File Types</td><td>Comma-separated extensions or MIME types (e.g., <code>.pdf,.docx</code>). Leave blank to allow any type.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Supports:</strong> Required · Show in list view</p>
+    <p><strong>Does not support:</strong> Category</p>
+
+    <hr>
+
+    <!-- SECTION HEADING -->
+    <h3>📌 Section Heading — visual divider</h3>
+    <p>Displays a styled heading to divide the submission form into named sections. It collects <strong>no data</strong> from students.</p>
+    <figure class="screenshot">
+      <img src="images/fields_type_sectionheading.png" alt="Fieldtype section heading" class="screenshot" />
+      <figcaption>Section Heading field — purely structural</figcaption>
+    </figure>
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">Section headings do not appear in list view, cannot be required, and cannot be used as category fields. Use them purely to organise long forms.</div>
+    </div>
+
+    <!-- Best practices -->
+    <h2>Best practices</h2>
+    <ul>
+      <li>Use <strong>consistent, descriptive short names</strong> (e.g., <code>case_type</code>, <code>analysis_body</code>, <code>references</code>) — they are used in templates.</li>
+      <li><strong>Mark Category</strong> only on Dropdown/Radio fields you intend to use in completion rules.</li>
+      <li>Use <strong>Section Headings</strong> to group related fields (e.g., Background, Analysis, Conclusions).</li>
+      <li><strong>Show in List View</strong> for fields that help graders identify submissions at a glance (e.g., a case type or student name field).</li>
+      <li>Set <strong>Required</strong> on fields where a blank answer would make the submission meaningless.</li>
+    </ul>
+
+    <div class="page-nav">
+      <a class="prev" href="setup.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Activity Settings</span>
+        </span>
+      </a>
+      <a class="next" href="templates.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Templates</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Guide — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html" class="active"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Student Guide
+  </div>
+
+  <div class="content">
+    <h1>Student Guide</h1>
+    <p class="page-intro">
+      This guide explains how to create, edit, and submit your case study entries,
+      view grader feedback, and resubmit if asked to revise your work.
+    </p>
+
+    <!-- Activity page -->
+    <h2>Opening the activity</h2>
+    <p>Click the <strong>Case Study</strong> activity link on your course page. The main page shows:</p>
+    <ul>
+      <li>Activity introduction / instructions from your teacher</li>
+      <li>Deadline information (if set)</li>
+      <li>Your existing submissions and their current status</li>
+      <li>A button to create a new submission</li>
+    </ul>
+
+    <figure class="screenshot">
+      <img src="images/student_activity_view.png" alt="The Case Study activity page as seen by a student">
+      <figcaption>The Case Study activity page as seen by a student</figcaption>
+    </figure>
+
+    <!-- Status meanings -->
+    <h2>Understanding submission statuses</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Status</th><th>What it means for you</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-grey">Draft</span></td><td>You saved your work but haven't submitted yet. Only you can see it. You can still edit it.</td></tr>
+          <tr><td><span class="badge badge-blue">Submitted</span></td><td>You clicked Finish and Submit. Your teacher can now see and grade it. You cannot edit it.</td></tr>
+          <tr><td><span class="badge badge-blue">In Review</span></td><td>A grader has opened your submission and is currently marking it.</td></tr>
+          <tr><td><span class="badge badge-orange">Awaiting Resubmission</span></td><td>The grader has asked you to revise and resubmit. Look for their feedback and create a new version.</td></tr>
+          <tr><td><span class="badge badge-blue">Resubmitted</span></td><td>You submitted your revised version. It is awaiting grader review.</td></tr>
+          <tr><td><span class="badge badge-green">Satisfactory ✓</span></td><td>Your submission has been accepted by the grader.</td></tr>
+          <tr><td><span class="badge badge-red">Unsatisfactory</span></td><td>Your submission did not meet the criteria. Check the grader's feedback.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/student_statuses.png" alt="Table showing the different submission statuses and what they mean">
+      <figcaption>Different status badges shown on the activity page</figcaption>
+    </figure>
+
+    <!-- Creating -->
+    <h2>Creating a new submission</h2>
+    <ol class="steps">
+      <li>Click <strong>New submission</strong> on the activity page.</li>
+      <li>Fill in all the fields in the form. Required fields are marked with an asterisk (*).</li>
+      <li>Choose one of the save options when you are ready.</li>
+    </ol>
+
+    <figure class="screenshot">
+      <img src="images/student_submission_form.png" alt="The submission form with various input fields and save options">
+      <figcaption>The submission form — fill in all required fields before submitting</figcaption>
+    </figure>
+
+    <h3>Save options</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Button</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Save as Draft</strong></td><td>Saves your answers without submitting. You can return and edit later. Graders cannot see drafts.</td></tr>
+          <tr><td><strong>Save and Add Another</strong></td><td>Saves this submission and immediately opens a blank form for a new one.</td></tr>
+          <tr><td><strong>Finish and Submit</strong></td><td>Shows a confirmation dialog, then submits your work for grading. <strong>You cannot edit after submitting.</strong></td></tr>
+          <tr><td><strong>Cancel</strong></td><td>Discards unsaved changes and returns to the activity page.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The submission confirmation dialog</h3>
+    <p>When you click <strong>Finish and Submit</strong>, a dialog appears:</p>
+    <blockquote style="background:#fff3e0;border-left:4px solid #ff9800;padding:12px 16px;border-radius:6px;margin:1rem 0;font-style:italic;">
+      "Please review your case study carefully. After submission, it cannot be edited. Are you sure you want to submit?"
+    </blockquote>
+    <p>Click <strong>Confirm</strong> to proceed, or <strong>Cancel</strong> to go back and review your answers.</p>
+
+    <figure class="screenshot">
+      <img src="images/student_submit_dialog.png" alt="A confirmation dialog asking the student to confirm their submission">
+      <figcaption>Confirmation dialog before final submission</figcaption>
+    </figure>
+
+    <!-- Submission statement -->
+    <h2>Submission statement (if required)</h2>
+    <p>If your teacher has enabled the submission statement, you must tick the following checkbox <strong>before</strong> you can submit:</p>
+    <blockquote style="background:#e3f2fd;border-left:4px solid #2196f3;padding:12px 16px;border-radius:6px;margin:1rem 0;">
+      "This case study submission is my own work, except where I have properly acknowledged the work of others."
+    </blockquote>
+    <p>You cannot click <strong>Finish and Submit</strong> without ticking this checkbox.</p>
+
+    <!-- Editing -->
+    <h2>Editing a draft</h2>
+    <p>You can edit your work freely while it has <span class="badge badge-grey">Draft</span> status.</p>
+    <ol class="steps">
+      <li>Find the submission with <span class="badge badge-grey">Draft</span> status on the activity page.</li>
+      <li>Click <strong>Edit</strong>.</li>
+      <li>Make your changes and save.</li>
+    </ol>
+
+    <!-- Resubmitting -->
+    <h2>Resubmitting after feedback</h2>
+    <p>If a grader changes your status to <span class="badge badge-orange">Awaiting Resubmission</span>, you will receive a notification (if enabled) and a <strong>Resubmit</strong> button will appear.</p>
+
+    <ol class="steps">
+      <li>Return to the activity page and read the grader's feedback.</li>
+      <li>Click <strong>Resubmit</strong> next to the relevant submission.</li>
+      <li>If pre-fill is enabled by your teacher, your previous answers load automatically — edit and improve them.</li>
+      <li>Click <strong>Finish and Submit</strong> when ready.</li>
+    </ol>
+
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">There is a limit on how many times you can resubmit (set by your teacher). Once you reach the limit, the Resubmit button will not appear.</div>
+    </div>
+
+    <!-- Viewing feedback -->
+    <h2>Viewing grader feedback</h2>
+    <p>After your submission is graded, click the submission title or <strong>View</strong> to see:</p>
+    <ul>
+      <li>The outcome: <span class="badge badge-green">Satisfactory</span> or <span class="badge badge-red">Unsatisfactory</span></li>
+      <li>The grader's written feedback (if provided)</li>
+      <li>The grade (if grading is enabled for this activity)</li>
+    </ul>
+
+    <!-- Deadlines -->
+    <h2>Deadlines</h2>
+    <p>If your teacher set a due date, it is shown on the activity page:</p>
+    <ul>
+      <li><strong>Before the deadline:</strong> Normal submission is allowed.</li>
+      <li><strong>After the deadline:</strong> A message appears — <em>"This case study is no longer accepting submissions."</em> — and the New Submission button is hidden.</li>
+    </ul>
+    <p>If your teacher granted you a personal extension via User Overrides, your extended deadline applies instead — you will simply see that submissions are still open for you.</p>
+
+    <div class="page-nav">
+      <a class="prev" href="notifications.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Notifications & Reports</span>
+        </span>
+      </a>
+      <a class="next" href="index.html">
+        <span>
+          <span class="nav-label">Back to</span>
+          <span class="nav-title">Overview</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

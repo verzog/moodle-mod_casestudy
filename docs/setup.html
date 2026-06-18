@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Settings — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html" class="active"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Activity Settings
+  </div>
+
+  <div class="content">
+    <h1>Activity Settings</h1>
+    <p class="page-intro">
+      When you add or edit a Case Study activity, the settings form controls all behaviour:
+      who can submit, when, how many times, how grading works, and what notifications are sent.
+    </p>
+
+    <!-- Adding the activity -->
+    <h2>Adding the activity to a course</h2>
+    <ol class="steps">
+      <li>Turn editing on in your course.</li>
+      <li>Click <strong>Add an activity or resource</strong>.</li>
+      <li>Choose <strong>Case Study</strong> from the list.</li>
+      <li>Fill in the settings and click <strong>Save and display</strong>.</li>
+    </ol>
+    <figure class="screenshot">
+      <img src="images/setup_add_activity.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Selecting Case Study from the Moodle activity chooser</figcaption>
+    </figure>
+
+    <!-- GENERAL -->
+    <h2>General</h2>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Case Study Name <span class="required">* required</span></div>
+      <div class="setting-block-body">
+        <p>The title students see on the course page and at the top of the activity.</p>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Introduction</div>
+      <div class="setting-block-body">
+        <p>An optional description displayed below the activity title. Use this to explain the purpose, expected length, or any contextual information about the case study.</p>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/setup_general.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>General section of the activity settings form</figcaption>
+    </figure>
+
+    <!-- ENTRIES -->
+    <h2>Entries</h2>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Maximum Entries Per Student</div>
+      <div class="setting-block-body">
+        <p>Controls how many separate case study submissions one student may create.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>0</strong> (default)</td><td>Unlimited — student can create as many submissions as they like</td></tr>
+              <tr><td><strong>1–50</strong></td><td>Student can create at most this many submissions</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body"><strong>Tip:</strong> Set to <code>1</code> for a single-submission assessment. Set higher (or to <code>0</code>) for portfolio activities where students build multiple entries over time.</div>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/setup_entries.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Maximum Entries Per Student setting</figcaption>
+    </figure>
+
+    <!-- AVAILABILITY -->
+    <h2>Availability</h2>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Allow Submissions From</div>
+      <div class="setting-block-body">
+        <p>If set, students cannot create a submission before this date and time. Leave blank to allow submissions immediately after the activity is published.</p>
+        <p>Students will see: <em>"This case study will be available for submissions from [date]."</em></p>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Due Date</div>
+      <div class="setting-block-body">
+        <p>If set, students cannot submit after this date and time. The New Submission button is hidden once the deadline passes.</p>
+        <p>Students will see: <em>"This case study is no longer accepting submissions. The due date was [date]."</em></p>
+        <div class="callout note">
+          <span class="callout-icon">📌</span>
+          <div class="callout-body"><strong>Validation:</strong> The Due Date cannot be earlier than the Allow Submissions From date. Individual students can receive a personal extension via <a href="overrides.html">User Overrides</a>.</div>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/setup_availability.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Availability section — Allow Submissions From and Due Date</figcaption>
+    </figure>
+
+    <!-- NOTIFICATIONS -->
+    <h2>Notifications</h2>
+    <p>These settings control automatic email alerts. See <a href="notifications.html">Notifications &amp; Reports</a> for full details of email content.</p>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Notify Graders About Submissions</div>
+      <div class="setting-block-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Yes</strong> (default)</td><td>Sends an email to all graders when a student clicks Finish and Submit</td></tr>
+              <tr><td><strong>No</strong></td><td>No automatic notification is sent to graders</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Email Others</div>
+      <div class="setting-block-body">
+        <p>Optional comma-separated list of additional email addresses to notify when a student submits, in addition to assigned graders. Useful for external assessors or coordinators.</p>
+        <p><strong>Example:</strong> <code>coordinator@example.com, external@partner.org</code></p>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Default for "Notify Student"</div>
+      <div class="setting-block-body">
+        <p>When this option is enabled, the student will be notified for each submission action. If it is disabled, no notification will be sent.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Yes</strong> (default)</td><td>Notify student of submission actions</td></tr>
+              <tr><td><strong>No</strong></td><td>No notification is sent to the student</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/setup_notifications.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Notifications settings section</figcaption>
+    </figure>
+
+    <!-- SUBMISSION SETTINGS -->
+    <h2>Submission Settings</h2>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Require Students to Click Submit Button</div>
+      <div class="setting-block-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Yes</strong> (default)</td><td>Students must explicitly press <strong>Finish and Submit</strong>. Until then the work stays as a draft invisible to graders.</td></tr>
+              <tr><td><strong>No</strong></td><td>Submissions are visible to graders as soon as they are saved.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Require Submission Statement</div>
+      <div class="setting-block-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>No</strong> (default)</td><td>No statement required</td></tr>
+              <tr><td><strong>Yes</strong></td><td>Student must tick: <em>"This case study submission is my own work, except where I have properly acknowledged the work of others."</em> before submitting.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Max Resubmission Attempts</div>
+      <div class="setting-block-body">
+        <p>How many times a student may resubmit after a grader has requested resubmission.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><strong>0</strong></td><td>Unlimited resubmissions</td></tr>
+              <tr><td><strong>1–10</strong></td><td>Maximum number of resubmission rounds allowed</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Pre-fill Resubmissions with Previous Data</div>
+      <div class="setting-block-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Yes</strong> (default)</td><td>When a student starts a resubmission, the form is pre-populated with their previous answers so they can edit and improve</td></tr>
+              <tr><td><strong>No</strong></td><td>Resubmission form starts completely blank</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/setup_submission_settings.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Submission Settings — submit button, statement, attempts and pre-fill options</figcaption>
+    </figure>
+
+    <!-- GRADING -->
+    <h2>Grading</h2>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Grade</div>
+      <div class="setting-block-body">
+        <p>Choose the grading scale: <strong>None</strong> (ungraded), <strong>Scale</strong> (custom scale e.g. Pass/Fail), or <strong>Point</strong> (numeric with a maximum). The grade appears in the Moodle gradebook column for this activity.</p>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Hide Grader Identity from Students</div>
+      <div class="setting-block-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Value</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td><strong>No</strong> (default)</td><td>Students see the name of the person who graded their submission</td></tr>
+              <tr><td><strong>Yes</strong></td><td>Grader's name is hidden from students in feedback and notifications</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Grader Information</div>
+      <div class="setting-block-body">
+        <p>A rich text area visible <strong>only to graders</strong> while they are marking — students cannot see this. Use it for:</p>
+        <ul>
+          <li>Marking criteria or rubric</li>
+          <li>Internal notes or instructions for markers</li>
+          <li>Links to relevant grading resources</li>
+        </ul>
+      </div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/setup_grading.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Grading section of the settings form</figcaption>
+    </figure>
+
+    <!-- COMPLETION -->
+    <h2>Completion Conditions</h2>
+    <p>
+      These settings define when a student is considered to have <em>completed</em> this activity
+      for Moodle course-completion tracking. See the dedicated
+      <a href="completion.html">Completion Rules</a> page for full details and examples.
+    </p>
+
+    <figure class="screenshot">
+      <img src="images/setup_completion.png" alt="Activity chooser showing Case Study" class="screenshot" />
+      <figcaption>Completion Conditions — total satisfactory and category-based rules</figcaption>
+    </figure>
+
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">After saving, <strong>add fields</strong> before students can submit. If no fields are configured, students will see a message that the activity is not yet ready.</div>
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="index.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Overview</span>
+        </span>
+      </a>
+      <a class="next" href="fields.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Field Management</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

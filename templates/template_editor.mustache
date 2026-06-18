@@ -1,0 +1,175 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_casestudy/template_editor
+
+    Template editor interface
+
+    Context variables required for this template:
+    * title - Title of the template
+    * sesskey - Session key
+    * url - Form action URL
+    * toolbar - Toolbar data with available tags
+    * editors - Editor data array
+
+    Example context (json):
+    {
+        "title": "Single View Template",
+        "sesskey": "abc123",
+        "url": "/mod/casestudy/templates.php",
+        "toolbar": {},
+        "editors": []
+    }
+}}
+
+{{#css}}
+.template-editor-container .tag-insert {
+    cursor: move;
+    cursor: grab;
+    display: inline-block;
+    padding: 2px 6px;
+    margin: 2px 0;
+    border-radius: 3px;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.template-editor-container .tag-insert:hover {
+    background-color: #f0f0f0;
+}
+
+.template-editor-container .tag-insert.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.template-editor-container .tag-insert code {
+    color: #0066cc;
+    background-color: #f5f5f5;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-size: 0.9em;
+    cursor: inherit;
+}
+
+.template-editor-container .tag-insert:hover code {
+    background-color: #e8f4ff;
+    color: #004080;
+}
+
+.template-editor-container .tag-category h6 {
+    color: #333;
+    font-size: 0.95em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.template-editor-container .template-toolbar {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.template-editor-container .editor-wrapper textarea {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.template-editor-container .editor-wrapper textarea:focus {
+    border-color: #0066cc;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+.template-editor-container .editor-wrapper textarea.drag-over {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    background-color: #f8fff8;
+}
+
+.casestudy-submission-single.drag-over {
+    border: 2px dashed #28a745;
+    background-color: #f8fff8;
+}
+{{/css}}
+
+<div class="template-editor-container">
+    <div class="row">
+        <div class="col-md-9">
+
+            <form action="{{{url}}}" method="post" class="template-editor-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+
+                <h3>{{title}}</h3>
+
+                {{#editors}}
+                <div class="editor-wrapper mb-3">
+                    <label for="{{name}}" class="font-weight-bold">{{title}}</label>
+                    <div class="editor-content">
+                        <textarea id="{{name}}" name="{{name}}" rows="20" style="width: 100%;">{{{content}}}</textarea>
+                    </div>
+                </div>
+                {{/editors}}
+
+                <div class="form-actions mt-3">
+                    <button type="submit" class="btn btn-primary">{{#str}}savechanges, core{{/str}}</button>
+                    <button type="submit" name="defaultform" value="1" class="btn btn-secondary">{{#str}}resettodefault, mod_casestudy{{/str}}</button>
+                    <button type="submit" name="resetall" value="1" class="btn btn-danger">{{#str}}resetalltemplates, mod_casestudy{{/str}}</button>
+                </div>
+            </form>
+
+        </div>
+
+        <div class="col-md-3">
+            <div class="template-toolbar card">
+                <div class="card-body">
+                    <h5 class="card-title">{{#str}}availabletags, mod_casestudy{{/str}}</h5>
+
+                    {{#toolbar.tags}}
+                    <div class="tag-category mb-3">
+                        <h6 class="font-weight-bold">{{category}}</h6>
+                        <ul class="list-unstyled">
+                            {{#items}}
+                            <li>
+                                <span class="tag-insert" data-tag="{{tag}}" title="{{description}}">
+                                    <code>{{tag}}</code>
+                                </span>
+                            </li>
+                            {{/items}}
+                        </ul>
+                    </div>
+                    {{/toolbar.tags}}
+
+                    <div class="mt-3">
+                        <small class="text-muted">{{#str}}dragtoinsert, mod_casestudy{{/str}}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{#js}}
+require(['mod_casestudy/template_editor'], function(TemplateEditor) {
+    TemplateEditor.init();
+});
+{{/js}}

@@ -1,0 +1,214 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_casestudy/view_submission
+
+    Individual submission viewing template.
+
+    Context variables required for this template:
+    * casestudyinfo - object containing submission info
+    * fields - array of field display objects
+    * actions - array of action buttons
+
+    Example context (json):
+    {
+        "casestudyinfo": {
+            "student": "John Doe",
+            "status": "submitted",
+            "statusclass": "primary",
+            "statuslabel": "Submitted",
+            "timecreated": "2025-01-15 10:30:00",
+            "timemodified": "2025-01-15 11:45:00"
+        },
+        "fields": [
+            {
+                "name": "Case Study Title",
+                "description": "Enter the title of your case study",
+                "value": "My Case Study Title",
+                "hasvalue": true
+            }
+        ],
+        "actions": [
+            {
+                "url": "/mod/casestudy/submission.php?id=123&sid=456",
+                "label": "Edit",
+                "class": "btn btn-primary"
+            }
+        ]
+    }
+}}
+
+{{{actionmenu}}}
+
+{{#usernavigation}}
+{{{usernavigation}}}
+{{/usernavigation}}
+
+<div class="casestudy-submission-view d-flex {{#issubmituser}}submit-user-view{{/issubmituser}}">
+    <div class="left-section mr-3">
+
+        {{^customtemplate}}
+            {{> mod_casestudy/submission}}
+        {{/customtemplate}}
+
+        {{#customtemplate}}
+            <div class="casestudy-template-output">{{{customtemplate}}}</div>
+        {{/customtemplate}}
+
+        {{! Action buttons }}
+        {{#actions.length}}
+            <div class="submission-actions mb-3">
+                {{#actions}}
+                    <a href="{{url}}" class="{{class}}">{{label}}</a>
+                {{/actions}}
+            </div>
+        {{/actions.length}}
+
+        {{! Submission History Section }}
+        {{#hashistory}}
+        <div class="submission-history-section mt-4">
+            <h4>{{#str}}submissionhistory, mod_casestudy{{/str}}</h4>
+            <p class="text-muted">{{#str}}submissionhistorydesc, mod_casestudy{{/str}}</p>
+
+            {{#history}}
+            <div class="card mb-3 {{#islatest}}border-primary{{/islatest}}">
+                <div class="card-header {{#islatest}}bg-primary text-white{{/islatest}}">
+                    <strong>{{#str}}submission, mod_casestudy{{/str}} {{submissionnumber}}</strong>
+                    {{#islatest}}<span class="badge badge-light ml-2">{{#str}}current, mod_casestudy{{/str}}</span>{{/islatest}}
+                    <span class="float-right">
+                        <span class="badge badge-{{statusclass}}">{{status}}</span>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>{{#str}}submitted, mod_casestudy{{/str}}:</strong> {{{timesubmitted}}}</p>
+
+                    {{#hasfeedback}}
+                        <hr>
+
+                        <div class="feedback-content">
+                            {{#showgraderinfo}}
+                            <p class="mb-1"><strong>{{#str}}grader, mod_casestudy{{/str}}:</strong> {{grader}}</p>
+                            {{/showgraderinfo}}
+                            <p class="mb-1"><strong>{{#str}}grade, mod_casestudy{{/str}}:</strong> <span class="badge badge-{{statusclass}}">{{gradestatus}}</span></p>
+                            <p class="mb-1"><strong>{{#str}}timegraded, mod_casestudy{{/str}}:</strong> {{{timegraded}}}</p>
+                            {{#resubmissionrequested}}
+                                <div class="alert alert-warning mt-2">
+                                    <i class="fa fa-exclamation-triangle"></i> {{#str}}resubmissionrequested, mod_casestudy{{/str}}
+                                </div>
+                            {{/resubmissionrequested}}
+                            {{#feedback}}
+                            <div class="feedback-text mt-2 p-2 bg-light rounded">
+                                {{{feedback}}}
+                            </div>
+                            {{/feedback}}
+                        </div>
+                    {{/hasfeedback}}
+                    {{^hasfeedback}}
+                        <p class="text-muted"><em>{{#str}}nofeedbackyet, mod_casestudy{{/str}}</em></p>
+                    {{/hasfeedback}}
+                </div>
+            </div>
+            {{/history}}
+        </div>
+        {{/hashistory}}
+
+    </div>
+
+    {{! Grading form (for teachers/graders) }}
+    {{#gradeform}}
+    <div class="right-section">
+        <div class="card mb-3 grading-form-card">
+            <div class="card-body">
+                <h5 class="card-title">{{#str}}gradesubmission, mod_casestudy{{/str}}</h5>
+                {{! Container for dynamic grading form }}
+                <div id="casestudy-gradeform-container">
+                    {{{gradeform}}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/gradeform}}
+
+</div>
+
+{{#gradeform}}
+    {{! Include JS for dynamic grading form }}
+    {{#js}}
+        require(['core_form/dynamicform', 'core/notification', 'core/toast', 'core/fragment', 'core/templates'],
+            function(DynamicForm, Notification, Toast, Fragment, Template) {
+
+            const updateCaseStudySubmission = function(submissionid, contextID) {
+                Fragment.loadFragment('mod_casestudy', 'load_submission', contextID, {submissionid: submissionid})
+                .then((html, js) => {
+                    Template.replaceNode(document.querySelector('.casestudy-submission-template'), html, js);
+                })
+                .catch(error => {
+                    console.error('Error updating submission:', error);
+                    Notification.exception(error);
+                });
+            };
+
+            var formClass = 'mod_casestudy\\local\\forms\\grading_form';
+            var dynamicForm = new DynamicForm(
+                document.querySelector('#casestudy-gradeform-container'), formClass);
+
+            var params = {
+                submissionid: {{casestudyinfo.submission.id}},
+                casestudyid: {{casestudyinfo.submission.casestudyid}},
+                id: {{casestudyinfo.cm.id}},
+                contextid: {{casestudyinfo.context.id}}
+            };
+
+            dynamicForm.addEventListener(dynamicForm.events.FORM_SUBMITTED, (e) => {
+                if (e.detail.success == true) {
+                    Toast.add(e.detail.message, {type: 'success'});
+
+                    // Redirect to the submissions list after a brief delay to show the toast
+                    var cmid = {{casestudyinfo.cm.id}};
+                    setTimeout(function() {
+                        window.location.href = M.cfg.wwwroot + '/mod/casestudy/view.php?id=' + cmid;
+                    }, 1500);
+                }
+            });
+
+            document.querySelector('#casestudy-gradeform-container').addEventListener('click', function(e) {
+                // Handle cancel button click - redirect to view.php
+                if (e.target.matches('input[name="cancel"]')) {
+                    e.preventDefault();
+                    var cmid = {{casestudyinfo.cm.id}};
+                    window.location.href = M.cfg.wwwroot + '/mod/casestudy/view.php?id=' + cmid;
+                    return;
+                }
+
+                if (!e.target.matches('input[type=submit]')) {
+                    return;
+                }
+
+                console.log('Submitting form', e.target.name);
+                // Set the hidden input value to indicate which button was pressed.
+                var submitActionInput = document.querySelector('input[name="submitaction"]');
+                if (submitActionInput) {
+                    submitActionInput.value = e.target.name;
+                }
+            });
+
+            dynamicForm.addEventListener(dynamicForm.events.SUBMIT_BUTTON_PRESSED, (e) => {
+                console.log('Submit button pressed', e);
+            });
+        });
+    {{/js}}
+{{/gradeform}}

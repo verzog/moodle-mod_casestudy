@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Templates — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html" class="active"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Templates
+  </div>
+
+  <div class="content">
+    <h1>Template Customisation</h1>
+    <p class="page-intro">
+      Templates let you control how the submission form looks and how submitted work is displayed.
+      You can also inject custom CSS for styling. This is an advanced feature —
+      the defaults work well for most activities.
+    </p>
+
+    <div class="callout note">
+      <span class="callout-icon">🔑</span>
+      <div class="callout-body"><strong>Required capability:</strong> <code>mod/casestudy:managetemplates</code> — Editing Teacher or Manager role.</div>
+    </div>
+
+    <!-- Accessing -->
+    <h2>Accessing templates</h2>
+    <p>Inside the Case Study activity, click <strong>Manage Templates</strong> in the activity navigation.</p>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">You must <a href="fields.html">add fields</a> before templates are useful. If no fields exist, a warning is shown and the template placeholders have nothing to reference.</div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/templates_editor_tabs.png" alt="Templates editor with three tabs: View, Form, and CSS" class="screenshot" />
+      <figcaption>The Templates editor — three tabs for View, Form, and CSS</figcaption>
+    </figure>
+
+    <!-- Three templates overview -->
+    <h2>Three templates</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Template</th><th>Controls</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Submission View Template</strong></td><td>How a completed submission is displayed to students and graders</td></tr>
+          <tr><td><strong>Submission Form Template</strong></td><td>The layout of the form students fill in when submitting</td></tr>
+          <tr><td><strong>Custom CSS</strong></td><td>Additional styles applied to both the form and submission view pages</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- VIEW TEMPLATE -->
+    <h2>Submission View Template</h2>
+    <p>Controls how submitted answers are displayed. Without a custom template, all field values are shown in a simple vertical list.</p>
+
+    <h3>Available placeholder tags</h3>
+
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">All tags use double square brackets: <code>[[tag]]</code>. Tags that don't match any field are silently removed from the output.</div>
+    </div>
+
+    <h4>User information</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tag</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><code>[[user]]</code></td><td>Student's full name</td></tr>
+          <tr><td><code>[[userpicture]]</code></td><td>Student's profile picture (&lt;img&gt; element, 50×50 px)</td></tr>
+          <tr><td><code>[[userid]]</code></td><td>Student's Moodle user ID</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Submission information</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tag</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><code>[[timesubmitted]]</code></td><td>Date/time the submission was submitted</td></tr>
+          <tr><td><code>[[timecreated]]</code></td><td>Date/time the submission was first created</td></tr>
+          <tr><td><code>[[timemodified]]</code></td><td>Date/time the submission was last modified</td></tr>
+          <tr><td><code>[[status]]</code></td><td>Submission status label (e.g., "Satisfactory")</td></tr>
+          <tr><td><code>[[attempt]]</code></td><td>Attempt number (1, 2, 3…)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Grade information</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tag</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><code>[[grade]]</code></td><td>Grade badge (satisfactory / unsatisfactory)</td></tr>
+          <tr><td><code>[[feedback]]</code></td><td>Grader's feedback text (formatted HTML)</td></tr>
+          <tr><td><code>[[grader]]</code></td><td>Grader's name (hidden if <em>Hide Grader</em> is enabled)</td></tr>
+          <tr><td><code>[[gradetime]]</code></td><td>Date/time the grade was given</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Field values — use the field <strong>name</strong> or <strong>short name</strong></h4>
+    <p>Replace <em>Field Name</em> with the actual field name (e.g., <code>Case Study Title</code>) or its short name (e.g., <code>CStitle</code>).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tag</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><code>[[Field Name]]</code></td><td>Complete field block: label + value (HTML wrapped)</td></tr>
+          <tr><td><code>[[Field Name#name]]</code></td><td>The field label only</td></tr>
+          <tr><td><code>[[Field Name#id]]</code></td><td>The field's internal database ID</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">Tags work with the exact field name, the short name, or a lowercase no-space version. For example, a field named <strong>Case Study Title</strong> with short name <strong>CStitle</strong> can be referenced as <code>[[Case Study Title]]</code>, <code>[[CStitle]]</code>, or <code>[[casestudytitle]]</code>.</div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/templates_view_editor.png" alt="Single Template editor" class="screenshot" />
+      <figcaption>The Submission View Template editor</figcaption>
+    </figure>
+
+    <!-- FORM TEMPLATE -->
+    <h2>Submission Form Template</h2>
+    <p>Controls the layout of the form students use to enter their submission. Without a custom template, all fields are rendered using the default Moodle form fields.</p>
+
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">All tags use double square brackets: <code>[[tag]]</code>. Replace <em>Field Name</em> with the actual field name (e.g., <code>Case Category</code>) or the field's short name (e.g., <code>category</code>). Both work.</div>
+    </div>
+
+    <h3>Available placeholder tags</h3>
+    <h4>Per field — use the field <strong>name</strong> or <strong>short name</strong></h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tag</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td><code>[[Field Name]]</code></td><td>Complete form element: label + input + description</td></tr>
+          <tr><td><code>[[Field Name#label]]</code></td><td>Field label with required indicator (*)</td></tr>
+          <tr><td><code>[[Field Name#description]]</code></td><td>Field description text only (formatted HTML)</td></tr>
+          <tr><td><code>[[Field Name#input]]</code></td><td>Input element only (no label or description)</td></tr>
+          <tr><td><code>[[Field Name#required]]</code></td><td>Required indicator — red * if required, empty otherwise</td></tr>
+          <tr><td><code>[[Field Name#id]]</code></td><td>The field's HTML element ID attribute</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/templates_form_editor.png" alt="Submission Form Template editor with example field tags" class="screenshot" />
+      <figcaption>The Submission Form Template editor</figcaption>
+    </figure>
+
+    <!-- CSS TEMPLATE -->
+    <h2>Custom CSS Template</h2>
+    <p>Write plain CSS to style the submission form and view pages for this activity only.</p>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">Use specific selectors like <code>.casestudy-submission</code> or <code>.casestudy-form</code> to avoid styles bleeding into the rest of the Moodle page.</div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/templates_css_editor.png" alt="Custom CSS Template editor with example CSS code" class="screenshot" />
+      <figcaption>The Custom CSS Template editor</figcaption>
+    </figure>
+
+    <!-- Saving and resetting -->
+    <h2>Saving and resetting templates</h2>
+    <p>Click <strong>Save</strong> to persist your changes. Each template is saved independently.</p>
+
+    <ul>
+      <li><strong>Reset</strong> button (next to a single template) — reverts that template to its default.</li>
+      <li><strong>Reset All</strong> button — reverts all three templates to defaults simultaneously. Both require confirmation.</li>
+    </ul>
+
+    <div class="page-nav">
+      <a class="prev" href="fields.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Field Management</span>
+        </span>
+      </a>
+      <a class="next" href="completion.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Completion Rules</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

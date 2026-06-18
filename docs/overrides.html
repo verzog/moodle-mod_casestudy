@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Overrides — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html" class="active"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> User Overrides
+  </div>
+
+  <div class="content">
+    <h1>User Overrides</h1>
+    <p class="page-intro">
+      User overrides let you grant individual students a personalised deadline or a
+      different number of resubmission attempts — without affecting the activity settings for everyone else.
+    </p>
+
+    <div class="callout note">
+      <span class="callout-icon">🔑</span>
+      <div class="callout-body"><strong>Required capability:</strong> <code>mod/casestudy:manageoverrides</code> — Editing Teacher or Manager role.</div>
+    </div>
+
+    <!-- Accessing -->
+    <h2>Accessing overrides</h2>
+    <p>Inside the Case Study activity, click <strong>Overrides</strong> in the activity navigation menu.</p>
+
+    <figure class="screenshot">
+      <img src="images/overrides_nav_link.png" alt="Overrides link in activity navigation">
+      <figcaption>The Overrides link in the activity navigation</figcaption>
+    </figure>
+
+    <!-- Overrides list -->
+    <h2>Overrides list page</h2>
+    <p>The list shows all active overrides for this activity.</p>
+
+    <figure class="screenshot">
+      <img src="images/overrides_list_table.png" alt="Overrides list showing one override for a student with a personalised deadline and attempt limit">
+      <figcaption>The overrides list — one row per student with an override</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Column</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Student</td><td>The student who has the override</td></tr>
+          <tr><td>Case Study Closes</td><td>Their personalised deadline (shown only if set)</td></tr>
+          <tr><td>Total Attempts Allowed</td><td>Their personalised attempt limit (shown only if set)</td></tr>
+          <tr><td>Actions</td><td>Edit / Duplicate / Delete</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Adding -->
+    <h2>Adding an override</h2>
+
+    <h3>Override edit form</h3>
+
+    <figure class="screenshot">
+      <img src="images/overrides_edit_form.png" alt="The override edit form with student field and two override sections (end date and attempts)">
+      <figcaption>The override edit form</figcaption>
+    </figure>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Student</div>
+      <div class="setting-block-body">
+        <p>Select the student from the dropdown. The list shows all users with the <code>mod/casestudy:submit</code> capability (typically all enrolled students).</p>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Case study closes</div>
+      <div class="setting-block-body">
+        <p>Tick the checkbox to enable a personalised deadline. A date/time picker appears — set the student's extended deadline.</p>
+        <p><strong>Example:</strong> The activity closes 30 June. You grant one student an override closing 7 July. Only that student can submit until 7 July; everyone else is locked out after 30 June.</p>
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">Leave unticked to not override the deadline — the student simply uses the activity's default due date.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-block-header">Total attempts allowed per case study</div>
+      <div class="setting-block-body">
+        <p>Tick the checkbox to enable a personalised attempt limit. A number input appears — set how many times (1–10) this student may resubmit.</p>
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-body">Leave unticked to not override the attempts — the student uses the activity default.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body"><strong>Validation:</strong> At least one of the two overrides (end date OR attempts) must be enabled before you can save. You cannot save a blank override.</div>
+    </div>
+
+    <!-- Editing -->
+    <h2>Editing an override</h2>
+    <p>Click <strong>Edit</strong> next to the override. The same form opens pre-filled with the current values. Modify and click <strong>Save</strong>.</p>
+
+    <!-- Duplicating -->
+    <h2>Duplicating an override</h2>
+    <p>Click <strong>Duplicate</strong> next to an override to create a copy for a <em>different</em> student.</p>
+    <p>The edit form opens with the same override values but with the student field cleared. Select a new student and save.</p>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">Duplicate is the quickest way to grant the same extension to several students — create one override, then duplicate it for each additional student.</div>
+    </div>
+
+    <!-- Deleting -->
+    <h2>Deleting an override</h2>
+    <p>Click <strong>Delete</strong> and confirm. Once deleted, the student immediately reverts to the default activity settings.</p>
+
+    <!-- How overrides work -->
+    <h2>How overrides interact with the activity</h2>
+    <p>When an override exists for a student, the system uses the override values instead of the activity-level values for that student only:</p>
+    <ul>
+      <li><strong>Due date:</strong> The override <em>timeclose</em> replaces the activity <em>timeclose</em> for all deadline checks.</li>
+      <li><strong>Attempt limit:</strong> The override <em>maxattempts</em> replaces the activity <em>maxattempts</em> when calculating remaining submissions.</li>
+    </ul>
+    <p>Overrides are invisible to students — they simply experience the extended deadline or additional attempts without any indication that an override exists.</p>
+
+    <div class="page-nav">
+      <a class="prev" href="completion.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Completion Rules</span>
+        </span>
+      </a>
+      <a class="next" href="grading.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Grading Guide</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

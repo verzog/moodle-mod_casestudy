@@ -1,0 +1,130 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_casestudy/fields_table
+
+    Fields table for Case Study field management
+
+    Context variables required for this template:
+    * fields - Array of field objects with actions
+    * cmid - Course module ID
+    * sesskey - Session key for security
+
+    Example context (json):
+    {
+        "fields": [
+            {
+                "id": 1,
+                "sortorder": 1,
+                "name": "Field Name",
+                "typename": "Text",
+                "required": true,
+                "iscategory": false,
+                "showlistview": true,
+                "canmoveup": false,
+                "canmovedown": true,
+                "editurl": "field_edit.php?id=123&fieldid=1",
+                "moveupurl": "fields.php?id=123&action=moveup&fieldid=1&sesskey=abc123",
+                "movedownurl": "fields.php?id=123&action=movedown&fieldid=1&sesskey=abc123",
+                "deleteurl": "fields.php?id=123&action=delete&fieldid=1&sesskey=abc123"
+            }
+        ]
+    }
+}}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{#str}}existingfields, mod_casestudy{{/str}}</h5>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{{#str}}order{{/str}}</th>
+                        <th>{{#str}}name{{/str}}</th>
+                        <th>{{#str}}type{{/str}}</th>
+                        <th>{{#str}}required{{/str}}</th>
+                        <th>{{#str}}category, mod_casestudy{{/str}}</th>
+                        <th>{{#str}}listview, mod_casestudy{{/str}}</th>
+                        <th>{{#str}}actions{{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#fields}}
+                    <tr>
+                        <td>{{sortorder}}</td>
+                        <td>{{name}}</td>
+                        <td>{{typename}}</td>
+                        <td>
+                            {{#required}}
+                                {{#str}}yes{{/str}}
+                            {{/required}}
+                            {{^required}}
+                                {{#str}}no{{/str}}
+                            {{/required}}
+                        </td>
+                        <td>
+                            {{#category}}
+                                {{#str}}yes{{/str}}
+                            {{/category}}
+                            {{^category}}
+                                {{#str}}no{{/str}}
+                            {{/category}}
+                        </td>
+                        <td>
+                            {{#showlistview}}
+                                {{#str}}yes{{/str}}
+                            {{/showlistview}}
+                            {{^showlistview}}
+                                {{#str}}no{{/str}}
+                            {{/showlistview}}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <!-- Edit button -->
+                                <a href="{{{editurl}}}" class="btn btn-sm btn-secondary" title="{{#str}}edit{{/str}}">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+
+                                <!-- Move up button -->
+                                {{#canmoveup}}
+                                <a href="{{{moveupurl}}}" class="btn btn-sm btn-secondary" title="{{#str}}moveup{{/str}}">
+                                    <i class="fa fa-arrow-up"></i>
+                                </a>
+                                {{/canmoveup}}
+
+                                <!-- Move down button -->
+                                {{#canmovedown}}
+                                <a href="{{{movedownurl}}}" class="btn btn-sm btn-secondary" title="{{#str}}movedown{{/str}}">
+                                    <i class="fa fa-arrow-down"></i>
+                                </a>
+                                {{/canmovedown}}
+
+                                <!-- Delete button -->
+                                <a href="{{{deleteurl}}}" class="btn btn-sm btn-danger" title="{{#str}}delete{{/str}}"
+                                   onclick="return confirm('{{#str}}confirmdelete, mod_casestudy{{/str}}')">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/fields}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

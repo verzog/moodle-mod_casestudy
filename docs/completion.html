@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completion Rules — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html" class="active"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Completion Rules
+  </div>
+
+  <div class="content">
+    <h1>Completion Rules</h1>
+    <p class="page-intro">
+      Completion rules control when Moodle marks a student as having <strong>completed</strong>
+      this Case Study activity. This feeds into course-level completion tracking, badges, and
+      progress bars. You can require a total number of satisfactory submissions, or require
+      submissions across specific categories — or both.
+    </p>
+
+    <div class="callout note">
+      <span class="callout-icon">📍</span>
+      <div class="callout-body">Completion rules are configured in the <strong>Activity Settings</strong> form, in the <strong>Completion Conditions</strong> section.</div>
+    </div>
+
+    <!-- Overview -->
+    <h2>Rule types</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Total Satisfactory Submissions</strong></td><td>Student must have X submissions marked as Satisfactory in total, across all case studies</td></tr>
+          <tr><td><strong>Category-Based Satisfactory Submissions</strong></td><td>Student must have X Satisfactory submissions where a specific category field equals a specific value</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Both rules can be enabled at the same time. A student must satisfy <strong>all</strong> enabled rules to complete the activity.</p>
+
+    <!-- Enabling -->
+    <h2>Enabling completion rules</h2>
+    <ol class="steps">
+      <li>Open the Case Study activity, click <strong>Settings</strong> (or Edit settings).</li>
+      <li>Scroll to the <strong>Completion Conditions</strong> section.</li>
+      <li>Enable the rules you need and set the required counts.</li>
+      <li>Click <strong>Save and display</strong>.</li>
+    </ol>
+
+    <figure class="screenshot">
+      <img src="images/setup_completion.png" alt="Completion Conditions section in the Activity Settings form">
+      <figcaption>Completion Conditions section in the Activity Settings form</figcaption>
+    </figure>
+
+    <!-- Rule 1 -->
+    <h2>Rule 1: Total Satisfactory Submissions</h2>
+    <p>Enable the checkbox, then set a count. The student must have at least that many submissions marked <span class="badge badge-green">Satisfactory</span> across all case study entries.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Count</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Student needs at least 1 satisfactory submission</td></tr>
+          <tr><td>2</td><td>Student needs at least 2 satisfactory submissions</td></tr>
+          <tr><td>5</td><td>Student needs at least 5 satisfactory submissions</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body"><strong>Example:</strong> Set count to 2 so the student must have 2 case studies accepted as satisfactory before the activity is considered complete.</div>
+    </div>
+
+    <!-- Rule 2 -->
+    <h2>Rule 2: Category-Based Satisfactory Submissions</h2>
+    <p>This rule requires satisfactory submissions where a <strong>specific category field</strong> contains a <strong>specific value</strong>. You can add multiple category rules — one per row — to require submissions across different categories.</p>
+
+    <h3>Step 1 — Set up a Category Field</h3>
+    <p>Before using this rule you need at least one field marked as a <strong>Category Field</strong>. Only <strong>Dropdown</strong> and <strong>Radio</strong> fields can be category fields.</p>
+    <ol class="steps">
+      <li>Go to <strong>Manage Fields</strong>.</li>
+      <li>Edit a Dropdown or Radio field.</li>
+      <li>Tick the <strong>Category Field</strong> checkbox.</li>
+      <li>Save the field.</li>
+    </ol>
+    <p>That field's options now become available in the completion rule configuration.</p>
+
+    <h3>Step 2 — Configure each category rule</h3>
+    <p>Each rule row has three settings:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Category Field</strong></td><td>Choose a field that has been marked as a Category Field</td></tr>
+          <tr><td><strong>Category Value</strong></td><td>Choose which value in that field must be present — the dropdown populates automatically from the field's options</td></tr>
+          <tr><td><strong>Required Count</strong></td><td>How many satisfactory submissions matching this category value are required</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Adding and removing rules</h3>
+    <ul>
+      <li>Click <strong>Add rule</strong> to add another category rule row.</li>
+    </ul>
+
+    <!-- Examples -->
+    <h2>Configuration examples</h2>
+
+    <h3>Example 1 — Total count only</h3>
+    <p><strong>Goal:</strong> Student must have 2 satisfactory case study submissions total.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Total Satisfactory Submissions</td><td>Enabled — Count = <strong>2</strong></td></tr>
+          <tr><td>Category rules</td><td>None</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Example 2 — Category-based (multiple categories)</h3>
+    <p><strong>Goal:</strong> Student must have 1 satisfactory submission in "General Surgery" (Case Category) AND 1 in "Child (1–12 years)" (Patient Age Group).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rule</th><th>Field</th><th>Value</th><th>Count</th></tr></thead>
+        <tbody>
+          <tr><td>Total Satisfactory</td><td colspan="2">Enabled — Count = <strong>2</strong></td><td>2</td></tr>
+          <tr><td>Category rule 1</td><td>Case Category</td><td>General Surgery</td><td>1</td></tr>
+          <tr><td>Category rule 2</td><td>Patient Age Group</td><td>Child (1–12 years)</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">All enabled rules must be satisfied. A student with 2 General Surgery submissions but 0 Child age group submissions has <strong>not</strong> completed the activity.</div>
+    </div>
+
+    <!-- Case Study Summaries -->
+    <h2>Case Study Summaries view</h2>
+    <p>
+      The <strong>Case Study Summaries</strong> table gives teachers a real-time overview of every
+      student's progress against the configured completion rules. Access it from the activity page
+      by selecting <strong>Case Study Summaries</strong> from the <strong>Submissions</strong>
+      dropdown.
+    </p>
+
+    <figure class="screenshot">
+      <img src="images/completion_summaries.png" alt="Case Study Summaries table showing per-student progress against completion rules">
+      <figcaption>Case Study Summaries — per-student progress against completion rules</figcaption>
+    </figure>
+
+    <h3>Understanding the table columns</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Column</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Student</strong></td><td>Student name and profile picture</td></tr>
+          <tr>
+            <td><strong>Total number of satisfactory cases</strong><br><em>(e.g., /2)</em></td>
+            <td>How many satisfactory submissions the student has out of the required total. Green highlight = rule met.</td>
+          </tr>
+          <tr>
+            <td><strong>Category column</strong><br><em>(e.g., Case Category: General Surgery, Satisfactory /1)</em></td>
+            <td>One column per configured category rule. Shows the student's count of satisfactory submissions matching that category and value. Green highlight = rule met.</td>
+          </tr>
+          <tr><td><strong>Grade</strong></td><td>The student's current overall grade badge — <span class="badge badge-green">Satisfactory</span> or <span class="badge badge-red">Unsatisfactory</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Filtering and searching</h3>
+    <p>Use the <strong>Search users</strong> field to find a specific student, and the <strong>Filter by name</strong> control to sort or narrow the list.</p>
+
+    <!-- Learner reports -->
+    <h2>Learner progress reports</h2>
+    <p>When completion rules are configured, the system automatically sends weekly <strong>Learner Progress Reports</strong> by email to all enrolled students, showing how close they are to meeting each rule. See <a href="notifications.html">Notifications &amp; Reports</a> for details.</p>
+
+    <div class="page-nav">
+      <a class="prev" href="templates.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Templates</span>
+        </span>
+      </a>
+      <a class="next" href="overrides.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">User Overrides</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

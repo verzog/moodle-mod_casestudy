@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications &amp; Reports — Case Study Plugin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="index.html">
+    <div class="sidebar-brand-icon">📋</div>
+    <div class="sidebar-brand-text">
+      <div class="sidebar-brand-title">Case Study</div>
+      <div class="sidebar-brand-sub">Plugin Documentation</div>
+    </div>
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Getting Started</div>
+    <nav><a href="index.html"><span class="nav-icon">🏠</span> Overview</a></nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Teachers</div>
+    <nav>
+      <a href="setup.html"><span class="nav-icon">⚙️</span> Activity Settings</a>
+      <a href="fields.html"><span class="nav-icon">🗂️</span> Field Management</a>
+      <a href="templates.html"><span class="nav-icon">🎨</span> Templates</a>
+      <a href="completion.html"><span class="nav-icon">✅</span> Completion Rules</a>
+      <a href="overrides.html"><span class="nav-icon">🔓</span> User Overrides</a>
+      <a href="grading.html"><span class="nav-icon">📝</span> Grading Guide</a>
+      <a href="notifications.html" class="active"><span class="nav-icon">🔔</span> Notifications</a>
+    </nav>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">For Students</div>
+    <nav><a href="students.html"><span class="nav-icon">🎓</span> Student Guide</a></nav>
+  </div>
+  <div class="sidebar-footer">mod_casestudy · v1.0 · Moodle 4.5/5.0+</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a href="index.html">Home</a> <span class="sep">›</span> Notifications &amp; Reports
+  </div>
+
+  <div class="content">
+    <h1>Notifications &amp; Reports</h1>
+    <p class="page-intro">
+      The Case Study plugin sends automatic email notifications for key events and
+      runs two scheduled weekly reports to keep markers and students informed.
+    </p>
+
+    <!-- Instant notifications -->
+    <h2>Instant notifications</h2>
+    <p>These emails are sent immediately when specific events occur.</p>
+
+    <!-- 1. Grader notification -->
+    <h3>1. New submission notification — to graders</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>When</strong></td><td>A student clicks <strong>Finish and Submit</strong></td></tr>
+          <tr><td><strong>Condition</strong></td><td>Activity setting <strong>Notify Graders About Submissions</strong> = Yes</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>All users with <code>mod/casestudy:grade</code> capability + addresses in the <strong>Email Others</strong> field</td></tr>
+          <tr><td><strong>Subject</strong></td><td><em>[Student Name] has submitted: [Case Study Name]</em></td></tr>
+          <tr><td><strong>Body</strong></td><td>Student's name, case study title, course name, and a direct link to grade the submission</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr>
+
+    <!-- 2. Submission confirmation -->
+    <h3>2. Submission confirmation — to the student</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>When</strong></td><td>A student clicks <strong>Finish and Submit</strong></td></tr>
+          <tr><td><strong>Recipients</strong></td><td>The student who submitted</td></tr>
+          <tr><td><strong>Subject</strong></td><td><em>Submission confirmed: [Case Study Name]</em></td></tr>
+          <tr><td><strong>Body</strong></td><td>Confirmation message with submission timestamp and a link to view the submission</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <hr>
+
+    <!-- 3. Grade notification -->
+    <h3>3. Grade notification — to the student</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>When</strong></td><td>A grader clicks <strong>Mark Satisfactory</strong>, <strong>Mark Unsatisfactory</strong>, or <strong>Save Feedback</strong></td></tr>
+          <tr><td><strong>Condition</strong></td><td>The <strong>Notify Student</strong> checkbox is ticked on the grading form</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>The student whose submission was graded</td></tr>
+          <tr><td><strong>Subject</strong></td><td><em>Your case study has been graded: [Case Study Name] – [Status]</em></td></tr>
+          <tr><td><strong>Body</strong></td><td>Outcome status, grader name (unless hidden), feedback text, and a link to view the marked submission</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout note">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">If <strong>Hide Grader Identity</strong> is enabled in the activity settings, the grader's name is omitted from the notification.</div>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/casestudy-submission-notification-student.png" alt="Example grade notification email with feedback and a link to view the graded submission">
+      <figcaption>Example — grade notification email received by the student</figcaption>
+    </figure>
+
+    <hr>
+
+    <!-- Weekly reports -->
+    <h2>Weekly scheduled reports</h2>
+    <p>Two automated tasks run every Monday morning. Site administrators can adjust the schedule via <strong>Site Administration → Server → Scheduled tasks</strong>.</p>
+
+    <!-- Learner report -->
+    <h3>Weekly Learner Progress Report</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Schedule</strong></td><td>Every Monday at 09:00 (configurable)</td></tr>
+          <tr><td><strong>Task class</strong></td><td><code>mod_casestudy\task\send_learner_reports</code></td></tr>
+          <tr><td><strong>Recipients</strong></td><td>All enrolled students with submit capability, in courses where a Case Study has <a href="completion.html">completion rules</a> enabled</td></tr>
+          <tr><td><strong>Subject</strong></td><td><em>Progress report: [Case Study Name] ([Course Name])</em></td></tr>
+          <tr><td><strong>Body</strong></td><td>Completion status (complete/incomplete), progress toward each completion criterion, motivational message if incomplete, link to the activity</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure class="screenshot">
+      <img src="images/Progress-report.png" alt="Example learner progress report email showing progress toward completion criteria">
+      <figcaption>Example — weekly learner progress report received by a student</figcaption>
+    </figure>
+
+    <!-- Controlling notifications -->
+    <h2>Controlling notification behaviour</h2>
+
+    <h3>At the activity level (Activity Settings)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Notify Graders About Submissions</strong></td><td>Turns the grader new-submission notification on or off for the whole activity</td></tr>
+          <tr><td><strong>Email Others</strong></td><td>Adds extra recipients to the grader notification</td></tr>
+          <tr><td><strong>Default for "Notify Student"</strong></td><td>Pre-fills the Notify Student checkbox on the grading form (graders can override per submission)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>At the grading form level (per grading action)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Notify Student</strong> checkbox</td><td>Determines whether this specific grading action triggers a notification to the student</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="grading.html">
+        <span>
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">Grading Guide</span>
+        </span>
+      </a>
+      <a class="next" href="students.html">
+        <span>
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">Student Guide</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
