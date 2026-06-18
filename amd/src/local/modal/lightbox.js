@@ -17,7 +17,7 @@
  * Lightbox modal for file field to display the image in lightbox.
  *
  * @module     mod_casestudy/local/modal/lightbox
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

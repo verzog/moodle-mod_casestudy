@@ -18,7 +18,7 @@
  * Dynamic Grading Form class for Case Study activity
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

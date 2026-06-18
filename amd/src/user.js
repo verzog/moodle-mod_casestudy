@@ -17,7 +17,7 @@
  * User search functionality.
  *
  * @module   mod_casestudy/user
- * @copyright 2025 SCCA
+ * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -39,7 +39,7 @@ const casestudyID = parseInt(component.querySelector(selectors.instance).dataset
  * Allow the user to search for users in the action bar.
  *
  * @module    mod_casestudy/user
- * @copyright 2025 SCCA
+ * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 export default class User extends UserSearch {

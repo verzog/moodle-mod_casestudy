@@ -17,7 +17,7 @@
  * A repo for the search partial in the submissions page.
  *
  * @module    mod_casestudy/submission_confirmation
- * @copyright 2025 SCCA
+ * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['core/notification', 'core/prefetch', 'core/templates', 'core/str',

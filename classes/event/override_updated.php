@@ -18,7 +18,7 @@
  * The override_updated event.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +28,7 @@ namespace mod_casestudy\event;
  * The override_updated event class.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class override_updated extends \core\event\base {

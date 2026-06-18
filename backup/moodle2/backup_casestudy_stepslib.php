@@ -18,7 +18,7 @@
  * Define all the backup steps that will be used by the backup_casestudy_activity_task
  *
  * @package   mod_casestudy
- * @copyright 2025 SCCA
+ * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * Define the complete casestudy structure for backup, with file and id annotations
  *
  * @package   mod_casestudy
- * @copyright 2025 SCCA
+ * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_casestudy_activity_structure_step extends backup_activity_structure_step {

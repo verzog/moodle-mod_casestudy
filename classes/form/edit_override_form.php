@@ -18,7 +18,7 @@
  * Form for editing case study overrides
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -38,7 +38,7 @@ require_once($CFG->libdir . '/formslib.php');
  * Form for editing case study override settings.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class edit_override_form extends moodleform {

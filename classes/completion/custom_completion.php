@@ -27,7 +27,7 @@ use core_completion\activity_custom_completion;
  * of the custom completion rules for a given casestudy instance and a user.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class custom_completion extends activity_custom_completion {

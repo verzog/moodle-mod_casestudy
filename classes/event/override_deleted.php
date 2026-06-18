@@ -18,7 +18,7 @@
  * The override_deleted event.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +28,7 @@ namespace mod_casestudy\event;
  * The override_deleted event class.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class override_deleted extends \core\event\base {

@@ -19,7 +19,7 @@
  * local library functions for casestudy module
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -92,7 +92,7 @@ class casestudy_selector_form extends moodleform {
  * Template editor form.
  *
  * @package    mod_casestudy
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  */
 class template_editor_form extends moodleform {
 

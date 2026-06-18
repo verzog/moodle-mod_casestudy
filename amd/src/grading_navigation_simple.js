@@ -17,7 +17,7 @@
  * Simple navigation for case study grading - redirects on user change
  *
  * @module     mod_casestudy/grading_navigation_simple
- * @copyright  2025 SCCA
+ * @copyright  2025 Skin Cancer College Australasia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery', 'core/notification', 'core/str', 'core/form-autocomplete', 'core/ajax'],

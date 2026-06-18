@@ -17,7 +17,7 @@
  * Template editor JavaScript for inserting placeholders into textareas.
  *
  * @module   mod_casestudy/template_editor
- * @copyright 2025 SCCA
+ * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
