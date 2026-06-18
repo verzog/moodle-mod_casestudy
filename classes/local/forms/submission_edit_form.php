@@ -41,6 +41,9 @@ class submission_edit_form extends \moodleform {
     /** @var \cm_info|\stdClass Course module record. */
     private $cm;
 
+    /** @var bool True when the current submission is a resubmission (has a parentid). */
+    private $isresubmission;
+
     /** @var string Cached output of {@see parse_from_template()}; populated by render(). */
     protected $parsedformoutput;
 
@@ -55,6 +58,7 @@ class submission_edit_form extends \moodleform {
         $this->fieldmanager = $customdata['fieldmanager'];
         $this->editing = $customdata['editing'];
         $this->cm = $customdata['cmdata'];
+        $this->isresubmission = !empty($customdata['isresubmission']);
 
         parent::__construct($action, $customdata);
     }
@@ -131,8 +135,12 @@ class submission_edit_form extends \moodleform {
             $savedraftbtn = $mform->createElement('submit', 'savedraft', get_string('savedraft', 'mod_casestudy'));
             $buttonarray[] = $savedraftbtn;
 
-            $saveaddanotherbtn = $mform->createElement('submit', 'saveaddanother', get_string('saveandadd', 'mod_casestudy'));
-            $buttonarray[] = $saveaddanotherbtn;
+            // "Save and add another" only makes sense on a first attempt; on a
+            // resubmission the student is editing the existing attempt, so hide it.
+            if (!$this->isresubmission) {
+                $saveaddanotherbtn = $mform->createElement('submit', 'saveaddanother', get_string('saveandadd', 'mod_casestudy'));
+                $buttonarray[] = $saveaddanotherbtn;
+            }
 
             $finishbtn = $mform->createElement(
                 'button',

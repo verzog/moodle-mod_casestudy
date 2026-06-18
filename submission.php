@@ -154,6 +154,7 @@ $form = new \mod_casestudy\local\forms\submission_edit_form($PAGE->url, [
     'fieldmanager' => $fieldmanager,
     'editing' => $editing,
     'cmdata' => $cmdata,
+    'isresubmission' => !empty($submission->parentid),
 ]);
 
 $form->update_formdata_beforeset($submissiondata);
