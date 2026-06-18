@@ -38,15 +38,13 @@
 <div class="text-center mb-4">
     <button type="button"
             class="btn btn-primary btn-lg rounded-circle casestudy-add-field-btn"
-            data-toggle="popover"
-            data-placement="bottom"
-            data-html="true"
-            data-trigger="click"
-
+            data-bs-toggle="popover"
+            data-bs-placement="bottom"
+            data-bs-html="true"
+            data-bs-trigger="click"
+            data-bs-container="body"
             title="{{#str}}addfield, mod_casestudy{{/str}}"
             style="width: 60px; height: 60px; font-size: 24px;"
-            data-container="body"
-
             >
         <i class="fa fa-plus"></i>
     </button>
@@ -66,17 +64,23 @@
 </div>
 
 {{#js}}
-
-require(['jquery', 'theme_boost/popover'], function($) {
-    // Initialize the popover with the field types
-    $('.casestudy-add-field-btn').popover({
-        content: $('#field-type-popover').html(),
+require(['theme_boost/popover'], function(PopoverModule) {
+    // The theme_boost/popover module exports the Bootstrap 5 Popover class.
+    var Popover = PopoverModule.Popover || PopoverModule.default || PopoverModule;
+    var trigger = document.querySelector('.casestudy-add-field-btn');
+    if (!trigger || !Popover) {
+        return;
+    }
+    var content = document.getElementById('field-type-popover');
+    new Popover(trigger, {
+        content: content ? content.innerHTML : '',
         html: true,
         placement: 'bottom',
         trigger: 'click',
         container: 'body',
+        sanitize: false
     });
-
 });
 {{/js}}
+
 
