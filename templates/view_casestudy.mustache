@@ -259,15 +259,24 @@ require(['core/notification', 'core/str'], function(Notification, Str) {
                     return;
                 }
 
-                if (!e.target.matches('input[type=submit]')) {
+                var clicked = e.target.closest('input[type=submit], button[type=submit]');
+                if (!clicked) {
                     return;
                 }
 
-                console.log('Submitting form', e.target.name);
-                // Set the hidden input value to indicate which button was pressed.
+                // Set the hidden submitaction value to indicate which button was pressed.
                 var submitActionInput = document.querySelector('input[name="submitaction"]');
                 if (submitActionInput) {
-                    submitActionInput.value = e.target.name;
+                    submitActionInput.value = clicked.name;
+                }
+
+                // Scale buttons carry the chosen grade in data-scale-value; copy
+                // it into the hidden grade input so it travels with the submit.
+                if (clicked.name === 'markscale' && clicked.dataset.scaleValue !== undefined) {
+                    var gradeInput = document.querySelector('#casestudy-gradeform-container input[name="grade"]');
+                    if (gradeInput) {
+                        gradeInput.value = clicked.dataset.scaleValue;
+                    }
                 }
             });
 
