@@ -216,21 +216,16 @@ class summary_table extends table_sql {
             $from .= " JOIN {groups_members} gm ON gm.userid = u.id";
             $where .= " AND gm.groupid = :selgroup";
             $params['selgroup'] = $this->groupid;
-        } else {
-            if ($canaccessall || $groupmode == NOGROUPS) {
-                // Show all enrolled users — no extra SQL needed
+        } else if (!$canaccessall && $groupmode != NOGROUPS) {
+            // Visible groups / separate groups: restrict to the user's accessible groups.
+            if (empty($allowedgroups)) {
+                $where .= " AND 1 = 0";
             } else {
-                if (empty($allowedgroups)) {
-                    $where .= " AND 1 = 0";
-                } else {
-                    $usergroupids = array_keys($allowedgroups);
-
-                    $from .= " JOIN {groups_members} gm2 ON gm2.userid = u.id";
-                    [$ingroupSql, $groupParams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
-
-                    $where .= " AND gm2.groupid $ingroupSql";
-                    $params = array_merge($params, $groupParams);
-                }
+                $usergroupids = array_keys($allowedgroups);
+                $from .= " JOIN {groups_members} gm2 ON gm2.userid = u.id";
+                [$ingroupsql, $groupparams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
+                $where .= " AND gm2.groupid $ingroupsql";
+                $params = array_merge($params, $groupparams);
             }
         }
 

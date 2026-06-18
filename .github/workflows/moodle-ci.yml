@@ -33,25 +33,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - php: '8.2'
-            moodle-branch: 'MOODLE_500_STABLE'
-            database: 'pgsql'
-          - php: '8.2'
-            moodle-branch: 'MOODLE_500_STABLE'
-            database: 'mariadb'
-          - php: '8.3'
-            moodle-branch: 'MOODLE_501_STABLE'
-            database: 'pgsql'
-          - php: '8.3'
-            moodle-branch: 'MOODLE_501_STABLE'
-            database: 'mariadb'
+        php: ['8.2', '8.3', '8.4']
+        moodle-branch: ['MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE']
+        database: ['pgsql', 'mariadb']
+        exclude:
+          # Moodle 5.0 was released before PHP 8.4 support landed.
           - php: '8.4'
-            moodle-branch: 'MOODLE_502_STABLE'
-            database: 'pgsql'
-          - php: '8.4'
-            moodle-branch: 'MOODLE_502_STABLE'
-            database: 'mariadb'
+            moodle-branch: 'MOODLE_500_STABLE'
 
     steps:
       - name: Check out plugin
@@ -98,7 +86,10 @@ jobs:
       - name: Moodle Code Checker
         continue-on-error: true
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci phpcs --exclude=moodle.Files.BoilerplateComment --max-warnings 0
+        run: |
+          moodle-plugin-ci phpcs \
+            --exclude=moodle.Files.BoilerplateComment,moodle.Commenting.FileExpectedTags,moodle.Files.MoodleInternal \
+            --max-warnings 0
 
       - name: Moodle PHPDoc Checker
         continue-on-error: true

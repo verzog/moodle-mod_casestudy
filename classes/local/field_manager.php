@@ -21,8 +21,6 @@
 
 namespace mod_casestudy\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Manages CRUD operations for case study fields
  */

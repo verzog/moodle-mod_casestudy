@@ -24,8 +24,6 @@ namespace mod_casestudy\local\field_types;
 use core\output\html_writer;
 use mod_casestudy\local\field_data;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * File field implementation - File parameters stored in param1, param2, param3
  */

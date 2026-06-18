@@ -53,7 +53,7 @@ class submission_table extends table_sql {
     /** @var int $userid User filter */
     protected $userid;
 
-    protected $column_textsort = [];
+    protected $columntextsort = [];
 
     /**
      * Constructor
@@ -173,9 +173,9 @@ class submission_table extends table_sql {
                         // Filter users by allowed groups
                         $usergroupids = array_keys($allowedgroups);
                         $from .= ' JOIN {groups_members} gm2 ON gm2.userid = u.id';
-                        [$ingroupSQL, $groupParams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
-                        $where .= " AND gm2.groupid $ingroupSQL";
-                        $params = array_merge($params, $groupParams);
+                        [$ingroupsql, $groupparams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
+                        $where .= " AND gm2.groupid $ingroupsql";
+                        $params = array_merge($params, $groupparams);
                     }
                 }
             }
@@ -214,7 +214,7 @@ class submission_table extends table_sql {
             }
         }
 
-        return self::construct_order_by($columns, $this->column_textsort ?: []);
+        return self::construct_order_by($columns, $this->columntextsort ?: []);
     }
 
     /**
@@ -708,11 +708,6 @@ class submission_table extends table_sql {
 
         // Add status-specific classes
         $classes[] = 'submission-status-' . str_replace('_', '-', $row->status);
-
-        // Add late submission class if applicable
-        if ($row->status === 'submitted' && !empty($row->timesubmitted)) {
-            // $classes[] = 'submission-late';
-        }
 
         return implode(' ', $classes);
     }

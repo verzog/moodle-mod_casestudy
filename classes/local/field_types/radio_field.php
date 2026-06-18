@@ -23,8 +23,6 @@ namespace mod_casestudy\local\field_types;
 
 use mod_casestudy\local\field_data;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Radio button field implementation - Options stored in param1
  */
@@ -298,9 +296,9 @@ class radio_field extends base_field {
      * @return array Options array
      */
     private function get_options() {
-        $options_array = $this->get_param('param1', []);
-        if (is_array($options_array)) {
-            return array_combine($options_array, $options_array);
+        $optionsarray = $this->get_param('param1', []);
+        if (is_array($optionsarray)) {
+            return array_combine($optionsarray, $optionsarray);
         }
 
         return [];

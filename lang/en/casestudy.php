@@ -402,6 +402,7 @@ $string['tag_feedback'] = 'Feedback text';
 $string['tag_fielddescription'] = 'field description';
 $string['tag_fieldname'] = 'field label';
 $string['tag_form_description'] = '{$a} - Field description only';
+$string['tag_form_error'] = '{$a} - Inline validation error message (empty when no error)';
 $string['tag_form_field'] = '{$a} - Complete form field with label, input and description';
 $string['tag_form_id'] = '{$a} - Field HTML ID attribute';
 $string['tag_form_input'] = '{$a} - Input element only (without label/description)';

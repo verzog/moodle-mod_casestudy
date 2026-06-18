@@ -21,8 +21,6 @@
 
 namespace mod_casestudy\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_casestudy course module instance list viewed event class.
  *

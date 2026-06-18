@@ -26,8 +26,6 @@ use templatable;
 use renderer_base;
 use moodle_url;
 
-defined('MOODLE_INTERNAL') || die();
-
 class template_editor implements renderable, templatable {
     private $manager;
     private $templatename;

@@ -500,7 +500,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
             );
 
             $categoryindex = 0;
-            $hascategoryrulesEnabled = false;
+            $hascategoryrulesenabled = false;
             foreach ($rules as $rule) {
                 if ($rule->ruletype == CASESTUDY_COMPLETION_TOTAL) {
                     $defaultvalues['completionsatisfactory'] = 1;
@@ -515,7 +515,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
 
                     // Track if any category rule is enabled.
                     if ($rule->enabled && !empty($rule->fieldid)) {
-                        $hascategoryrulesEnabled = true;
+                        $hascategoryrulesenabled = true;
                     }
 
                     $categoryindex++;
@@ -523,7 +523,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
             }
 
             // Set completioncategory hidden field if any category rules are enabled.
-            if ($hascategoryrulesEnabled) {
+            if ($hascategoryrulesenabled) {
                 $defaultvalues['completioncategory'] = 1;
             }
         }

@@ -22,11 +22,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Define the complete casestudy structure for backup, with file and id annotations
- *
- * @package   mod_casestudy
- * @copyright 2025 Skin Cancer College Australasia
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Define the complete casestudy structure for backup, with file and id annotations.
  */
 class backup_casestudy_activity_structure_step extends backup_activity_structure_step {
     /**

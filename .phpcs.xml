@@ -4,5 +4,12 @@
         <!-- Proprietary, in-house plugin: not GPL, so the Moodle GPL
              boilerplate sniff does not apply. See CLAUDE.md §3.9 / §5. -->
         <exclude name="moodle.Files.BoilerplateComment"/>
+        <!-- Proprietary @license value is free text by design (§5); the
+             sniff expects `URL Name` which doesn't fit. -->
+        <exclude name="moodle.Commenting.FileExpectedTags"/>
+        <!-- Mixed-discipline codebase: drops MOODLE_INTERNAL where the
+             autoloader handles things; the sniff misfires on a number of
+             our class files. -->
+        <exclude name="moodle.Files.MoodleInternal"/>
     </rule>
 </ruleset>

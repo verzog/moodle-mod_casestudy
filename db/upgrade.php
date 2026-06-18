@@ -19,8 +19,6 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Execute mod_casestudy upgrade from the given old version.
  *

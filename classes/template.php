@@ -27,8 +27,6 @@ use moodle_url;
 use mod_casestudy\local\casestudy;
 use mod_casestudy\local\submission;
 
-defined('MOODLE_INTERNAL') || die();
-
 class template {
     private $casestudyinstance;
 
@@ -385,6 +383,7 @@ class template {
             $tags['fieldattr']['[[' . $field->name . '#input]]'] = get_string('tag_form_input', 'mod_casestudy', $field->name);
             $tags['fieldattr']['[[' . $field->name . '#required]]'] = get_string('tag_form_required', 'mod_casestudy', $field->name);
             $tags['fieldattr']['[[' . $field->name . '#id]]'] = get_string('tag_form_id', 'mod_casestudy', $field->name);
+            $tags['fieldattr']['[[' . $field->name . '#error]]'] = get_string('tag_form_error', 'mod_casestudy', $field->name);
         }
 
         return $tags;
@@ -405,7 +404,6 @@ class template {
                 if (!empty($field->description)) {
                     $template .= '<div class="section-description text-muted">[[' . $field->name . '#description]]</div>';
                 }
-                // $template .= '</div>';
             } else {
                 $template .= '<div class="form-group field-wrapper mb-3" data-field="' . $field->shortname . '">';
                 $template .= '[[' . $field->name . ']]';
@@ -579,6 +577,16 @@ class template {
 
             $replacements['[[' . $field->name . '#description]]'] = $descriptionhtml;
 
+            // Inline validation error tag.
+            $errorhtml = '';
+            if (!empty($fielderrors)) {
+                $errorhtml = \html_writer::div(
+                    is_array($fielderrors) ? implode(' ', $fielderrors) : $fielderrors,
+                    'casestudy-field-error text-danger'
+                );
+            }
+            $replacements['[[' . $field->name . '#error]]'] = $errorhtml;
+
             // Input only tag (just the input element without wrapper)
             $haserrors = !empty($fielderrors);
             // $fieldclass->get_input_html($fieldname, $value, $submissionid, $haserrors);
@@ -598,6 +606,7 @@ class template {
                 $replacements['[[' . $field->shortname . '#input]]'] = $inputhtml;
                 $replacements['[[' . $field->shortname . '#required]]'] = $requiredmark;
                 $replacements['[[' . $field->shortname . '#id]]'] = $fieldname;
+                $replacements['[[' . $field->shortname . '#error]]'] = $errorhtml;
             }
         }
 

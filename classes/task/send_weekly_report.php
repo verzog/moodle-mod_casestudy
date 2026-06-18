@@ -21,8 +21,6 @@
 
 namespace mod_casestudy\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Scheduled task to send weekly submission reports
  */
