@@ -51,7 +51,7 @@ abstract class base_field implements fieldtype {
      * @param int|object $field Field definition
      * @param object $submission Current submission (optional)
      */
-    public function __construct($casestudyid=null, $field=null, $submission = null) {
+    public function __construct($casestudyid = null, $field = null, $submission = null) {
 
         if (is_object($field)) {
             $fieldid = $field->id;
@@ -69,7 +69,6 @@ abstract class base_field implements fieldtype {
         }
 
         $this->submission = $submission;
-
     }
 
     /**
@@ -206,7 +205,7 @@ abstract class base_field implements fieldtype {
      * @param mixed $value Raw input value
      * @return mixed Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
         return field_data::create((object) ['content' => $value]);
     }
 
@@ -245,7 +244,7 @@ abstract class base_field implements fieldtype {
      * @param mixed $default Default value
      * @return mixed Parameter value
      */
-    protected function get_param($paramname, $default = null, array $defaults=[]) {
+    protected function get_param($paramname, $default = null, array $defaults = []) {
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {
             return $default;
         }
@@ -257,7 +256,7 @@ abstract class base_field implements fieldtype {
     /**
      * Get param value with defaults.
      */
-    public function get_param_decode($paramname, $default = null, array $defaults=[]) {
+    public function get_param_decode($paramname, $default = null, array $defaults = []) {
 
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {
             return $default;
@@ -278,7 +277,7 @@ abstract class base_field implements fieldtype {
         return [
             'required' => $this->fielddata->required,
             'showlistview' => $this->fielddata->showlistview,
-            'category' => $this->fielddata->category
+            'category' => $this->fielddata->category,
         ];
     }
 
@@ -297,7 +296,6 @@ abstract class base_field implements fieldtype {
             'editing' => $editing,
             'fieldtype' => $this->get_type(),
         ]);
-
     }
 
     /**
@@ -321,9 +319,8 @@ abstract class base_field implements fieldtype {
         return [
             'required' => !empty($data['required']),
             'showlistview' => !empty($data['showlistview']),
-            'category' => !empty($data['category'])
+            'category' => !empty($data['category']),
         ];
-
     }
 
     /**
@@ -511,7 +508,7 @@ abstract class base_field implements fieldtype {
      *
      * @return bool True if supports content
      */
-    public function supports_content() :bool {
+    public function supports_content(): bool {
         return true;
     }
 }

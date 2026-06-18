@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * Scheduled task to send learner progress reports weekly
  */
 class send_learner_reports extends \core\task\scheduled_task {
-
     /**
      * Get task name
      *

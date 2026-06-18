@@ -29,7 +29,6 @@ use moodle_url;
 defined('MOODLE_INTERNAL') || die();
 
 class template_editor implements renderable, templatable {
-
     private $manager;
     private $templatename;
 
@@ -74,7 +73,7 @@ class template_editor implements renderable, templatable {
             'reseturl' => new moodle_url('/mod/casestudy/templates.php', [
                 'id' => $this->manager->get_cm()->id,
                 'mode' => $this->templatename,
-                'sesskey' => sesskey()
+                'sesskey' => sesskey(),
             ]),
         ];
 
@@ -86,9 +85,9 @@ class template_editor implements renderable, templatable {
         foreach ($tags as $category => $categorytags) {
             $toolbar['tags'][] = [
                 'category' => get_string('tagcategory_' . $category, 'mod_casestudy'),
-                'items' => array_map(function($tag, $description) {
+                'items' => array_map(function ($tag, $description) {
                     return ['tag' => $tag, 'description' => $description];
-                }, array_keys($categorytags), $categorytags)
+                }, array_keys($categorytags), $categorytags),
             ];
         }
 

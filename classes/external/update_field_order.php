@@ -36,7 +36,6 @@ use mod_casestudy\local\field_manager;
  * External function for updating field order
  */
 class update_field_order extends external_api {
-
     /**
      * Describes the parameters for update_field_order
      * @return external_function_parameters
@@ -45,7 +44,7 @@ class update_field_order extends external_api {
         return new external_function_parameters([
             'cmid' => new external_value(PARAM_INT, 'Course module ID'),
             'fieldid' => new external_value(PARAM_INT, 'Field ID to move'),
-            'newposition' => new external_value(PARAM_INT, 'New position (1-based index)')
+            'newposition' => new external_value(PARAM_INT, 'New position (1-based index)'),
         ]);
     }
 
@@ -64,7 +63,7 @@ class update_field_order extends external_api {
         $params = self::validate_parameters(self::execute_parameters(), [
             'cmid' => $cmid,
             'fieldid' => $fieldid,
-            'newposition' => $newposition
+            'newposition' => $newposition,
         ]);
 
         // Get course module and context.
@@ -77,7 +76,7 @@ class update_field_order extends external_api {
         // Get the field and validate it belongs to this case study.
         $field = $DB->get_record('casestudy_fields', [
             'id' => $params['fieldid'],
-            'casestudyid' => $cm->instance
+            'casestudyid' => $cm->instance,
         ]);
 
         if (!$field) {
@@ -85,8 +84,11 @@ class update_field_order extends external_api {
         }
 
         // Validate new position
-        $maxorder = $DB->get_field('casestudy_fields', 'MAX(sortorder)',
-            ['casestudyid' => $cm->instance]);
+        $maxorder = $DB->get_field(
+            'casestudy_fields',
+            'MAX(sortorder)',
+            ['casestudyid' => $cm->instance]
+        );
 
         if ($params['newposition'] < 1 || $params['newposition'] > $maxorder) {
             throw new \moodle_exception('invalidposition', 'mod_casestudy');
@@ -100,7 +102,7 @@ class update_field_order extends external_api {
 
         return [
             'success' => $success,
-            'message' => $success ? get_string('fieldorderupdated', 'mod_casestudy') : get_string('fieldorderupdatefailed', 'mod_casestudy')
+            'message' => $success ? get_string('fieldorderupdated', 'mod_casestudy') : get_string('fieldorderupdatefailed', 'mod_casestudy'),
         ];
     }
 
@@ -126,7 +128,8 @@ class update_field_order extends external_api {
             }
 
             // Get all fields for this case study ordered by sort order.
-            $fields = $DB->get_records('casestudy_fields',
+            $fields = $DB->get_records(
+                'casestudy_fields',
                 ['casestudyid' => $field->casestudyid],
                 'sortorder ASC'
             );
@@ -163,7 +166,7 @@ class update_field_order extends external_api {
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether the operation was successful'),
-            'message' => new external_value(PARAM_TEXT, 'Success or error message')
+            'message' => new external_value(PARAM_TEXT, 'Success or error message'),
         ]);
     }
 }

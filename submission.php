@@ -21,7 +21,7 @@
 
 require_once('../../config.php');
 
-require_once(dirname(__FILE__).'/lib.php');
+require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course module ID
 $submissionid = optional_param('submissionid', 0, PARAM_INT); // Submission ID for editing
@@ -29,8 +29,8 @@ $action = optional_param('action', '', PARAM_ALPHA); // Action to perform.
 
 // Get course module and related data
 $cm = get_coursemodule_from_id('casestudy', $id, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$casestudy = $DB->get_record('casestudy', array('id' => $cm->instance), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+$casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
@@ -41,7 +41,7 @@ if (!has_capability('mod/casestudy:submit', $context) && !has_capability('mod/ca
     throw new required_capability_exception($context, 'mod/casestudy:submit', 'nopermissions', '');
 }
 
-$PAGE->set_url('/mod/casestudy/submission.php', array('id' => $cm->id, 'submissionid' => $submissionid));
+$PAGE->set_url('/mod/casestudy/submission.php', ['id' => $cm->id, 'submissionid' => $submissionid]);
 $PAGE->set_title(format_string($casestudy->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
@@ -55,18 +55,25 @@ $submissionmanager = \mod_casestudy\local\submission_manager::instance($casestud
 
 // Get or create submission
 if ($action) {
-
     switch ($action) {
         case 'delete':
             require_sesskey();
             $submission = $submissionmanager->get_submission_record($submissionid);
             if (!empty($submission) && $submissionmanager->can_delete_submission($submission, $USER->id)) {
                 $submissionmanager->delete_submission($submission);
-                redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)),
-                        get_string('submissiondeleted', 'mod_casestudy'), null, \core\output\notification::NOTIFY_SUCCESS);
+                redirect(
+                    new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]),
+                    get_string('submissiondeleted', 'mod_casestudy'),
+                    null,
+                    \core\output\notification::NOTIFY_SUCCESS
+                );
             } else {
-                redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)),
-                        get_string('cannotdeletesubmission', 'mod_casestudy'), null, \core\output\notification::NOTIFY_WARNING);
+                redirect(
+                    new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]),
+                    get_string('cannotdeletesubmission', 'mod_casestudy'),
+                    null,
+                    \core\output\notification::NOTIFY_WARNING
+                );
             }
             break;
         case 'reattempt':
@@ -74,11 +81,19 @@ if ($action) {
             $submission = $submissionmanager->get_submission_record($submissionid);
             if (!empty($submission) && $submissionmanager->can_reattempt_submission($submission, $USER->id)) {
                 $submissionmanager->recreate_submission($submission);
-                redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)),
-                        get_string('submissionreattempted', 'mod_casestudy'), null, \core\output\notification::NOTIFY_SUCCESS);
+                redirect(
+                    new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]),
+                    get_string('submissionreattempted', 'mod_casestudy'),
+                    null,
+                    \core\output\notification::NOTIFY_SUCCESS
+                );
             } else {
-                redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)),
-                        get_string('cannotreattemptsubmission', 'mod_casestudy'), null, \core\output\notification::NOTIFY_WARNING);
+                redirect(
+                    new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]),
+                    get_string('cannotreattemptsubmission', 'mod_casestudy'),
+                    null,
+                    \core\output\notification::NOTIFY_WARNING
+                );
             }
             break;
         default:
@@ -90,8 +105,12 @@ if ($action) {
 $submission = $submissionmanager->get_or_create_user_submission($USER->id, $submissionid);
 
 if (!$submission) {
-    redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)),
-            get_string('submissionlevelreached', 'mod_casestudy'), null, \core\output\notification::NOTIFY_ERROR);
+    redirect(
+        new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]),
+        get_string('submissionlevelreached', 'mod_casestudy'),
+        null,
+        \core\output\notification::NOTIFY_ERROR
+    );
 }
 
 $editing = !empty($submissionid) && $submission && $submission->id == $submissionid;
@@ -100,8 +119,12 @@ $editing = !empty($submissionid) && $submission && $submission->id == $submissio
 $fields = $fieldmanager->get_fields();
 
 if (empty($fields)) {
-    redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)),
-            get_string('nofields', 'mod_casestudy'), null, \core\output\notification::NOTIFY_ERROR);
+    redirect(
+        new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]),
+        get_string('nofields', 'mod_casestudy'),
+        null,
+        \core\output\notification::NOTIFY_ERROR
+    );
 }
 
 // Check if user can edit this submission
@@ -117,21 +140,21 @@ if ($submission && $submission->id) {
 
 // Create form
 // Prepare form data
-$formdata = array(
+$formdata = [
     'id' => $cm->id,
-    'submissionid' => $submission->id
-);
+    'submissionid' => $submission->id,
+];
 
 // Add existing submission data
 
-$cmdata = $DB->get_record('casestudy', array('id' => $cm->instance), '*', MUST_EXIST);
+$cmdata = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
-$form = new \mod_casestudy\local\forms\submission_edit_form($PAGE->url, array(
+$form = new \mod_casestudy\local\forms\submission_edit_form($PAGE->url, [
     'fields' => $fields,
     'fieldmanager' => $fieldmanager,
     'editing' => $editing,
     'cmdata' => $cmdata,
-));
+]);
 
 $form->update_formdata_beforeset($submissiondata);
 
@@ -140,11 +163,8 @@ $formdata = array_merge($formdata, $submissiondata);
 $form->set_data($formdata);
 
 if ($form->is_cancelled()) {
-
-    redirect(new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id)));
-
+    redirect(new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]));
 } else if ($data = $form->get_data()) {
-
     // Standard moodleform submission
     $isdraft = $form->is_draft_submission($data) || $form->is_save_and_add_another($data);
     $issubmit = !$isdraft && $form->is_finish_submission($data);
@@ -152,19 +172,22 @@ if ($form->is_cancelled()) {
 
     try {
         $submission = $submissionmanager->process_form_submission(
-            $USER->id, $data, $currentsubmissionid, $issubmit, $form
+            $USER->id,
+            $data,
+            $currentsubmissionid,
+            $issubmit,
+            $form
         );
 
         $redirecturl = $form->is_save_and_add_another($data)
-            ? new moodle_url('/mod/casestudy/submission.php', array('id' => $cm->id))
-            : new moodle_url('/mod/casestudy/view.php', array('id' => $cm->id));
+            ? new moodle_url('/mod/casestudy/submission.php', ['id' => $cm->id])
+            : new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]);
 
         $message = $issubmit
             ? get_string('submissionsubmitted', 'mod_casestudy')
             : get_string('draftsaved', 'mod_casestudy');
 
         redirect($redirecturl, $message, null, \core\output\notification::NOTIFY_SUCCESS);
-
     } catch (Exception $e) {
         debugging('Error processing submission: ' . $e->getMessage(), DEBUG_DEVELOPER);
         $form->set_data($data);
@@ -177,10 +200,10 @@ $casestudyobj = new \mod_casestudy\local\casestudy($casestudy->id, $cm, $context
 $template = new \mod_casestudy\template($casestudyobj, $cm, $context);
 $useformtemplate = $template->has_form_template();
 
-//pop up.
+// pop up.
 $totalunanswered = 0;
 $requiresubmit = !empty($casestudy->requiresubmit) ? 1 : 0;
-$PAGE->requires->js_call_amd('mod_casestudy/submission_confirmation','init',[$totalunanswered, $requiresubmit]);
+$PAGE->requires->js_call_amd('mod_casestudy/submission_confirmation', 'init', [$totalunanswered, $requiresubmit]);
 
 echo $OUTPUT->header();
 
@@ -214,7 +237,6 @@ if ($useformtemplate) {
     // The template will handle rendering the form and any errors, so we pass those in as well.
     $form->parse_from_template($template, $fields, $templatedata, $errors, $submission->id ?? null);
     $form->display();
-
 } else {
     // Use standard moodleform rendering
     $form->display();

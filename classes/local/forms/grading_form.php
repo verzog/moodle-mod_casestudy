@@ -32,7 +32,6 @@ require_once($CFG->libdir . '/formslib.php');
  * Dynamic grading form for case study submissions
  */
 class grading_form extends \core_form\dynamic_form {
-
     protected $casestudyobj;
 
     /**
@@ -60,8 +59,12 @@ class grading_form extends \core_form\dynamic_form {
         // Student name (read-only display)
         $submission = $this->get_submission();
         if ($submission) {
-            $mform->addElement('static', 'studentname', get_string('student', 'mod_casestudy'),
-                fullname($submission));
+            $mform->addElement(
+                'static',
+                'studentname',
+                get_string('student', 'mod_casestudy'),
+                fullname($submission)
+            );
         }
 
         // Check if submission is already graded and user has regrade capability.
@@ -72,13 +75,22 @@ class grading_form extends \core_form\dynamic_form {
 
         // Show warning if submission is finished and user cannot regrade.
         if ($isfinished && !$canregrade) {
-            $mform->addElement('static', 'regradewarning', '',
-                '<div class="alert alert-warning">' . get_string('cannotregrade', 'mod_casestudy') . '</div>');
+            $mform->addElement(
+                'static',
+                'regradewarning',
+                '',
+                '<div class="alert alert-warning">' . get_string('cannotregrade', 'mod_casestudy') . '</div>'
+            );
         }
 
         // Marker comments
-        $mform->addElement('editor', 'feedback_editor', get_string('markercomments', 'mod_casestudy'),
-            ['rows' => 6], $this->get_editor_options());
+        $mform->addElement(
+            'editor',
+            'feedback_editor',
+            get_string('markercomments', 'mod_casestudy'),
+            ['rows' => 6],
+            $this->get_editor_options()
+        );
         $mform->setType('feedback_editor', PARAM_RAW);
 
         // Notify student checkbox
@@ -105,30 +117,44 @@ class grading_form extends \core_form\dynamic_form {
             $actiongroup = [];
 
             // Save feedback
-            $actiongroup[] = $mform->createElement('submit', 'savefeedback',
+            $actiongroup[] = $mform->createElement(
+                'submit',
+                'savefeedback',
                 get_string('savefeedback', 'mod_casestudy'),
-                ['class' => 'grade-primary']);
-
+                ['class' => 'grade-primary']
+            );
 
             // Save and request resubmission
-            $actiongroup[] = $mform->createElement('submit', 'saverequestresubmission',
+            $actiongroup[] = $mform->createElement(
+                'submit',
+                'saverequestresubmission',
                 get_string('saverequestresubmission', 'mod_casestudy'),
-                ['class' => 'grade-warning']);
+                ['class' => 'grade-warning']
+            );
 
             // Mark as satisfactory
-            $actiongroup[] = $mform->createElement('submit', 'marksatisfactory',
+            $actiongroup[] = $mform->createElement(
+                'submit',
+                'marksatisfactory',
                 get_string('marksatisfactory', 'mod_casestudy'),
-                ['class' => 'grade-success']);
+                ['class' => 'grade-success']
+            );
 
             // Mark as unsatisfactory
-            $actiongroup[] = $mform->createElement('submit', 'markunsatisfactory',
+            $actiongroup[] = $mform->createElement(
+                'submit',
+                'markunsatisfactory',
                 get_string('markunsatisfactory', 'mod_casestudy'),
-                ['class' => 'grade-danger']);
+                ['class' => 'grade-danger']
+            );
 
             // Cancel
-            $actiongroup[] = $mform->createElement('cancel', 'cancel',
+            $actiongroup[] = $mform->createElement(
+                'cancel',
+                'cancel',
                 get_string('cancel'),
-                ['class' => 'grade-secondary']);
+                ['class' => 'grade-secondary']
+            );
 
             $mform->addGroup($actiongroup, 'actions', '', ' ', false);
         }
@@ -244,7 +270,7 @@ class grading_form extends \core_form\dynamic_form {
             CASESTUDY_STATUS_SATISFACTORY,
             CASESTUDY_STATUS_UNSATISFACTORY,
         ];
-        list($statusinsql, $statusparams) = $DB->get_in_or_equal($submittedstatuses, SQL_PARAMS_NAMED, 'status');
+        [$statusinsql, $statusparams] = $DB->get_in_or_equal($submittedstatuses, SQL_PARAMS_NAMED, 'status');
 
         $sql = "SELECT s.id, s.userid, s.attempt, s.status, s.timesubmitted,
                        u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic,
@@ -260,7 +286,7 @@ class grading_form extends \core_form\dynamic_form {
         if ($groupid) {
             $groupmembers = groups_get_members($groupid, 'u.id');
             if (!empty($groupmembers)) {
-                list($insql, $inparams) = $DB->get_in_or_equal(array_keys($groupmembers), SQL_PARAMS_NAMED);
+                [$insql, $inparams] = $DB->get_in_or_equal(array_keys($groupmembers), SQL_PARAMS_NAMED);
                 $sql .= " AND s.userid $insql";
                 $params = array_merge($params, $inparams);
             } else {
@@ -311,7 +337,7 @@ class grading_form extends \core_form\dynamic_form {
             'maxbytes' => $CFG->maxbytes,
             'trusttext' => false,
             'subdirs' => true,
-            'context' => $this->get_context_for_dynamic_submission()
+            'context' => $this->get_context_for_dynamic_submission(),
         ];
     }
 
@@ -387,7 +413,7 @@ class grading_form extends \core_form\dynamic_form {
         $cm = get_coursemodule_from_instance('casestudy', $casestudyid);
         return new \moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $cm->id,
-            'submissionid' => $submissionid
+            'submissionid' => $submissionid,
         ]);
     }
 
@@ -433,7 +459,7 @@ class grading_form extends \core_form\dynamic_form {
             $data['feedback_editor'] = [
                 'text' => $feedback->feedback,
                 'format' => $feedback->feedbackformat ?? FORMAT_HTML,
-                'itemid' => 0
+                'itemid' => 0,
             ];
             $data['grade'] = $feedback->grade;
             $data['requestresubmission'] = $feedback->requestresubmission;
@@ -442,7 +468,7 @@ class grading_form extends \core_form\dynamic_form {
             $data['feedback_editor'] = [
                 'text' => '',
                 'format' => FORMAT_HTML,
-                'itemid' => 0
+                'itemid' => 0,
             ];
         }
 

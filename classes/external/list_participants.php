@@ -41,7 +41,6 @@ use core_user_external;
  * External function for updating field order
  */
 class list_participants extends external_api {
-
     /**
      * Returns description of method parameters
      *
@@ -51,18 +50,26 @@ class list_participants extends external_api {
     public static function execute_parameters() {
 
         return new external_function_parameters(
-            array(
+            [
                 'casestudyid' => new external_value(PARAM_INT, 'casestudy instance id'),
                 'groupid' => new external_value(PARAM_INT, 'group id'),
                 'filter' => new external_value(PARAM_RAW, 'search string to filter the results'),
                 'skip' => new external_value(PARAM_INT, 'number of records to skip', VALUE_DEFAULT, 0),
                 'limit' => new external_value(PARAM_INT, 'maximum number of records to return', VALUE_DEFAULT, 0),
                 'onlyids' => new external_value(PARAM_BOOL, 'Do not return all user fields', VALUE_DEFAULT, false),
-                'includeenrolments' => new external_value(PARAM_BOOL, 'Do return courses where the user is enrolled',
-                                                          VALUE_DEFAULT, true),
-                'tablesort' => new external_value(PARAM_BOOL, 'Apply current user table sorting preferences.',
-                                                          VALUE_DEFAULT, false)
-            )
+                'includeenrolments' => new external_value(
+                    PARAM_BOOL,
+                    'Do return courses where the user is enrolled',
+                    VALUE_DEFAULT,
+                    true
+                ),
+                'tablesort' => new external_value(
+                    PARAM_BOOL,
+                    'Apply current user table sorting preferences.',
+                    VALUE_DEFAULT,
+                    false
+                ),
+            ]
         );
     }
 
@@ -82,7 +89,7 @@ class list_participants extends external_api {
             throw new \moodle_exception('invalidcasestudyid', 'mod_casestudy');
         }
 
-        return array($casestudy, $casestudy->get_course(), $casestudy->get_cm(), $casestudy->get_context());
+        return [$casestudy, $casestudy->get_course(), $casestudy->get_cm(), $casestudy->get_context()];
     }
 
     /**
@@ -100,15 +107,24 @@ class list_participants extends external_api {
      * @since Moodle 3.1
      * @throws moodle_exception
      */
-    public static function execute($casestudyid, $groupid, $filter, $skip,
-            $limit, $onlyids, $includeenrolments, $tablesort) {
+    public static function execute(
+        $casestudyid,
+        $groupid,
+        $filter,
+        $skip,
+        $limit,
+        $onlyids,
+        $includeenrolments,
+        $tablesort
+    ) {
         global $DB, $CFG, $PAGE;
 
         require_once($CFG->dirroot . "/user/lib.php");
         require_once($CFG->libdir . '/grouplib.php');
 
-        $params = self::validate_parameters(self::execute_parameters(),
-                        [
+        $params = self::validate_parameters(
+            self::execute_parameters(),
+            [
                             'casestudyid' => $casestudyid,
                             'groupid' => $groupid,
                             'filter' => $filter,
@@ -116,17 +132,18 @@ class list_participants extends external_api {
                             'limit' => $limit,
                             'onlyids' => $onlyids,
                             'includeenrolments' => $includeenrolments,
-                            'tablesort' => $tablesort
-                        ]);
-        $warnings = array();
+                            'tablesort' => $tablesort,
+            ]
+        );
+        $warnings = [];
 
-        list($casestudy, $course, $cm, $context) = self::validate_casestudy($params['casestudyid']);
+        [$casestudy, $course, $cm, $context] = self::validate_casestudy($params['casestudyid']);
 
         require_capability('mod/casestudy:view', $context);
 
         $PAGE->set_context($context);
 
-        $participants = array();
+        $participants = [];
         $coursegroups = [];
         if (groups_group_visible($params['groupid'], $course, $cm)) {
             $participants = $casestudy->list_participants_with_filter_status_and_group($params['groupid'], $params['tablesort']);
@@ -144,7 +161,7 @@ class list_participants extends external_api {
             }
         }
 
-        $result = array();
+        $result = [];
         $index = 0;
         foreach ($participants as $record) {
             // Preserve the fullname set by the casestudyment.
@@ -206,7 +223,7 @@ class list_participants extends external_api {
         // Get user description.
         $userdesc = core_user_external::user_description();
         $unneededproperties = [
-            'auth', 'confirmed', 'lang', 'calendartype', 'theme', 'timezone', 'mailformat'
+            'auth', 'confirmed', 'lang', 'calendartype', 'theme', 'timezone', 'mailformat',
         ];
         // Remove unneeded properties for consistency with the previous version.
         foreach ($unneededproperties as $prop) {
@@ -230,7 +247,9 @@ class list_participants extends external_api {
                         'name' => new external_value(PARAM_RAW, 'group name'),
                         'description' => new external_value(PARAM_RAW, 'group description'),
                     ]
-                ), 'user groups', VALUE_OPTIONAL
+                ),
+                'user groups',
+                VALUE_OPTIONAL
             ),
             'roles' => new external_multiple_structure(
                 new external_single_structure(
@@ -238,18 +257,22 @@ class list_participants extends external_api {
                         'roleid' => new external_value(PARAM_INT, 'role id'),
                         'name' => new external_value(PARAM_RAW, 'role name'),
                         'shortname' => new external_value(PARAM_ALPHANUMEXT, 'role shortname'),
-                        'sortorder' => new external_value(PARAM_INT, 'role sortorder')
+                        'sortorder' => new external_value(PARAM_INT, 'role sortorder'),
                     ]
-                ), 'user roles', VALUE_OPTIONAL
+                ),
+                'user roles',
+                VALUE_OPTIONAL
             ),
             'enrolledcourses' => new external_multiple_structure(
                 new external_single_structure(
                     [
                         'id' => new external_value(PARAM_INT, 'Id of the course'),
                         'fullname' => new external_value(PARAM_RAW, 'Fullname of the course'),
-                        'shortname' => new external_value(PARAM_RAW, 'Shortname of the course')
+                        'shortname' => new external_value(PARAM_RAW, 'Shortname of the course'),
                     ]
-                ), 'Courses where the user is enrolled - limited by which courses the user is able to see', VALUE_OPTIONAL
+                ),
+                'Courses where the user is enrolled - limited by which courses the user is able to see',
+                VALUE_OPTIONAL
             ),
             'submitted' => new external_value(PARAM_BOOL, 'have they submitted their casestudyment'),
             'requiregrading' => new external_value(PARAM_BOOL, 'is their submission waiting for grading'),
@@ -264,5 +287,4 @@ class list_participants extends external_api {
         $userdesc->keys = array_merge($userdesc->keys, $otherkeys);
         return new external_multiple_structure($userdesc);
     }
-
 }

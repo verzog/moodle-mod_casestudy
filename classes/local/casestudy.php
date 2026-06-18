@@ -32,7 +32,6 @@ global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
 
 class casestudy {
-
     public int $casestudyid;
 
     protected $context;
@@ -47,14 +46,14 @@ class casestudy {
 
     public static $instances = [];
 
-    public function __construct($casestudyid, $cm=null, $context=null) {
+    public function __construct($casestudyid, $cm = null, $context = null) {
 
         $this->casestudyid = $casestudyid;
 
         $this->casestudy = helper::get_casestudy($casestudyid);
 
         if (empty($cm)) {
-            list($course, $cm) = get_course_and_cm_from_instance($casestudyid, 'casestudy');
+            [$course, $cm] = get_course_and_cm_from_instance($casestudyid, 'casestudy');
             $this->cm = $cm;
             $this->course = $course;
         } else {
@@ -69,8 +68,6 @@ class casestudy {
         } else {
             throw new \coding_exception('Either cm or context must be provided to casestudy class constructor');
         }
-
-
     }
 
     public function get_context() {
@@ -89,7 +86,7 @@ class casestudy {
         return $this->casestudy;
     }
 
-    public static function instance(int $casestudyid, ?cm_info $cm=null, $context=null) {
+    public static function instance(int $casestudyid, ?cm_info $cm = null, $context = null) {
 
         if (empty(self::$instances[$casestudyid])) {
             self::$instances[$casestudyid] = new self($casestudyid, $cm, $context);
@@ -112,7 +109,7 @@ class casestudy {
         $params = [
             // 'casestudyid' => $this->casestudyid,
             'userid' => $userid,
-            'submissionid' => $submissionid
+            'submissionid' => $submissionid,
         ];
 
         $grade = $DB->get_record('casestudy_grades', $params);
@@ -150,8 +147,12 @@ class casestudy {
 
         $hasgrading = false;
         if ($gradinginstance) {
-            $mform->addElement('grading', 'advancedgrading', get_string('grade', 'mod_casestudy'),
-                              ['gradinginstance' => $gradinginstance]);
+            $mform->addElement(
+                'grading',
+                'advancedgrading',
+                get_string('grade', 'mod_casestudy'),
+                ['gradinginstance' => $gradinginstance]
+            );
             $mform->setType('advancedgrading', PARAM_RAW);
             $hasgrading = true;
         } else {
@@ -170,7 +171,7 @@ class casestudy {
                 }
                 $hasgrading = true;
             } else {
-                $grademenu = array(-1 => get_string("nograde")) + make_grades_menu($this->casestudy->grade);
+                $grademenu = [-1 => get_string("nograde")] + make_grades_menu($this->casestudy->grade);
                 if (count($grademenu) > 1) {
                     $gradingelement = $mform->addElement('select', 'grade', get_string('gradenoun') . ':', $grademenu);
 
@@ -188,7 +189,6 @@ class casestudy {
         }
 
         return $hasgrading;
-
     }
 
     /**
@@ -222,9 +222,11 @@ class casestudy {
                     $gradinginstance = $controller->get_current_instance($USER->id, $itemid);
                 } else if (!$gradingdisabled) {
                     $instanceid = optional_param('advancedgradinginstanceid', 0, PARAM_INT);
-                    $gradinginstance = $controller->get_or_create_instance($instanceid,
-                                                                           $USER->id,
-                                                                           $itemid);
+                    $gradinginstance = $controller->get_or_create_instance(
+                        $instanceid,
+                        $USER->id,
+                        $itemid
+                    );
                 }
             } else {
                 $advancedgradingwarning = $controller->form_unavailable_notification();
@@ -273,7 +275,6 @@ class casestudy {
         $feedback = $this->process_feedback_data($data);
         $grade = $this->process_advanced_grading($data, $casestudyid, $submissionid);
 
-
         $result = new \stdClass();
         $result->success = true;
         $result->message = '';
@@ -282,7 +283,7 @@ class casestudy {
         // Just save feedback without changing grade/status.
         $this->save_feedback($submission, $feedback, $grade, $data->saverequestresubmission, $form);
 
-        $status = match($data->submitaction) {
+        $status = match ($data->submitaction) {
             'savefeedback' => !empty($submission->parentid) ? CASESTUDY_STATUS_RESUBMITTED_INREVIEW : CASESTUDY_STATUS_IN_REVIEW,
             'saverequestresubmission' => CASESTUDY_STATUS_AWAITING_RESUBMISSION,
             'marksatisfactory' => CASESTUDY_STATUS_SATISFACTORY,
@@ -298,7 +299,6 @@ class casestudy {
         $result->message = get_string('feedbacksaved', 'mod_casestudy');
 
         return $result;
-
     }
 
     /**
@@ -360,7 +360,7 @@ class casestudy {
         return [
             'text' => $data->feedback_editor['text'] ?? '',
             'format' => $data->feedback_editor['format'] ?? FORMAT_HTML,
-            'files' => $data->feedback_editor['itemid'] ?? 0
+            'files' => $data->feedback_editor['itemid'] ?? 0,
         ];
     }
 
@@ -377,7 +377,7 @@ class casestudy {
 
         // Check if feedback already exists
         $existingfeedback = $DB->get_record('casestudy_grades', [
-            'submissionid' => $submission->id
+            'submissionid' => $submission->id,
         ], '*', IGNORE_MULTIPLE);
 
         $graderecord = null;
@@ -522,11 +522,11 @@ class casestudy {
 
         $instance = $this->casestudy;
 
-        $params = array('itemtype' => 'mod',
+        $params = ['itemtype' => 'mod',
                         'itemmodule' => 'casestudy',
                         'iteminstance' => $instance->id,
                         'courseid' => $instance->course,
-                        'itemnumber' => 0);
+                        'itemnumber' => 0];
 
         $this->gradeitem = \grade_item::fetch($params);
 
@@ -567,7 +567,7 @@ class casestudy {
     public static function get_max_submissions(int $casestudyid): int {
         global $DB;
 
-        $casestudy = $DB->get_record('casestudy', array('id' => $casestudyid), '*', MUST_EXIST);
+        $casestudy = $DB->get_record('casestudy', ['id' => $casestudyid], '*', MUST_EXIST);
         return (int)$casestudy->maxsubmissions;
     }
 
@@ -598,7 +598,7 @@ class casestudy {
 
         $key = $this->context->id . '-' . $currentgroup;
 
-        list($esql, $params) = get_enrolled_sql($this->context, 'mod/casestudy:submit', $currentgroup, true);
+        [$esql, $params] = get_enrolled_sql($this->context, 'mod/casestudy:submit', $currentgroup, true);
 
         $fields = 'u.*';
         $orderby = 'u.lastname, u.firstname, u.id';
@@ -636,14 +636,14 @@ class casestudy {
             [
                 'name' => get_string('all'),
                 'key' => 'none',
-                'active' => $current === '' ? true : false
-            ]
+                'active' => $current === '' ? true : false,
+            ],
         ];
         foreach ($statuslist as $key => $status) {
             $statusfilters[] = [
                 'name' => $status,
                 'key' => $key,
-                'active' => $current == $key ? true : false
+                'active' => $current == $key ? true : false,
             ];
         }
 

@@ -185,11 +185,7 @@ define('mod_casestudy/template_editor', ['jquery'], function($) {
                 return;
             }
 
-            // Get cursor position from the drop event
             var textarea = this;
-            var rect = textarea.getBoundingClientRect();
-            var offsetX = e.originalEvent.clientX - rect.left;
-            var offsetY = e.originalEvent.clientY - rect.top;
 
             // Focus the textarea first
             textarea.focus();

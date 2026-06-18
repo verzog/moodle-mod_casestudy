@@ -71,12 +71,13 @@ if (!$hasfields) {
     // No fields configured.
     echo $renderer->render_no_fields_message($canmanage);
 } else {
-
     if ($cansubmit) {
-
         // Show student interface.
-        $submissions = $DB->get_records('casestudy_submissions',
-            ['casestudyid' => $casestudy->id, 'userid' => $USER->id], 'timecreated DESC');
+        $submissions = $DB->get_records(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudy->id, 'userid' => $USER->id],
+            'timecreated DESC'
+        );
 
         // Count only original/parent submissions (entries) - not resubmissions
         // maxsubmissions controls how many unique case studies can be created
@@ -87,7 +88,7 @@ if (!$hasfields) {
                    AND (parentid IS NULL OR parentid = 0)";
         $entrycount = $DB->count_records_sql($sql, [
             'casestudyid' => $casestudy->id,
-            'userid' => $USER->id
+            'userid' => $USER->id,
         ]);
 
         // Get effective settings including any user overrides.
@@ -121,13 +122,20 @@ if (!$hasfields) {
 
         // Completion criteria are now stored directly in the casestudy object.
         // Pass the casestudy object instead of separate completion records.
-        echo $renderer->student_interface($casestudy, $cm, $fields, $submissions, $cansubmitmore, $casestudy,
-            $availabilitymessage, $availabilitystatus, $preventaccess);
-
+        echo $renderer->student_interface(
+            $casestudy,
+            $cm,
+            $fields,
+            $submissions,
+            $cansubmitmore,
+            $casestudy,
+            $availabilitymessage,
+            $availabilitystatus,
+            $preventaccess
+        );
     } else if ($cangrade) {
         // Show grader interface.
         echo $renderer->grader_interface($cm);
-
     } else if ($canview) {
         // View only interface.
         echo $renderer->view_only_interface();

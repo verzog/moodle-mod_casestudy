@@ -36,7 +36,6 @@ use context_module;
  * External function for getting submissions for grading navigation
  */
 class get_submissions_for_grading extends external_api {
-
     /**
      * Returns description of method parameters
      *
@@ -45,7 +44,7 @@ class get_submissions_for_grading extends external_api {
     public static function execute_parameters() {
         return new external_function_parameters([
             'casestudyid' => new external_value(PARAM_INT, 'Case study instance id'),
-            'cmid' => new external_value(PARAM_INT, 'Course module id')
+            'cmid' => new external_value(PARAM_INT, 'Course module id'),
         ]);
     }
 
@@ -62,7 +61,7 @@ class get_submissions_for_grading extends external_api {
         // Validate parameters
         $params = self::validate_parameters(self::execute_parameters(), [
             'casestudyid' => $casestudyid,
-            'cmid' => $cmid
+            'cmid' => $cmid,
         ]);
 
         // Get context and validate permissions
@@ -85,7 +84,7 @@ class get_submissions_for_grading extends external_api {
             CASESTUDY_STATUS_SATISFACTORY,
             CASESTUDY_STATUS_UNSATISFACTORY,
         ];
-        list($statusinsql, $statusparams) = $DB->get_in_or_equal($submittedstatuses, SQL_PARAMS_NAMED, 'status');
+        [$statusinsql, $statusparams] = $DB->get_in_or_equal($submittedstatuses, SQL_PARAMS_NAMED, 'status');
 
         $sql = "SELECT s.id, s.userid, s.attempt, s.status, s.timesubmitted,
                        u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic,
@@ -101,7 +100,7 @@ class get_submissions_for_grading extends external_api {
         if ($groupid) {
             $groupmembers = groups_get_members($groupid, 'u.id');
             if (!empty($groupmembers)) {
-                list($insql, $inparams) = $DB->get_in_or_equal(array_keys($groupmembers), SQL_PARAMS_NAMED);
+                [$insql, $inparams] = $DB->get_in_or_equal(array_keys($groupmembers), SQL_PARAMS_NAMED);
                 $sql .= " AND s.userid $insql";
                 $sqlparams = array_merge($sqlparams, $inparams);
             } else {
@@ -121,7 +120,7 @@ class get_submissions_for_grading extends external_api {
                 'fullname' => fullname($submission),
                 'attempt' => (int)$submission->attempt,
                 'status' => (int)$submission->status,
-                'timesubmitted' => $submission->timesubmitted ? (int)$submission->timesubmitted : 0
+                'timesubmitted' => $submission->timesubmitted ? (int)$submission->timesubmitted : 0,
             ];
         }
 
@@ -141,7 +140,7 @@ class get_submissions_for_grading extends external_api {
                 'fullname' => new external_value(PARAM_TEXT, 'User full name'),
                 'attempt' => new external_value(PARAM_INT, 'Attempt number'),
                 'status' => new external_value(PARAM_INT, 'Submission status'),
-                'timesubmitted' => new external_value(PARAM_INT, 'Time submitted')
+                'timesubmitted' => new external_value(PARAM_INT, 'Time submitted'),
             ])
         );
     }

@@ -34,7 +34,6 @@ use core_table\dynamic as dynamic_table;
  * Dynamic table for displaying case study fields
  */
 class fields_table extends table_sql implements dynamic_table {
-
     /** @var object $cm Course module object */
     protected $cm;
 
@@ -69,7 +68,7 @@ class fields_table extends table_sql implements dynamic_table {
             'required',
             'category',
             'showlistview',
-            'actions'
+            'actions',
         ];
 
         // Define column headers
@@ -80,7 +79,7 @@ class fields_table extends table_sql implements dynamic_table {
             get_string('required'),
             get_string('category', 'core'),
             get_string('showlistview', 'mod_casestudy'),
-            get_string('actions', 'core')
+            get_string('actions', 'core'),
         ];
 
         $this->define_columns($columns);
@@ -125,7 +124,6 @@ class fields_table extends table_sql implements dynamic_table {
             'data-sort-order' => $row->sortorder,
             'class' => 'move',
         ]);
-
     }
 
     /**
@@ -138,8 +136,14 @@ class fields_table extends table_sql implements dynamic_table {
         global $OUTPUT;
 
         $title = new \core\output\inplace_editable(
-            'mod_casestudy', 'casestudyname', $row->id, true, \html_writer::tag('strong', format_string($row->name)),
-            $row->name, get_string('casestudyname', 'casestudy'),  get_string('newvaluefor', 'casestudy', $row->name)
+            'mod_casestudy',
+            'casestudyname',
+            $row->id,
+            true,
+            \html_writer::tag('strong', format_string($row->name)),
+            $row->name,
+            get_string('casestudyname', 'casestudy'),
+            get_string('newvaluefor', 'casestudy', $row->name)
         );
 
         return $OUTPUT->render($title);
@@ -211,12 +215,14 @@ class fields_table extends table_sql implements dynamic_table {
         if ($row->showlistview) {
             return \html_writer::span(
                 \html_writer::tag('i', '', ['class' => 'fa fa-eye']) . ' ' . get_string('yes'),
-                'badge badge-primary', ['title' => get_string('showlistview', 'mod_casestudy')],
+                'badge badge-primary',
+                ['title' => get_string('showlistview', 'mod_casestudy')],
             );
         } else {
             return \html_writer::span(
                 \html_writer::tag('i', '', ['class' => 'fa fa-eye-slash']) . ' ' . get_string('no'),
-                'badge badge-light text-muted', ['title' => get_string('hidelistview', 'mod_casestudy')],
+                'badge badge-light text-muted',
+                ['title' => get_string('hidelistview', 'mod_casestudy')],
             );
         }
     }
@@ -353,7 +359,7 @@ class fields_table extends table_sql implements dynamic_table {
     public function get_row_attributes($row) {
         return [
             'data-field-id' => $row->id,
-            'data-sort-order' => $row->sortorder
+            'data-sort-order' => $row->sortorder,
         ];
     }
 }

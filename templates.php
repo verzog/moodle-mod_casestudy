@@ -29,7 +29,7 @@ $action = optional_param('action', '', PARAM_ALPHA);
 $url = new moodle_url('/mod/casestudy/templates.php');
 
 if ($cmid) {
-    list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'casestudy');
+    [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'casestudy');
     $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
     $url->param('id', $cmid);
 } else {
@@ -73,15 +73,21 @@ if (!$manager->has_fields()) {
 $templateurl = new moodle_url('/mod/casestudy/templates.php', ['id' => $cm->id]);
 
 $tabs = [];
-$tabs[] = new tabobject('singletemplate',
+$tabs[] = new tabobject(
+    'singletemplate',
     new moodle_url('/mod/casestudy/templates.php', ['id' => $cm->id, 'mode' => 'singletemplate']),
-    get_string('singletemplate', 'mod_casestudy'));
-$tabs[] = new tabobject('formtemplate',
+    get_string('singletemplate', 'mod_casestudy')
+);
+$tabs[] = new tabobject(
+    'formtemplate',
     new moodle_url('/mod/casestudy/templates.php', ['id' => $cm->id, 'mode' => 'formtemplate']),
-    get_string('formtemplate', 'mod_casestudy'));
-$tabs[] = new tabobject('csstemplate',
+    get_string('formtemplate', 'mod_casestudy')
+);
+$tabs[] = new tabobject(
+    'csstemplate',
     new moodle_url('/mod/casestudy/templates.php', ['id' => $cm->id, 'mode' => 'csstemplate']),
-    get_string('csstemplate', 'mod_casestudy'));
+    get_string('csstemplate', 'mod_casestudy')
+);
 
 echo $OUTPUT->tabtree($tabs, $mode);
 $notificationstr = '';

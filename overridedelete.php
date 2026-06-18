@@ -20,13 +20,13 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->dirroot.'/mod/casestudy/lib.php');
+require_once($CFG->dirroot . '/mod/casestudy/lib.php');
 
 $overrideid = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', false, PARAM_BOOL);
 
 $override = $DB->get_record('casestudy_overrides', ['id' => $overrideid], '*', MUST_EXIST);
-list($course, $cm) = get_course_and_cm_from_instance($override->casestudyid, 'casestudy');
+[$course, $cm] = get_course_and_cm_from_instance($override->casestudyid, 'casestudy');
 $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 $context = context_module::instance($cm->id);
 
@@ -50,9 +50,9 @@ if ($confirm) {
         'context' => $context,
         'other' => [
             'casestudyid' => $casestudy->id,
-            'userid' => $override->userid
+            'userid' => $override->userid,
         ],
-        'relateduserid' => $override->userid
+        'relateduserid' => $override->userid,
     ]);
     $event->trigger();
 
@@ -70,7 +70,7 @@ $PAGE->set_secondary_active_tab("mod_casestudy_useroverrides");
 $PAGE->activityheader->set_attrs([
     "title" => format_string($casestudy->name, true, ['context' => $context]),
     "description" => "",
-    "hidecompletion" => true
+    "hidecompletion" => true,
 ]);
 
 echo $OUTPUT->header();

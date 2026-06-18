@@ -19,12 +19,12 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace mod_casestudy\grades;
 
-use \core_grades\local\gradeitem\itemnumber_mapping;
-use \core_grades\local\gradeitem\advancedgrading_mapping;
+use core_grades\local\gradeitem\itemnumber_mapping;
+use core_grades\local\gradeitem\advancedgrading_mapping;
 
 /**
  * Grade item mappings for the activity.
@@ -33,8 +33,7 @@ use \core_grades\local\gradeitem\advancedgrading_mapping;
  * @copyright 2025 Skin Cancer College Australasia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class gradeitems implements itemnumber_mapping, advancedgrading_mapping {
-
+class gradeitems implements advancedgrading_mapping, itemnumber_mapping {
     /**
      * Return the list of grade item mappings for the assign.
      *

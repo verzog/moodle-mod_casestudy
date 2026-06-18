@@ -31,7 +31,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class submission_updated extends \core\event\base {
-
     /**
      * Init method.
      *
@@ -70,7 +69,7 @@ class submission_updated extends \core\event\base {
     public function get_url() {
         return new \moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $this->contextinstanceid,
-            'submissionid' => $this->objectid
+            'submissionid' => $this->objectid,
         ]);
     }
 
@@ -104,7 +103,7 @@ class submission_updated extends \core\event\base {
     public static function create_from_submission($casestudy, $cm, $submission, $updatetype = null) {
         $other = [
             'casestudyid' => $casestudy->id,
-            'status' => $submission->status
+            'status' => $submission->status,
         ];
 
         if ($updatetype !== null) {
@@ -115,7 +114,7 @@ class submission_updated extends \core\event\base {
             'context' => \context_module::instance($cm->id),
             'objectid' => $submission->id,
             'relateduserid' => $submission->userid,
-            'other' => $other
+            'other' => $other,
         ];
         $event = self::create($data);
         $event->add_record_snapshot('casestudy_submissions', $submission);

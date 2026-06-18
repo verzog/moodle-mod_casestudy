@@ -30,7 +30,6 @@ use mod_casestudy\local\submission;
 defined('MOODLE_INTERNAL') || die();
 
 class template {
-
     private $casestudyinstance;
 
     protected $casestudy;
@@ -82,7 +81,7 @@ class template {
      */
     protected function update_field_html($fielddata) {
         $attributes = [
-            'class' => 'field-display mt-2 field-' . $fielddata['type']
+            'class' => 'field-display mt-2 field-' . $fielddata['type'],
         ];
 
         $valuehtml = '';
@@ -90,14 +89,17 @@ class template {
             $valuehtml = $fielddata['value'];
         } else {
             $valuehtml = html_writer::tag(
-            'em',
-            get_string('novalue', 'mod_casestudy'),
-            ['class' => 'text-muted']
+                'em',
+                get_string('novalue', 'mod_casestudy'),
+                ['class' => 'text-muted']
             );
         }
 
         return \html_writer::div(
-            \html_writer::div($valuehtml, 'field-value'), null, $attributes);
+            \html_writer::div($valuehtml, 'field-value'),
+            null,
+            $attributes
+        );
     }
 
     /**
@@ -131,7 +133,6 @@ class template {
 
         // Field data from export_for_template - already formatted!
         if (isset($submissiondata['fieldsbyshortname'])) {
-
             foreach ($submissiondata['fieldsbyshortname'] as $shortname => $fielddata) {
                 // Use the already rendered value from export_for_template.
                 $fieldcontent = $this->update_field_html($fielddata);// ['value'];
@@ -264,7 +265,7 @@ class template {
         $url = new moodle_url('/mod/casestudy/submission.php', [
             'id' => $this->cm->id,
             'submissionid' => $submission->id,
-            'action' => 'edit'
+            'action' => 'edit',
         ]);
 
         return html_writer::link($url, get_string('edit'), ['class' => 'btn btn-secondary']);
@@ -288,7 +289,7 @@ class template {
             'id' => $this->cm->id,
             'submissionid' => $submission->id,
             'action' => 'delete',
-            'sesskey' => sesskey()
+            'sesskey' => sesskey(),
         ]);
 
         return html_writer::link($url, get_string('delete'), ['class' => 'btn btn-danger']);
@@ -297,7 +298,7 @@ class template {
     private function get_view_button($submission) {
         $url = new moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $this->cm->id,
-            'submissionid' => $submission->id
+            'submissionid' => $submission->id,
         ]);
 
         return html_writer::link($url, get_string('view'), ['class' => 'btn btn-primary']);
@@ -326,7 +327,6 @@ class template {
                 '[[gradetime]]' => get_string('tag_gradetime', 'mod_casestudy'),
             ],
         ];
-
 
         foreach ($fields as $field) {
             $tags['fields']['[[' . $field->name . ']]'] = $field->name;
@@ -474,9 +474,7 @@ class template {
                 $fielderrors = (array)$errors[$fieldid];
             }
 
-
             if (!$this->mform->get_form()->elementExists($fieldname)) {
-
                 $existingroup = $this->mform->get_form()->elementExists($fieldname . '_group');
                 $existinheading = $this->mform->get_form()->elementExists($fieldname . '_heading');
                 if (!$existingroup && !$existinheading) {
@@ -501,7 +499,6 @@ class template {
             $error = $this->mform->get_form()->_errors[$fieldname] ?? null;  // Confirm the element has any errors.
 
             try {
-
                 // For the filemanager element, render will include the js for filemanager.
                 // When renderering for inputhtml and field html separetly, loads the js twice but only one element is included using template.
                 if ($mformelement instanceof \MoodleQuickForm_filemanager) {
@@ -518,7 +515,6 @@ class template {
                     $mformelement->_attributes['class'] = isset($mformelement->_attributes['class'])
                         ? $mformelement->_attributes['class'] . ' form-control' : 'form-control';
                 }
-
             } catch (\Exception $e) {
                 // Fallback to default rendering if element not found or any error occurs.
                 $fieldhtml = "";
@@ -546,7 +542,6 @@ class template {
             }
 
             try {
-
                 $mformelement->updateAttributes(['class' => str_replace('form-control', '', $mformelement->_attributes['class'] ?? '')]);
 
                 if ($mformelement instanceof \templatable && !($mformelement instanceof \MoodleQuickForm_filemanager)) {
@@ -559,11 +554,9 @@ class template {
                     $params['error'] = $error; // Include the error message in the template context.
 
                     $inputhtml = $OUTPUT->render_from_template($templatename, $params);
-
                 } else {
                     $inputhtml = $inputhtml ?: $mformelement->toHtml();
                 }
-
             } catch (\Exception $e) {
                 // Fallback to default rendering if specific template not found.
                 $inputhtml = $mformelement->toHtml();

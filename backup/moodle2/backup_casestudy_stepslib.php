@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_casestudy_activity_structure_step extends backup_activity_structure_step {
-
     /**
      * Define the structure for the casestudy activity
      *
@@ -48,7 +47,7 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
             'notifygraders', 'notifyemail', 'notifystudentdefault',
             'completionaggr', 'completionsatisfactory', 'cmpsatisfactorysubmissions',
             'completioncategory', 'singletemplate', 'csstemplate',
-            'timecreated', 'timemodified'
+            'timecreated', 'timemodified',
         ]);
 
         $fields = new backup_nested_element('fields');
@@ -57,41 +56,41 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
             'type', 'name', 'shortname', 'description', 'descriptionformat',
             'required', 'sortorder', 'showlistview', 'category',
             'param1', 'param2', 'param3', 'param4', 'param5',
-            'timecreated', 'timemodified'
+            'timecreated', 'timemodified',
         ]);
 
         $completionrules = new backup_nested_element('completion_rules');
 
         $completionrule = new backup_nested_element('completion_rule', ['id'], [
             'enabled', 'ruletype', 'count', 'fieldid', 'categoryvalue',
-            'sortorder', 'timecreated', 'timemodified'
+            'sortorder', 'timecreated', 'timemodified',
         ]);
 
         $overrides = new backup_nested_element('overrides');
 
         $override = new backup_nested_element('override', ['id'], [
-            'userid', 'timeclose', 'maxattempts', 'timecreated', 'timemodified'
+            'userid', 'timeclose', 'maxattempts', 'timecreated', 'timemodified',
         ]);
 
         $submissions = new backup_nested_element('submissions');
 
         $submission = new backup_nested_element('submission', ['id'], [
             'userid', 'groupid', 'status', 'attempt', 'parentid',
-            'timecreated', 'timemodified', 'timesubmitted'
+            'timecreated', 'timemodified', 'timesubmitted',
         ]);
 
         $contents = new backup_nested_element('contents');
 
         $content = new backup_nested_element('content', ['id'], [
             'fieldid', 'content', 'contentformat',
-            'content1', 'content2', 'content3', 'content4'
+            'content1', 'content2', 'content3', 'content4',
         ]);
 
         $grades = new backup_nested_element('grades');
 
         $grade = new backup_nested_element('grade', ['id'], [
             'userid', 'graderid', 'feedback', 'feedbackformat', 'grade',
-            'requestresubmission', 'timecreated', 'timemodified'
+            'requestresubmission', 'timecreated', 'timemodified',
         ]);
 
         // Build the tree.
@@ -152,6 +151,7 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
         $field->annotate_files('mod_casestudy', 'description', 'id');
         $content->annotate_files('mod_casestudy', 'content', 'id');
         $grade->annotate_files('mod_casestudy', 'feedback', 'id');
+        $submission->annotate_files('mod_casestudy', 'submission_richtext', 'id');
 
         // Return the root element (casestudy), wrapped into standard activity structure.
         return $this->prepare_activity_structure($casestudy);

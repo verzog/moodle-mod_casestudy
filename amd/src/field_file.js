@@ -32,7 +32,7 @@ import ModalLightBox from 'mod_casestudy/local/modal/lightbox';
  * @returns {Promise<ModalAlert>}
  */
 
-const displayLightBox = async (body) => {
+const displayLightBox = async(body) => {
 
     return ModalLightBox.create({
         body,
@@ -49,13 +49,13 @@ export const init = () => {
     const selector = `[data-toggle="casestudy-file-modal"]`;
 
     document.querySelectorAll(selector)?.forEach(elem => {
-        elem.addEventListener('click', function (e) {
+        elem.addEventListener('click', function(e) {
             const lightBox = e.target.closest('[data-modal="lightbox"]');
             if (lightBox) {
                 e.preventDefault();
                 displayLightBox(lightBox.dataset?.modalContent);
             }
-        })
+        });
     });
 };
 
@@ -68,7 +68,7 @@ export const completionValueSelector = (categorySelector, valueSelector) => {
         return;
     }
 
-    categoryField.addEventListener('change', function () {
+    categoryField.addEventListener('change', function() {
         const selectedCategory = this.value;
 
         Array.from(valueField.options).forEach(option => {
@@ -79,5 +79,5 @@ export const completionValueSelector = (categorySelector, valueSelector) => {
             }
         });
     });
-}
+};
 

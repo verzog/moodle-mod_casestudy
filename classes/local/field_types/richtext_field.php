@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * Rich text field implementation using Moodle's HTML editor
  */
 class richtext_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -60,8 +59,13 @@ class richtext_field extends base_field {
         $editoroptions = $this->get_editor_options();
 
         // Add the editor element
-        $mform->addElement('editor', $elementname, $this->fielddata->name,
-                          ['rows' => $editoroptions['rows']], $editoroptions);
+        $mform->addElement(
+            'editor',
+            $elementname,
+            $this->fielddata->name,
+            ['rows' => $editoroptions['rows']],
+            $editoroptions
+        );
         $mform->setType($elementname, PARAM_RAW);
 
         // Set default value if provided
@@ -151,10 +155,16 @@ class richtext_field extends base_field {
             );
         }
 
-        $label = \html_writer::label(format_string($this->fielddata->name), 'field-' . $this->fielddata->id,
-                                   '', ['class' => 'casestudy-field-label font-weight-bold field-label']);
-        $content = \html_writer::div(format_text($text, $format, ['context' => $this->fieldmanager->get_context()]),
-                                     'casestudy-field-richtext field-' . $this->fielddata->id);
+        $label = \html_writer::label(
+            format_string($this->fielddata->name),
+            'field-' . $this->fielddata->id,
+            '',
+            ['class' => 'casestudy-field-label font-weight-bold field-label']
+        );
+        $content = \html_writer::div(
+            format_text($text, $format, ['context' => $this->fieldmanager->get_context()]),
+            'casestudy-field-richtext field-' . $this->fielddata->id
+        );
 
         return $content;
     }
@@ -165,7 +175,7 @@ class richtext_field extends base_field {
      * @param mixed $value Raw input value
      * @return mixed Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
 
         $fielddata = field_data::create((object) ['content' => $value]);
 
@@ -236,7 +246,7 @@ class richtext_field extends base_field {
             $submissiondata[$fieldname] = [
                 'text' => $text,
                 'format' => $value->contentformat ?? FORMAT_HTML,
-                'itemid' => $draftideditor
+                'itemid' => $draftideditor,
             ];
         }
     }
@@ -257,7 +267,7 @@ class richtext_field extends base_field {
             'context' => $this->fieldmanager->get_context(),
             'noclean' => false,
             'trusttext' => false,
-            'rows' => $config['rows'] ?? 10
+            'rows' => $config['rows'] ?? 10,
         ];
 
         return $options;
@@ -278,7 +288,7 @@ class richtext_field extends base_field {
             $options = [
                 'rows' => (int) ($config['param1']['rows'] ?? 10),
                 'maxbytes' => (int) ($config['param1']['maxbytes'] ?? 0),
-                'maxfiles' => (int) ($config['param1']['maxfiles'] ?? -1)
+                'maxfiles' => (int) ($config['param1']['maxfiles'] ?? -1),
             ];
 
             $field->param1 = json_encode($options);
@@ -321,7 +331,7 @@ class richtext_field extends base_field {
         return [
             'param1[rows]',
             'param1[maxbytes]',
-            'param1[maxfiles]'
+            'param1[maxfiles]',
         ];
     }
 
@@ -423,12 +433,12 @@ class richtext_field extends base_field {
 
         // Save files from draft area to permanent storage
         $text = file_save_draft_area_files(
-            $value['itemid'],                     // Draft item ID from editor
-            $context->id,                         // Context ID
-            'mod_casestudy',                      // Component
-            'submission_richtext',                // File area
-            $submissionid,                        // Final item ID (submission ID)
-            $editoroptions,                       // Editor options
+            $value['itemid'], // Draft item ID from editor
+            $context->id, // Context ID
+            'mod_casestudy', // Component
+            'submission_richtext', // File area
+            $submissionid, // Final item ID (submission ID)
+            $editoroptions, // Editor options
             $value['text']                        // Text content
         );
 

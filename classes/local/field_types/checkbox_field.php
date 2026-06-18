@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * Checkbox field implementation - Options stored in param1
  */
 class checkbox_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -61,8 +60,12 @@ class checkbox_field extends base_field {
 
         if (empty($options)) {
             // If no options, show a note
-            $mform->addElement('static', $elementname . '_note', $this->fielddata->name,
-                get_string('no_options_configured', 'mod_casestudy'));
+            $mform->addElement(
+                'static',
+                $elementname . '_note',
+                $this->fielddata->name,
+                get_string('no_options_configured', 'mod_casestudy')
+            );
             return;
         }
 
@@ -72,7 +75,6 @@ class checkbox_field extends base_field {
         }
 
         $mform->addGroup($checkboxarray, $elementname . '_group', $this->fielddata->name, ['<br/>'], false);
-
     }
 
     /**
@@ -111,12 +113,11 @@ class checkbox_field extends base_field {
         if (!empty($contentdata->content)) {
             $selectedvalues = json_decode($contentdata->content, true);
             if (is_array($selectedvalues)) {
-                array_map(function($v) use (&$submissiondata, $fieldname) {
+                array_map(function ($v) use (&$submissiondata, $fieldname) {
                     $submissiondata[$fieldname . '[' . $v . ']'] = 1;
                 }, $selectedvalues);
             }
         }
-
     }
 
     /**
@@ -207,7 +208,7 @@ class checkbox_field extends base_field {
      * @param mixed $value Raw input value
      * @return mixed Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
 
         if (is_array($value)) {
             // Filter out unchecked boxes and get keys
@@ -316,7 +317,7 @@ class checkbox_field extends base_field {
     /**
      * Get param value with defaults.
      */
-    public function get_param($paramname, $default = null, array $defaults=[]) {
+    public function get_param($paramname, $default = null, array $defaults = []) {
 
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {
             return $default;

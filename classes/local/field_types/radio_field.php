@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * Radio button field implementation - Options stored in param1
  */
 class radio_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -61,8 +60,12 @@ class radio_field extends base_field {
 
         if (empty($options)) {
             // If no options, show a note
-            $mform->addElement('static', $elementname . '_note', $this->fielddata->name,
-                get_string('no_options_configured', 'mod_casestudy'));
+            $mform->addElement(
+                'static',
+                $elementname . '_note',
+                $this->fielddata->name,
+                get_string('no_options_configured', 'mod_casestudy')
+            );
             return;
         }
 
@@ -72,7 +75,6 @@ class radio_field extends base_field {
         }
 
         $mform->addGroup($radioarray, $elementname . '_group', $this->fielddata->name, '', false);
-
 
         // Set default value
         if ($value !== null) {
@@ -144,7 +146,7 @@ class radio_field extends base_field {
      * @param mixed $value Raw input value
      * @return mixed Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
         $value = clean_param($value, PARAM_TEXT);
         return field_data::create((object) ['content' => $value]);
     }
@@ -213,7 +215,7 @@ class radio_field extends base_field {
     }
 
 
-    public function get_param($paramname, $default = null, array $defaults=[]) {
+    public function get_param($paramname, $default = null, array $defaults = []) {
 
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {
             return $default;

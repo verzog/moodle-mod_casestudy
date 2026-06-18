@@ -35,7 +35,6 @@ use mod_casestudy\local\helper;
  * Dynamic table for displaying case study submissions
  */
 class submission_table extends table_sql {
-
     /** @var object $cm Course module object */
     protected $cm;
 
@@ -95,7 +94,6 @@ class submission_table extends table_sql {
         $listfields = $DB->get_records('casestudy_fields', [
             'casestudyid' => $this->cm->instance, 'showlistview' => 1], 'sortorder ASC');
 
-
         $columns = ['fullname', 'groupname'];
         $headers = [get_string('fullname', 'core'), get_string('group')];
 
@@ -113,7 +111,7 @@ class submission_table extends table_sql {
             get_string('status', 'core'),
             get_string('timecreated', 'mod_casestudy'),
             get_string('timemodified', 'mod_casestudy'),
-            get_string('actions', 'core')
+            get_string('actions', 'core'),
         ]);
 
         $this->define_columns($columns);
@@ -161,14 +159,12 @@ class submission_table extends table_sql {
 
         $params = ['casestudyid' => $this->cm->instance];
 
-
         if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
-           if ($this->groupid > 0) {
+            if ($this->groupid > 0) {
                 $from .= ' JOIN {groups_members} gm ON gm.userid = u.id';
                 $where .= ' AND gm.groupid = :selectedgroup';
                 $params['selectedgroup'] = $this->groupid;
             } else {
-
                 if (!$canaccessall) {
                     if (empty($allowedgroups)) {
                         // No allowed groups → return no users
@@ -177,7 +173,7 @@ class submission_table extends table_sql {
                         // Filter users by allowed groups
                         $usergroupids = array_keys($allowedgroups);
                         $from .= ' JOIN {groups_members} gm2 ON gm2.userid = u.id';
-                        list($ingroupSQL, $groupParams) = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
+                        [$ingroupSQL, $groupParams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
                         $where .= " AND gm2.groupid $ingroupSQL";
                         $params = array_merge($params, $groupParams);
                     }
@@ -281,7 +277,6 @@ class submission_table extends table_sql {
     public function col_fullname($row) {
         global $OUTPUT, $COURSE;
 
-
         $name = fullname($row, has_capability('moodle/site:viewfullnames', $this->get_context()));
         if ($this->download) {
             return $name;
@@ -344,7 +339,7 @@ class submission_table extends table_sql {
         }
 
         // Collect group names.
-        $groupnames = array_map(function($g) {
+        $groupnames = array_map(function ($g) {
             return format_string($g->name);
         }, $groups);
 
@@ -611,8 +606,7 @@ class submission_table extends table_sql {
             $isownsubmission
             && in_array($row->status, [CASESTUDY_STATUS_NEW, CASESTUDY_STATUS_DRAFT, CASESTUDY_STATUS_AWAITING_RESUBMISSION])
         ) {
-
-            $submissionurl =  new moodle_url('/mod/casestudy/submission.php', ['id' => $this->cm->id, 'submissionid' => $row->id]);
+            $submissionurl = new moodle_url('/mod/casestudy/submission.php', ['id' => $this->cm->id, 'submissionid' => $row->id]);
             $editicon = new pix_icon('i/customfield', get_string('edit'));
             $title = get_string('edit');
 
@@ -620,7 +614,6 @@ class submission_table extends table_sql {
 
             // If awaiting resubmission, set action to reattempt.
             if ($row->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION) {
-
                 $submissionurl->param('action', 'reattempt');
                 $submissionurl->param('sesskey', $this->sesskey);
                 $editicon = new pix_icon('i/reload', get_string('recreate', 'mod_casestudy'));
@@ -631,7 +624,11 @@ class submission_table extends table_sql {
 
             if (!$recreated) {
                 $actions[] = $OUTPUT->action_icon(
-                    $submissionurl, $editicon, null, ['title' => $title, 'class' => 'btn btn-sm btn-outline-secondary']);
+                    $submissionurl,
+                    $editicon,
+                    null,
+                    ['title' => $title, 'class' => 'btn btn-sm btn-outline-secondary']
+                );
             }
         }
 
@@ -653,17 +650,20 @@ class submission_table extends table_sql {
         if (has_capability('mod/casestudy:grade', $this->context) && in_array($row->status, $gradeablestatuses)) {
             $viewurl->param('mode', 'grade');
             $actions[] = $OUTPUT->action_icon(
-                $viewurl, new pix_icon('t/grades', get_string('grade', 'mod_casestudy')), null,
+                $viewurl,
+                new pix_icon('t/grades', get_string('grade', 'mod_casestudy')),
+                null,
                 ['title' => get_string('grade', 'mod_casestudy'), 'class' => 'btn btn-sm btn-outline-success']
             );
-
         }
 
         if ($isownsubmission || has_capability('mod/casestudy:viewallsubmissions', $this->context)) {
             // View action (if user owns submission or has view all capability).
             $viewurl->param('mode', 'preview');
             $actions[] = $OUTPUT->action_icon(
-                $viewurl, new pix_icon('t/preview', get_string('view')), null,
+                $viewurl,
+                new pix_icon('t/preview', get_string('view')),
+                null,
                 ['title' => get_string('viewcasestudy', 'mod_casestudy'), 'class' => 'btn btn-sm btn-outline-primary']
             );
         }
@@ -677,7 +677,7 @@ class submission_table extends table_sql {
 
         if ($submissionmanager->can_delete_submission($row, $USER->id)) {
             $deleteurl = new moodle_url('/mod/casestudy/submission.php', [
-                'id' => $this->cm->id, 'action' => 'delete', 'submissionid' => $row->id, 'sesskey' => $this->sesskey
+                'id' => $this->cm->id, 'action' => 'delete', 'submissionid' => $row->id, 'sesskey' => $this->sesskey,
             ]);
 
             if (class_exists('core\output\actions\confirm_action')) {
@@ -686,8 +686,12 @@ class submission_table extends table_sql {
                 $confirmaction = new \confirm_action(get_string('confirmdeletecasestudy', 'mod_casestudy'));
             }
 
-            $actions[] = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete')),
-                $confirmaction, ['title' => get_string('delete', 'core'), 'class' => 'btn btn-sm btn-outline-danger']);
+            $actions[] = $OUTPUT->action_icon(
+                $deleteurl,
+                new pix_icon('t/delete', get_string('delete')),
+                $confirmaction,
+                ['title' => get_string('delete', 'core'), 'class' => 'btn btn-sm btn-outline-danger']
+            );
         }
 
         return \html_writer::div(implode(' ', $actions), 'btn-group', ['role' => 'group']);
@@ -724,7 +728,7 @@ class submission_table extends table_sql {
             'data-submission-id' => $row->id,
             'data-user-id' => $row->userid,
             'data-status' => $row->status,
-            'data-attempt' => $row->attempt
+            'data-attempt' => $row->attempt,
         ];
     }
 
@@ -771,7 +775,7 @@ class submission_table extends table_sql {
             // Get field content for this submission
             $content = $DB->get_record('casestudy_content', [
                 'submissionid' => $row->id,
-                'fieldid' => $fieldid
+                'fieldid' => $fieldid,
             ]);
 
             if (!$content) {

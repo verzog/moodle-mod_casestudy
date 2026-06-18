@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * Dropdown field implementation - Options stored in param1
  */
 class dropdown_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -66,7 +65,6 @@ class dropdown_field extends base_field {
 
         $mform->addElement('select', $elementname, $this->fielddata->name, $options);
         $mform->setType($elementname, PARAM_TEXT);
-
 
         // Set default value
         if ($value !== null) {
@@ -125,7 +123,9 @@ class dropdown_field extends base_field {
         $label = \html_writer::label(
             format_string($this->fielddata->name),
             'field-' . $this->fielddata->id,
-            '', ['class' => 'casestudy-field-label font-weight-bold field-label']);
+            '',
+            ['class' => 'casestudy-field-label font-weight-bold field-label']
+        );
 
         $valuespan = \html_writer::span(format_string($displayvalue), 'casestudy-field-dropdown field-' . $this->fielddata->id);
 
@@ -138,7 +138,7 @@ class dropdown_field extends base_field {
      * @param mixed $value Raw input value
      * @return field_data Cleaned value
      */
-    public function process_input($value, $data) : field_data {
+    public function process_input($value, $data): field_data {
         $value = clean_param($value, PARAM_TEXT);
         return field_data::create((object) ['content' => $value]);
     }
@@ -214,7 +214,7 @@ class dropdown_field extends base_field {
      * @param array $defaults Array of default values
      * @return mixed Parameter value
      */
-    public function get_param($paramname, $default = null, array $defaults=[]) {
+    public function get_param($paramname, $default = null, array $defaults = []) {
 
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {
             return $default;

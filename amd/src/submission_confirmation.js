@@ -39,7 +39,7 @@ function(notification, Prefetch, Templates, Str, ChangeChecker) {
             return;
         }
 
-        submitAction.addEventListener('click', async (e) => {
+        submitAction.addEventListener('click', async(e) => {
             e.preventDefault();
 
             try {

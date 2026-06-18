@@ -30,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  * This field type displays as a heading/section divider and doesn't collect input
  */
 class sectionheading_field extends base_field {
-
     /**
      * Get field type name
      *
@@ -66,10 +65,13 @@ class sectionheading_field extends base_field {
 
         // Add description if provided
         if (!empty($this->fielddata->description)) {
-
-            $mform->addElement('html',
-                \html_writer::tag('p',  format_text($this->fielddata->description, FORMAT_HTML),
-                ['class' => 'casestudy-section-heading-description text-muted small mt-1'])
+            $mform->addElement(
+                'html',
+                \html_writer::tag(
+                    'p',
+                    format_text($this->fielddata->description, FORMAT_HTML),
+                    ['class' => 'casestudy-section-heading-description text-muted small mt-1']
+                )
             );
         }
     }
@@ -125,7 +127,7 @@ class sectionheading_field extends base_field {
         $headingtext = format_string($this->fielddata->name);
 
         $html = \html_writer::tag('h4', $headingtext, [
-            'class' => 'casestudy-section-heading field-section-heading mt-4 mb-3'
+            'class' => 'casestudy-section-heading field-section-heading mt-4 mb-3',
         ]);
 
         // Add description if provided
@@ -254,7 +256,10 @@ class sectionheading_field extends base_field {
      */
     public function additional_form_elements(&$mform) {
         // Add note about section headings
-        $mform->addElement('static', 'sectionheading_note', '',
+        $mform->addElement(
+            'static',
+            'sectionheading_note',
+            '',
             \html_writer::div(
                 get_string('sectionheading_note', 'mod_casestudy'),
                 'alert alert-info'
@@ -285,7 +290,7 @@ class sectionheading_field extends base_field {
      *
      * @return bool False as section headings don't store content
      */
-    public function supports_content() :bool {
+    public function supports_content(): bool {
         return false;
     }
 }

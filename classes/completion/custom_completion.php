@@ -28,7 +28,6 @@ use core_completion\activity_custom_completion;
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 class custom_completion extends activity_custom_completion {
-
     /**
      * Fetches the completion state for a given completion rule.
      *
@@ -49,15 +48,18 @@ class custom_completion extends activity_custom_completion {
 
         // Handle total satisfactory rule.
         if ($rule == 'completionsatisfactory') {
-            $totalrule = $DB->get_record('casestudy_completion_rules',
-                ['casestudyid' => $casestudy->id, 'enabled' => 1, 'ruletype' => CASESTUDY_COMPLETION_TOTAL]);
+            $totalrule = $DB->get_record(
+                'casestudy_completion_rules',
+                ['casestudyid' => $casestudy->id, 'enabled' => 1, 'ruletype' => CASESTUDY_COMPLETION_TOTAL]
+            );
 
             if (!$totalrule) {
                 return COMPLETION_INCOMPLETE;
             }
 
             // Count total satisfactory submissions for this user.
-            $count = $DB->count_records_sql("
+            $count = $DB->count_records_sql(
+                "
                 SELECT COUNT(DISTINCT s.id)
                 FROM {casestudy_submissions} s
                 WHERE s.casestudyid = :casestudyid
@@ -66,7 +68,7 @@ class custom_completion extends activity_custom_completion {
                 [
                     'casestudyid' => $casestudy->id,
                     'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY
+                    'status' => CASESTUDY_STATUS_SATISFACTORY,
                 ]
             );
 
@@ -76,9 +78,11 @@ class custom_completion extends activity_custom_completion {
         // Handle category completion - check all enabled category rules with aggregation.
         if ($rule == 'completioncategory') {
             // Get all category completion rules.
-            $categoryrules = $DB->get_records('casestudy_completion_rules',
+            $categoryrules = $DB->get_records(
+                'casestudy_completion_rules',
                 ['casestudyid' => $casestudy->id, 'enabled' => 1, 'ruletype' => CASESTUDY_COMPLETION_CATEGORY],
-                'sortorder ASC');
+                'sortorder ASC'
+            );
 
             if (empty($categoryrules)) {
                 return COMPLETION_INCOMPLETE;
@@ -96,8 +100,12 @@ class custom_completion extends activity_custom_completion {
 
                 $actualvalue = null;
                 if (!empty($categoryvalueindex)) {
-                    $fields = $DB->get_records('casestudy_fields',
-                        ['casestudyid' => $casestudy->id, 'category' => 1], 'sortorder ASC', 'id, param1');
+                    $fields = $DB->get_records(
+                        'casestudy_fields',
+                        ['casestudyid' => $casestudy->id, 'category' => 1],
+                        'sortorder ASC',
+                        'id, param1'
+                    );
 
                     $optionindex = 1;
                     foreach ($fields as $field) {
@@ -134,7 +142,8 @@ class custom_completion extends activity_custom_completion {
                 }
 
                 // Count satisfactory submissions matching this category rule.
-                $count = $DB->count_records_sql("
+                $count = $DB->count_records_sql(
+                    "
                     SELECT COUNT(DISTINCT s.id)
                     FROM {casestudy_submissions} s
                     JOIN {casestudy_content} c ON s.id = c.submissionid
@@ -181,8 +190,11 @@ class custom_completion extends activity_custom_completion {
         $descriptions = [];
 
         // Get completion rules from the new table.
-        $rules = $DB->get_records('casestudy_completion_rules',
-            ['casestudyid' => $casestudyid, 'enabled' => 1], 'sortorder ASC');
+        $rules = $DB->get_records(
+            'casestudy_completion_rules',
+            ['casestudyid' => $casestudyid, 'enabled' => 1],
+            'sortorder ASC'
+        );
 
         if (empty($rules)) {
             return $descriptions;

@@ -27,7 +27,6 @@ use stdClass;
 defined('MOODLE_INTERNAL') || die();
 
 class template_manager {
-
     /**
      * List of supported template types.
      */
@@ -65,7 +64,6 @@ class template_manager {
         $this->casestudy = $casestudy;
         $this->cm = $cm;
         $this->context = $context;
-
     }
 
     /**

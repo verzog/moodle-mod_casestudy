@@ -30,7 +30,7 @@ $functions = [
         'type'        => 'write',
         'ajax'        => true,
         'loginrequired' => true,
-        'capabilities' => 'mod/casestudy:managefields'
+        'capabilities' => 'mod/casestudy:managefields',
     ],
 
     'mod_casestudy_list_participants' => [
@@ -41,7 +41,7 @@ $functions = [
         'ajax'        => true,
         'loginrequired' => true,
         'capabilities' => 'mod/casestudy:managefields',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
     'mod_casestudy_get_submissions_for_grading' => [
@@ -51,6 +51,6 @@ $functions = [
         'type'        => 'read',
         'ajax'        => true,
         'loginrequired' => true,
-        'capabilities' => 'mod/casestudy:grade'
+        'capabilities' => 'mod/casestudy:grade',
     ],
 ];

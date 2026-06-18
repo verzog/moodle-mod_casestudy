@@ -34,7 +34,6 @@ use context_module;
  * Summary table class for displaying student completion summaries
  */
 class summary_table extends table_sql {
-
     /** @var object Course module */
     protected $cm;
 
@@ -74,8 +73,11 @@ class summary_table extends table_sql {
         $this->baseurl = new moodle_url('/mod/casestudy/summaries.php', ['id' => $cm->id]);
 
         // Load completion rules from the new table.
-        $this->completionrules = $DB->get_records('casestudy_completion_rules',
-            ['casestudyid' => $this->casestudy->id, 'enabled' => 1], 'sortorder ASC');
+        $this->completionrules = $DB->get_records(
+            'casestudy_completion_rules',
+            ['casestudyid' => $this->casestudy->id, 'enabled' => 1],
+            'sortorder ASC'
+        );
 
         $columns = ['fullname'];
 
@@ -121,8 +123,11 @@ class summary_table extends table_sql {
                     $valuedisplay = '';
                     if (!empty($rule->categoryvalue)) {
                         // Convert index to actual value.
-                        $fields = $DB->get_records('casestudy_fields',
-                            ['casestudyid' => $this->casestudy->id, 'category' => 1], 'sortorder ASC');
+                        $fields = $DB->get_records(
+                            'casestudy_fields',
+                            ['casestudyid' => $this->casestudy->id, 'category' => 1],
+                            'sortorder ASC'
+                        );
 
                         $optionindex = 1;
                         foreach ($fields as $f) {
@@ -188,7 +193,7 @@ class summary_table extends table_sql {
         $fields = 'u.id, u.*, ' . $DB->sql_fullname('u.firstname', 'u.lastname') . ' AS fullname';
         $from = '{user} u';
         $params = [];
-        list($enrolledsql, $enrolledparams) = get_enrolled_sql($this->context, 'mod/casestudy:submit', 0, true);
+        [$enrolledsql, $enrolledparams] = get_enrolled_sql($this->context, 'mod/casestudy:submit', 0, true);
 
         $where = "u.id IN ($enrolledsql)";
         $params = $enrolledparams;
@@ -221,7 +226,7 @@ class summary_table extends table_sql {
                     $usergroupids = array_keys($allowedgroups);
 
                     $from .= " JOIN {groups_members} gm2 ON gm2.userid = u.id";
-                    list($ingroupSql, $groupParams) = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
+                    [$ingroupSql, $groupParams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
 
                     $where .= " AND gm2.groupid $ingroupSql";
                     $params = array_merge($params, $groupParams);
@@ -293,7 +298,7 @@ class summary_table extends table_sql {
         // Link to user profile page
         $url = new moodle_url('/user/view.php', [
             'id' => $row->id,
-            'course' => $this->cm->course
+            'course' => $this->cm->course,
         ]);
 
         $namelink = \html_writer::link($url, $name);
@@ -329,7 +334,7 @@ class summary_table extends table_sql {
         $count = $DB->count_records('casestudy_submissions', [
             'casestudyid' => $this->casestudy->id,
             'userid' => $row->id,
-            'status' => CASESTUDY_STATUS_SATISFACTORY
+            'status' => CASESTUDY_STATUS_SATISFACTORY,
         ]);
 
         $required = $totalrule->count;
@@ -337,7 +342,7 @@ class summary_table extends table_sql {
 
         if ($count >= $required) {
             return html_writer::tag('div', $text, [
-                'style' => 'background-color: #d4edda; padding: 5px; border-radius: 3px; text-align: center;'
+                'style' => 'background-color: #d4edda; padding: 5px; border-radius: 3px; text-align: center;',
             ]);
         }
 
@@ -374,8 +379,12 @@ class summary_table extends table_sql {
             // Convert the stored global index to the actual option value.
             $actualvalue = null;
             if (!empty($rule->categoryvalue)) {
-                $fields = $DB->get_records('casestudy_fields',
-                    ['casestudyid' => $this->casestudy->id, 'category' => 1], 'sortorder ASC', 'id, param1');
+                $fields = $DB->get_records(
+                    'casestudy_fields',
+                    ['casestudyid' => $this->casestudy->id, 'category' => 1],
+                    'sortorder ASC',
+                    'id, param1'
+                );
 
                 $optionindex = 1;
                 foreach ($fields as $field) {
@@ -413,7 +422,8 @@ class summary_table extends table_sql {
             }
 
             // Count satisfactory submissions matching this category rule.
-            $count = $DB->count_records_sql("
+            $count = $DB->count_records_sql(
+                "
                 SELECT COUNT(DISTINCT s.id)
                 FROM {casestudy_submissions} s
                 JOIN {casestudy_content} c ON s.id = c.submissionid
@@ -430,7 +440,7 @@ class summary_table extends table_sql {
 
             if ($count >= $required) {
                 return html_writer::tag('div', $text, [
-                    'style' => 'background-color: #d4edda; padding: 5px; border-radius: 3px; text-align: center;'
+                    'style' => 'background-color: #d4edda; padding: 5px; border-radius: 3px; text-align: center;',
                 ]);
             }
 
@@ -453,14 +463,20 @@ class summary_table extends table_sql {
         $iscomplete = $this->check_user_completion($row->id);
 
         if ($iscomplete) {
-            return html_writer::tag('span', get_string('satisfactory', 'mod_casestudy'),
-                ['class' => 'badge badge-success bg-success']);
+            return html_writer::tag(
+                'span',
+                get_string('satisfactory', 'mod_casestudy'),
+                ['class' => 'badge badge-success bg-success']
+            );
         }
 
         // Check if due date has passed.
         if (!empty($this->casestudy->timeclose) && $this->casestudy->timeclose < time()) {
-            return html_writer::tag('span', get_string('unsatisfactory', 'mod_casestudy'),
-                ['class' => 'badge badge-danger bg-danger']);
+            return html_writer::tag(
+                'span',
+                get_string('unsatisfactory', 'mod_casestudy'),
+                ['class' => 'badge badge-danger bg-danger']
+            );
         }
 
         return '--';
@@ -488,15 +504,19 @@ class summary_table extends table_sql {
                 $count = $DB->count_records('casestudy_submissions', [
                     'casestudyid' => $this->casestudy->id,
                     'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY
+                    'status' => CASESTUDY_STATUS_SATISFACTORY,
                 ]);
                 $results[] = ($count >= $rule->count);
             } else if ($rule->ruletype == CASESTUDY_COMPLETION_CATEGORY) {
                 // Check category completion.
                 $actualvalue = null;
                 if (!empty($rule->categoryvalue)) {
-                    $fields = $DB->get_records('casestudy_fields',
-                        ['casestudyid' => $this->casestudy->id, 'category' => 1], 'sortorder ASC', 'id, param1');
+                    $fields = $DB->get_records(
+                        'casestudy_fields',
+                        ['casestudyid' => $this->casestudy->id, 'category' => 1],
+                        'sortorder ASC',
+                        'id, param1'
+                    );
 
                     $optionindex = 1;
                     foreach ($fields as $field) {
@@ -532,7 +552,8 @@ class summary_table extends table_sql {
                     ];
                 }
 
-                $count = $DB->count_records_sql("
+                $count = $DB->count_records_sql(
+                    "
                     SELECT COUNT(DISTINCT s.id)
                     FROM {casestudy_submissions} s
                     JOIN {casestudy_content} c ON s.id = c.submissionid
@@ -567,11 +588,11 @@ class summary_table extends table_sql {
     public function col_actions($row) {
         $url = new moodle_url('/mod/casestudy/view.php', [
             'id' => $this->cm->id,
-            'userid' => $row->id
+            'userid' => $row->id,
         ]);
 
         return html_writer::link($url, get_string('view'), [
-            'class' => 'btn btn-primary btn-sm'
+            'class' => 'btn btn-primary btn-sm',
         ]);
     }
 }

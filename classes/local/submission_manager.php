@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * Manages case study submissions and attempts
  */
 class submission_manager {
-
     /** @var int Case study ID */
     private $casestudyid;
 
@@ -122,7 +121,7 @@ class submission_manager {
 
         $params = [
             'casestudyid' => $this->casestudyid,
-            'userid' => $userid
+            'userid' => $userid,
         ];
 
         $sql = "SELECT * FROM {casestudy_submissions} WHERE casestudyid = :casestudyid AND userid = :userid";
@@ -333,7 +332,7 @@ class submission_manager {
             // Check if content already exists
             $existing = $DB->get_record('casestudy_content', [
                 'submissionid' => $submissionid,
-                'fieldid' => $fieldid
+                'fieldid' => $fieldid,
             ]);
 
             $fieldcontent = (array) $fieldcontent;
@@ -429,7 +428,6 @@ class submission_manager {
 
         // Check maximum submissions (entries) limit
         if ($effective->maxsubmissions > 0) {
-
             $sql = "SELECT COUNT(*)
                       FROM {casestudy_submissions}
                      WHERE casestudyid = :casestudyid
@@ -437,7 +435,7 @@ class submission_manager {
                        AND (parentid IS NULL OR parentid = 0)";
             $entrycount = $DB->count_records_sql($sql, [
                 'casestudyid' => $this->casestudyid,
-                'userid' => $userid
+                'userid' => $userid,
             ]);
 
             if ($entrycount >= $effective->maxsubmissions) {
@@ -492,7 +490,6 @@ class submission_manager {
             }
 
             $this->update_submission($submission);
-
         } else {
             // Create new submission
             $submission = $this->create_submission($userid);
@@ -528,7 +525,7 @@ class submission_manager {
             // Check if content already exists
             $existing = $DB->get_record('casestudy_content', [
                 'submissionid' => $submissionid,
-                'fieldid' => $fieldid
+                'fieldid' => $fieldid,
             ]);
 
             if ($existing) {
@@ -587,7 +584,7 @@ class submission_manager {
         if ($submissionid) {
             // Get specific submission
             $submission = $DB->get_record('casestudy_submissions', [
-                'id' => $submissionid, 'userid' => $userid, 'casestudyid' => $this->casestudyid
+                'id' => $submissionid, 'userid' => $userid, 'casestudyid' => $this->casestudyid,
             ]);
 
             return $submission;
@@ -626,7 +623,7 @@ class submission_manager {
         $result = in_array($submission->status, [
             CASESTUDY_STATUS_DRAFT,
             CASESTUDY_STATUS_NEW,
-            CASESTUDY_STATUS_AWAITING_RESUBMISSION
+            CASESTUDY_STATUS_AWAITING_RESUBMISSION,
         ]);
 
         if (!$result && $createnotification && $submission->status == CASESTUDY_STATUS_SUBMITTED) {
@@ -696,7 +693,6 @@ class submission_manager {
             $transaction->allow_commit();
 
             return $submission;
-
         } catch (\Exception $e) {
             $transaction->rollback($e);
             throw $e;
@@ -795,7 +791,7 @@ class submission_manager {
 
         $children = $DB->get_records('casestudy_submissions', [
             'parentid' => $rootsubmissionid,
-            'casestudyid' => $this->casestudyid
+            'casestudyid' => $this->casestudyid,
         ]);
 
         // Recursively count children and their descendants
@@ -819,7 +815,7 @@ class submission_manager {
 
         $children = $DB->get_records('casestudy_submissions', [
             'parentid' => $submissionid,
-            'casestudyid' => $this->casestudyid
+            'casestudyid' => $this->casestudyid,
         ]);
 
         // Recursively count their descendants
@@ -853,7 +849,7 @@ class submission_manager {
         }
 
         // Delete all submissions in the chain
-        list($insql, $params) = $DB->get_in_or_equal($submissionids);
+        [$insql, $params] = $DB->get_in_or_equal($submissionids);
         $DB->delete_records_select('casestudy_submissions', "id $insql", $params);
 
         // Update user grade
@@ -950,7 +946,7 @@ class submission_manager {
 
         $list = $DB->get_records_sql($sql, ['casestudyid' => $this->casestudyid, 'casestudyid1' => $this->casestudyid, 'firstfieldid' => $firstfield->id, 'draft' => CASESTUDY_STATUS_DRAFT]);
 
-        $list = array_map(function($submission) use ($firstfield) {
+        $list = array_map(function ($submission) use ($firstfield) {
             $submission = fullname($submission) . ' (' . $submission->content . ')';
             return $submission;
         }, $list);
@@ -1009,5 +1005,4 @@ class submission_manager {
         // Reverse back so latest is first in display
         return array_reverse($history);
     }
-
 }

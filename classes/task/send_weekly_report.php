@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die();
  * Scheduled task to send weekly submission reports
  */
 class send_weekly_report extends \core\task\scheduled_task {
-
     /**
      * Get task name
      *
@@ -133,7 +132,7 @@ class send_weekly_report extends \core\task\scheduled_task {
                 }
 
                 // Get submissions from this marker's students in the past week.
-                list($insql, $inparams) = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'user');
+                [$insql, $inparams] = $DB->get_in_or_equal($studentids, SQL_PARAMS_NAMED, 'user');
 
                 $sql = "SELECT s.*, u.firstname, u.lastname, u.email, u.firstnamephonetic,
                                u.lastnamephonetic, u.middlename, u.alternatename
@@ -198,14 +197,14 @@ class send_weekly_report extends \core\task\scheduled_task {
         foreach ($submissions as $submission) {
             $submissionurl = new \moodle_url('/mod/casestudy/view_casestudy.php', [
                 'id' => $cm->id,
-                'submissionid' => $submission->id
+                'submissionid' => $submission->id,
             ]);
 
             $submissionlist[] = [
                 'student' => fullname($submission),
                 'status' => get_string('status_' . $submission->status, 'mod_casestudy'),
                 'timesubmitted' => userdate($submission->timesubmitted),
-                'url' => $submissionurl->out(false)
+                'url' => $submissionurl->out(false),
             ];
         }
 
@@ -219,7 +218,7 @@ class send_weekly_report extends \core\task\scheduled_task {
             'casestudy' => $casestudy->name,
             'course' => $course->fullname,
             'datefrom' => $datefrom,
-            'dateto' => $dateto
+            'dateto' => $dateto,
         ]);
 
         $messagedata = [
@@ -230,7 +229,7 @@ class send_weekly_report extends \core\task\scheduled_task {
             'submissions' => $submissionlist,
             'url' => $casestudyurl->out(false),
             'datefrom' => $datefrom,
-            'dateto' => $dateto
+            'dateto' => $dateto,
         ];
 
         $message->fullmessage = $this->build_text_report($messagedata);
@@ -240,7 +239,7 @@ class send_weekly_report extends \core\task\scheduled_task {
             'count' => count($submissions),
             'casestudy' => $casestudy->name,
             'datefrom' => $datefrom,
-            'dateto' => $dateto
+            'dateto' => $dateto,
         ]);
         $message->notification = 1;
         $message->contexturl = $casestudyurl->out(false);

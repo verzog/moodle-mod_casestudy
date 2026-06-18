@@ -21,13 +21,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 /**
  * Module instance settings form
  */
 class mod_casestudy_mod_form extends moodleform_mod {
-
     /**
      * Defines forms elements
      */
@@ -40,7 +39,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field
-        $mform->addElement('text', 'name', get_string('casestudyname', 'mod_casestudy'), array('size'=>'64'));
+        $mform->addElement('text', 'name', get_string('casestudyname', 'mod_casestudy'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -57,7 +56,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addElement('header', 'entriessection', get_string('entries', 'mod_casestudy'));
 
         // Maximum number of submissions per student
-        $options = array(0 => get_string('unlimited', 'mod_casestudy'));
+        $options = [0 => get_string('unlimited', 'mod_casestudy')];
         for ($i = 1; $i <= 50; $i++) {
             $options[$i] = $i;
         }
@@ -69,14 +68,22 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addElement('header', 'availabilitysection', get_string('availability', 'mod_casestudy'));
 
         // Allow submissions from (timeopen)
-        $mform->addElement('date_time_selector', 'timeopen', get_string('allowsubmissionsfromdate', 'mod_casestudy'),
-            array('optional' => true));
+        $mform->addElement(
+            'date_time_selector',
+            'timeopen',
+            get_string('allowsubmissionsfromdate', 'mod_casestudy'),
+            ['optional' => true]
+        );
         $mform->setDefault('timeopen', 0);
         $mform->addHelpButton('timeopen', 'allowsubmissionsfromdate', 'mod_casestudy');
 
         // Due date (timeclose)
-        $mform->addElement('date_time_selector', 'timeclose', get_string('duedate', 'mod_casestudy'),
-            array('optional' => true));
+        $mform->addElement(
+            'date_time_selector',
+            'timeclose',
+            get_string('duedate', 'mod_casestudy'),
+            ['optional' => true]
+        );
         $mform->setDefault('timeclose', 0);
         $mform->addHelpButton('timeclose', 'duedate', 'mod_casestudy');
 
@@ -89,7 +96,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addHelpButton('notifygraders', 'notifygraders', 'mod_casestudy');
 
         // Email others
-        $mform->addElement('text', 'notifyemail', get_string('notifyemail', 'mod_casestudy'), array('size'=>'64'));
+        $mform->addElement('text', 'notifyemail', get_string('notifyemail', 'mod_casestudy'), ['size' => '64']);
         $mform->setType('notifyemail', PARAM_TEXT);
         $mform->addHelpButton('notifyemail', 'notifyemail', 'mod_casestudy');
 
@@ -112,7 +119,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addHelpButton('requireacceptance', 'requireacceptance', 'mod_casestudy');
 
         // Maximum attempts
-        $attemptsoptions = array(0 => get_string('unlimited', 'mod_casestudy'));
+        $attemptsoptions = [0 => get_string('unlimited', 'mod_casestudy')];
         for ($i = 1; $i <= 10; $i++) {
             $attemptsoptions[$i] = $i;
         }
@@ -134,8 +141,13 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addHelpButton('hidegrader', 'hidegrader', 'mod_casestudy');
 
         // Grader information
-        $mform->addElement('editor', 'graderinfo_editor', get_string('graderinfo', 'mod_casestudy'),
-                          null, $this->get_editor_options());
+        $mform->addElement(
+            'editor',
+            'graderinfo_editor',
+            get_string('graderinfo', 'mod_casestudy'),
+            null,
+            $this->get_editor_options()
+        );
         $mform->addHelpButton('graderinfo_editor', 'graderinfo', 'mod_casestudy');
 
         // Add standard elements, common to all modules
@@ -233,10 +245,13 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $completionaggrsel = 'completionaggr' . $suffix;
 
         $group[] =& $mform->createElement('static', 'completionsatisfactorydesc', '', get_string('completionsatisfactorydesc', 'mod_casestudy'));
-        $group[] =& $mform->createElement('select', $completionaggrsel, '',
+        $group[] =& $mform->createElement(
+            'select',
+            $completionaggrsel,
+            '',
             [
                 CASESTUDY_COMPLETION_ALL => get_string('completionsatisfactoryall', 'mod_casestudy'),
-                CASESTUDY_COMPLETION_ANY => get_string('completionsatisfactoryany', 'mod_casestudy')
+                CASESTUDY_COMPLETION_ANY => get_string('completionsatisfactoryany', 'mod_casestudy'),
             ]
         );
         $mform->setType($completionaggrsel, PARAM_INT);
@@ -248,8 +263,12 @@ class mod_casestudy_mod_form extends moodleform_mod {
         // Completion rule: Total satisfactory submissions.
         $group1 = [];
         $completionsatisfactoryenabledel = 'completionsatisfactory' . $suffix;
-        $group1[] =& $mform->createElement('checkbox', $completionsatisfactoryenabledel, '',
-            get_string('completionsatisfactorysubmissions', 'mod_casestudy'));
+        $group1[] =& $mform->createElement(
+            'checkbox',
+            $completionsatisfactoryenabledel,
+            '',
+            get_string('completionsatisfactorysubmissions', 'mod_casestudy')
+        );
 
         $completionsatisfactoryel = 'cmpsatisfactorysubmissions' . $suffix;
         $group1[] =& $mform->createElement('select', $completionsatisfactoryel, '', $countoptions);
@@ -296,12 +315,14 @@ class mod_casestudy_mod_form extends moodleform_mod {
 
         $existingrules = [];
         if ($this->current->instance) {
-            $existingrules = $DB->get_records('casestudy_completion_rules',
+            $existingrules = $DB->get_records(
+                'casestudy_completion_rules',
                 [
                     'casestudyid' => $this->current->instance,
-                    'ruletype' => CASESTUDY_COMPLETION_CATEGORY
+                    'ruletype' => CASESTUDY_COMPLETION_CATEGORY,
                 ],
-            'sortorder ASC');
+                'sortorder ASC'
+            );
         }
 
         $rulecount = max(1, count($existingrules));
@@ -349,7 +370,8 @@ class mod_casestudy_mod_form extends moodleform_mod {
         return [$satisfactoryconditiongroupel, $completionsatisfactorygroupel, $completioncategoryel];
     }
 
-    public function add_completiongrade_elements(string $modname,
+    public function add_completiongrade_elements(
+        string $modname,
         bool $rating = false
     ): void {
         // No grade-based completion.
@@ -380,8 +402,10 @@ class mod_casestudy_mod_form extends moodleform_mod {
                 // Get the number of existing rules.
                 global $DB;
                 if (!empty($this->current->instance)) {
-                    $existingrules = $DB->get_records('casestudy_completion_rules',
-                        ['casestudyid' => $this->current->instance, 'ruletype' => CASESTUDY_COMPLETION_CATEGORY]);
+                    $existingrules = $DB->get_records(
+                        'casestudy_completion_rules',
+                        ['casestudyid' => $this->current->instance, 'ruletype' => CASESTUDY_COMPLETION_CATEGORY]
+                    );
                     $repeatno = count($existingrules);
                 }
             }
@@ -434,12 +458,12 @@ class mod_casestudy_mod_form extends moodleform_mod {
      * @return array
      */
     private function get_editor_options() {
-        return array(
+        return [
             'maxfiles' => EDITOR_UNLIMITED_FILES,
             'noclean' => true,
             'context' => $this->context,
-            'subdirs' => true
-        );
+            'subdirs' => true,
+        ];
     }
 
     /**
@@ -451,21 +475,29 @@ class mod_casestudy_mod_form extends moodleform_mod {
     public function data_preprocessing(&$defaultvalues) {
         global $DB;
 
-
         if ($this->current->instance) {
             // Prepare editor data.
             $draftitemid = file_get_submitted_draft_itemid('graderinfo_editor');
             $defaultvalues['graderinfo_editor']['text'] =
-                file_prepare_draft_area($draftitemid, $this->context->id, 'mod_casestudy', 'graderinfo', 0,
-                                       $this->get_editor_options(),
-                                       isset($defaultvalues['graderinfo']) ? $defaultvalues['graderinfo'] : '');
+                file_prepare_draft_area(
+                    $draftitemid,
+                    $this->context->id,
+                    'mod_casestudy',
+                    'graderinfo',
+                    0,
+                    $this->get_editor_options(),
+                    isset($defaultvalues['graderinfo']) ? $defaultvalues['graderinfo'] : ''
+                );
             $defaultvalues['graderinfo_editor']['itemid'] = $draftitemid;
             $defaultvalues['graderinfo_editor']['format'] =
                 isset($defaultvalues['graderinfoformat']) ? $defaultvalues['graderinfoformat'] : FORMAT_HTML;
 
             // Load completion rules from the database.
-            $rules = $DB->get_records('casestudy_completion_rules',
-                ['casestudyid' => $this->current->instance], 'sortorder ASC');
+            $rules = $DB->get_records(
+                'casestudy_completion_rules',
+                ['casestudyid' => $this->current->instance],
+                'sortorder ASC'
+            );
 
             $categoryindex = 0;
             $hascategoryrulesEnabled = false;
@@ -494,7 +526,6 @@ class mod_casestudy_mod_form extends moodleform_mod {
             if ($hascategoryrulesEnabled) {
                 $defaultvalues['completioncategory'] = 1;
             }
-
         }
         $suffix = $this->get_suffix();
 
@@ -524,7 +555,6 @@ class mod_casestudy_mod_form extends moodleform_mod {
                 $data->$field = $data->{$field . $suffix};
             }
         }
-
 
         // When completion is unlocked, we can modify the settings.
         if (!empty($data->completionunlocked)) {
@@ -573,8 +603,11 @@ class mod_casestudy_mod_form extends moodleform_mod {
                 global $DB;
 
                 // Load existing completion rules to preserve them.
-                $existingrules = $DB->get_records('casestudy_completion_rules',
-                    ['casestudyid' => $this->current->instance], 'sortorder ASC');
+                $existingrules = $DB->get_records(
+                    'casestudy_completion_rules',
+                    ['casestudyid' => $this->current->instance],
+                    'sortorder ASC'
+                );
 
                 $categoryindex = 0;
                 foreach ($existingrules as $rule) {
@@ -597,7 +630,6 @@ class mod_casestudy_mod_form extends moodleform_mod {
                 }
             }
         }
-
     }
 
     /**

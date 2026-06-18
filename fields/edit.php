@@ -28,15 +28,15 @@ $fieldtype = optional_param('type', 'text', PARAM_ALPHA);
 
 // Get course module and related data
 $cm = get_coursemodule_from_id('casestudy', $id, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$casestudy = $DB->get_record('casestudy', array('id' => $cm->instance), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+$casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 require_capability('mod/casestudy:managefields', $context);
 
-$PAGE->set_url('/mod/casestudy/fields/edit.php', array('id' => $cm->id, 'fieldid' => $fieldid));
+$PAGE->set_url('/mod/casestudy/fields/edit.php', ['id' => $cm->id, 'fieldid' => $fieldid]);
 $PAGE->set_title(format_string($casestudy->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
@@ -60,33 +60,44 @@ $form = $fieldclass->get_edit_form($fieldmanager, $editing, $fieldid);
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]));
 } else if ($data = $form->get_data()) {
-
     // Get field data from form
     $fielddata = $form->get_field_data($data);
 
     if ($editing) {
         $fielddata->id = $fieldid;
         if ($fieldmanager->update_field($fieldid, $fielddata)) {
-            redirect(new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
-                    get_string('fieldupdated', 'mod_casestudy'), null, \core\output\notification::NOTIFY_SUCCESS);
+            redirect(
+                new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
+                get_string('fieldupdated', 'mod_casestudy'),
+                null,
+                \core\output\notification::NOTIFY_SUCCESS
+            );
         } else {
-            redirect(new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
-                    get_string('errorupdating', 'mod_casestudy'), null, \core\output\notification::NOTIFY_ERROR);
+            redirect(
+                new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
+                get_string('errorupdating', 'mod_casestudy'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
-
     } else {
-
         if ($fieldmanager->create_field($fielddata->type, $fielddata)) {
-            redirect(new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
-                    get_string('fieldcreated', 'mod_casestudy'), null, \core\output\notification::NOTIFY_SUCCESS);
+            redirect(
+                new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
+                get_string('fieldcreated', 'mod_casestudy'),
+                null,
+                \core\output\notification::NOTIFY_SUCCESS
+            );
         } else {
-            redirect(new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
-                    get_string('errorcreating', 'mod_casestudy'), null, \core\output\notification::NOTIFY_ERROR);
+            redirect(
+                new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
+                get_string('errorcreating', 'mod_casestudy'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
     }
-
 } else {
-
     if ($editing) {
         // Load existing field data into form
         $field = $fieldmanager->get_field($fieldid);
