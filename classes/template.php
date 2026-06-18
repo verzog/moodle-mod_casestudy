@@ -27,17 +27,36 @@ use moodle_url;
 use mod_casestudy\local\casestudy;
 use mod_casestudy\local\submission;
 
+/**
+ * Renders submissions and submission forms through the teacher-authored template strings.
+ *
+ * Templates use [[tag]] placeholders for substitution and ##button## markers for action
+ * buttons. The class consults the activity's singletemplate / formtemplate / csstemplate
+ * fields, falling back to the bundled default templates when none is configured.
+ */
 class template {
+    /** @var casestudy Domain wrapper around the activity. */
     private $casestudyinstance;
 
+    /** @var \stdClass Raw {casestudy} row. */
     protected $casestudy;
 
+    /** @var \cm_info|\stdClass Course module record. */
     private $cm;
 
+    /** @var \MoodleQuickForm|null Form being decorated, set by {@see set_form()}. */
     protected $mform;
 
+    /** @var \context_module Module context, used for file area lookups. */
     private $context;
 
+    /**
+     * Build a renderer for the given activity instance and context.
+     *
+     * @param casestudy $casestudy Domain wrapper for the activity instance.
+     * @param \cm_info|\stdClass $cm Course module record.
+     * @param \context_module $context Module context.
+     */
     public function __construct(casestudy $casestudy, $cm, $context) {
         $this->casestudyinstance = $casestudy;
         $this->casestudy = $this->casestudyinstance->get_casestudy_record();
@@ -45,6 +64,16 @@ class template {
         $this->context = $context;
     }
 
+    /**
+     * Render a submission through the configured single-view template, or return null to fall
+     * back to the default mustache rendering.
+     *
+     * @param submission $submission Submission to render.
+     * @param array|null $fields Unused; kept for backwards-compatible callers.
+     * @param array|null $contents Unused; kept for backwards-compatible callers.
+     * @param \stdClass|null $grade Optional grade record to expose to the template.
+     * @return string|null Rendered HTML, or null when no custom template is configured.
+     */
     public function render_submission(submission $submission, $fields = null, $contents = null, $grade = null) {
         global $DB, $OUTPUT, $USER;
 
@@ -190,6 +219,15 @@ class template {
         return $output;
     }
 
+    /**
+     * Build the default single-view template HTML for the given fields.
+     *
+     * Used when the activity has no `singletemplate` configured and the editor wants something
+     * to start from.
+     *
+     * @param array $fields Array of field records.
+     * @return string Default template HTML containing [[tag]] placeholders.
+     */
     public function get_default_template($fields) {
         $template = '<div class="casestudy-submission-single">';
         $template .= '<div class="submission-header">';
@@ -220,6 +258,12 @@ class template {
         return $template;
     }
 
+    /**
+     * Format a grade row for display in the rendered template.
+     *
+     * @param \stdClass|null $grade Grade record.
+     * @return string Formatted grade text (empty when no grade is set).
+     */
     private function get_grade_display($grade) {
         global $OUTPUT;
 
@@ -237,6 +281,12 @@ class template {
         return html_writer::span($gradetext, $gradeclass);
     }
 
+    /**
+     * Get the formatted full name of a grader, honouring hidegrader if set on the activity.
+     *
+     * @param int $graderid User id of the grader.
+     * @return string Display name, or anonymised placeholder.
+     */
     private function get_grader_name($graderid) {
         global $DB;
 
@@ -248,6 +298,12 @@ class template {
         return fullname($grader);
     }
 
+    /**
+     * Build the edit button for a submission, returning HTML or empty when the user can't edit.
+     *
+     * @param \stdClass $submission Submission row.
+     * @return string Anchor HTML, or '' if the action is not permitted.
+     */
     private function get_edit_button($submission) {
         global $USER;
 
@@ -269,6 +325,12 @@ class template {
         return html_writer::link($url, get_string('edit'), ['class' => 'btn btn-secondary']);
     }
 
+    /**
+     * Build the delete button for a submission, returning HTML or empty when not permitted.
+     *
+     * @param \stdClass $submission Submission row.
+     * @return string Anchor HTML, or '' if the action is not permitted.
+     */
     private function get_delete_button($submission) {
         global $USER;
 
@@ -293,6 +355,12 @@ class template {
         return html_writer::link($url, get_string('delete'), ['class' => 'btn btn-danger']);
     }
 
+    /**
+     * Build the "view full submission" button for a submission.
+     *
+     * @param \stdClass $submission Submission row.
+     * @return string Anchor HTML.
+     */
     private function get_view_button($submission) {
         $url = new moodle_url('/mod/casestudy/view_casestudy.php', [
             'id' => $this->cm->id,
@@ -302,6 +370,15 @@ class template {
         return html_writer::link($url, get_string('view'), ['class' => 'btn btn-primary']);
     }
 
+    /**
+     * Build the catalogue of available tags for the single-view template editor.
+     *
+     * Categorises tags into static (submission/user/grade) and per-field groups so the
+     * editor toolbar can group them sensibly.
+     *
+     * @param array $fields Configured field records.
+     * @return array Map of category => [tag => description].
+     */
     public function get_available_tags($fields) {
         $tags = [
             'fields' => [],
@@ -416,6 +493,11 @@ class template {
         return $template;
     }
 
+    /**
+     * Inject the moodleform the template should decorate when rendering a submission form.
+     *
+     * @param \MoodleQuickForm $form Form instance.
+     */
     public function set_form($form) {
         $this->mform = $form;
     }

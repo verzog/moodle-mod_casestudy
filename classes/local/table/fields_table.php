@@ -58,9 +58,16 @@ class fields_table extends table_sql implements dynamic_table {
         $this->sesskey = sesskey();
     }
 
+    /**
+     * Configure columns, headers and SQL then defer to the parent table renderer.
+     *
+     * @param int $pagesize Page size for the table.
+     * @param bool $useinitialsbar Whether to show the initials bar.
+     * @param string $downloadhelpbutton Optional download button HTML.
+     */
     public function out($pagesize, $useinitialsbar, $downloadhelpbutton = '') {
 
-        // Define columns
+        // Define columns.
         $columns = [
             'sortorder',
             'name',

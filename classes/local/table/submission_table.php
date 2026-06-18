@@ -53,6 +53,7 @@ class submission_table extends table_sql {
     /** @var int $userid User filter */
     protected $userid;
 
+    /** @var array Columns that should be sorted as text (used by {@see construct_order_by()}). */
     protected $columntextsort = [];
 
     /**
@@ -77,6 +78,13 @@ class submission_table extends table_sql {
     }
 
 
+    /**
+     * Configure columns (including dynamic field columns), headers and SQL, then render.
+     *
+     * @param int $pagesize Page size for the table.
+     * @param bool $useinitialsbar Whether to show the initials bar.
+     * @param string $downloadhelpbutton Optional download button HTML.
+     */
     public function out($pagesize, $useinitialsbar, $downloadhelpbutton = '') {
         global $DB, $USER;
 
@@ -201,6 +209,8 @@ class submission_table extends table_sql {
     }
 
     /**
+     * Build the ORDER BY fragment, mapping dynamic field-column requests to subselects.
+     *
      * @return string SQL fragment that can be used in an ORDER BY clause.
      */
     public function get_sql_sort() {
@@ -580,6 +590,12 @@ class submission_table extends table_sql {
     }
 
 
+    /**
+     * Check whether the given submission already has a child resubmission row.
+     *
+     * @param \stdClass $row Submission table row.
+     * @return bool
+     */
     public function is_reattempt_created($row) {
         global $DB;
 

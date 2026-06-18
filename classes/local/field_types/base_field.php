@@ -42,6 +42,7 @@ abstract class base_field implements fieldtype {
     /** @var int|null Field ID, if editing an existing field */
     protected $fieldid;
 
+    /** @var \mod_casestudy\local\field_manager Owning field manager (gives access to context + sibling fields). */
     protected $fieldmanager;
     /**
      * Constructor

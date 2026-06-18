@@ -27,25 +27,47 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
-// Include grade library for grade_item and grade_grade classes
+// Include grade library for grade_item and grade_grade classes.
 global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
 
+/**
+ * Main domain wrapper around a case study activity instance.
+ *
+ * Caches the cm / context / course records and acts as the entry point for grading,
+ * participant lookups and submission status changes that need access to the
+ * surrounding course-module context.
+ */
 class casestudy {
+    /** @var int Activity instance id from the {casestudy} table. */
     public int $casestudyid;
 
+    /** @var \context_module Module-level context for this activity. */
     protected $context;
 
+    /** @var \cm_info|\stdClass Course module record. */
     protected $cm;
 
+    /** @var \stdClass Course record. */
     protected $course;
 
+    /** @var \stdClass Raw {casestudy} row. */
     protected $casestudy;
 
+    /** @var \grade_item|null Cached grade item. Loaded lazily on first grading interaction. */
     protected ?\grade_item $gradeitem = null;
 
+    /** @var self[] In-process instance cache keyed by casestudyid. */
     public static $instances = [];
 
+    /**
+     * Build the wrapper, resolving missing course module / context from the activity id.
+     *
+     * @param int $casestudyid Activity instance id.
+     * @param \cm_info|\stdClass|null $cm Optional pre-loaded course module record.
+     * @param \context_module|null $context Optional pre-loaded module context.
+     * @throws \coding_exception When neither $cm nor $context is provided.
+     */
     public function __construct($casestudyid, $cm = null, $context = null) {
 
         $this->casestudyid = $casestudyid;
@@ -70,22 +92,50 @@ class casestudy {
         }
     }
 
+    /**
+     * Get the module-level context for this activity.
+     *
+     * @return \context_module
+     */
     public function get_context() {
         return $this->context;
     }
 
+    /**
+     * Get the cached course module record.
+     *
+     * @return \cm_info|\stdClass
+     */
     public function get_cm() {
         return $this->cm;
     }
 
+    /**
+     * Get the cached course record.
+     *
+     * @return \stdClass
+     */
     public function get_course() {
         return $this->course;
     }
 
+    /**
+     * Get the raw {casestudy} row backing this wrapper.
+     *
+     * @return \stdClass
+     */
     public function get_casestudy_record() {
         return $this->casestudy;
     }
 
+    /**
+     * Return a cached instance for the given activity id, building one on first call.
+     *
+     * @param int $casestudyid Activity instance id.
+     * @param \cm_info|null $cm Optional pre-loaded course module record.
+     * @param \context_module|null $context Optional pre-loaded module context.
+     * @return self
+     */
     public static function instance(int $casestudyid, ?cm_info $cm = null, $context = null) {
 
         if (empty(self::$instances[$casestudyid])) {
@@ -133,7 +183,20 @@ class casestudy {
         return $grade;
     }
 
-    public function add_grading_elements(\MoodleQuickForm &$mform, int $submissionid, ?\stdClass $data = null, bool $gradingdisabled = false) {
+    /**
+     * Inject the activity's grading elements (point grade / advanced grading instance) into a form.
+     *
+     * @param \MoodleQuickForm $mform Form being built (modified in place).
+     * @param int $submissionid Submission being graded.
+     * @param \stdClass|null $data Optional default form data.
+     * @param bool $gradingdisabled True when the form should be read-only (final grade already issued).
+     */
+    public function add_grading_elements(
+        \MoodleQuickForm &$mform,
+        int $submissionid,
+        ?\stdClass $data = null,
+        bool $gradingdisabled = false
+    ) {
 
         $userid = helper::get_submission($submissionid)->userid;
 
@@ -572,6 +635,15 @@ class casestudy {
     }
 
 
+    /**
+     * Resolve the participants visible to the current user given a group + status filter.
+     *
+     * Honours the activity's group mode and the calling user's access-all-groups capability.
+     *
+     * @param int $currentgroup Group id, or 0 for "all groups".
+     * @param array|bool $tablesort Sort spec accepted by {@see list_participants()}.
+     * @return array Participant records.
+     */
     public function list_participants_with_filter_status_and_group($currentgroup, $tablesort) {
         $participants = $this->list_participants($currentgroup, false, $tablesort);
         return $participants;
@@ -627,6 +699,11 @@ class casestudy {
     }
 
 
+    /**
+     * Build the status-filter list for the submissions table dropdown.
+     *
+     * @return array Map of status constant => display label.
+     */
     public function get_status_filters() {
         $statuslist = helper::get_status_list();
 

@@ -39,6 +39,7 @@ class submission_manager {
     /** @var object Context */
     private $context;
 
+    /** @var casestudy Activity wrapper this manager operates against. */
     protected $casestudyman;
 
     /**
@@ -825,6 +826,11 @@ class submission_manager {
     }
 
 
+    /**
+     * Delete a submission and the entire resubmission chain it belongs to (including grades & files).
+     *
+     * @param \stdClass $submission Submission row to delete.
+     */
     public function delete_submission($submission) {
         global $DB;
 
@@ -942,7 +948,12 @@ class submission_manager {
                 AND s.status <> :draft
                 ORDER BY s.timesubmitted ASC';
 
-        $list = $DB->get_records_sql($sql, ['casestudyid' => $this->casestudyid, 'casestudyid1' => $this->casestudyid, 'firstfieldid' => $firstfield->id, 'draft' => CASESTUDY_STATUS_DRAFT]);
+        $list = $DB->get_records_sql($sql, [
+            'casestudyid' => $this->casestudyid,
+            'casestudyid1' => $this->casestudyid,
+            'firstfieldid' => $firstfield->id,
+            'draft' => CASESTUDY_STATUS_DRAFT,
+        ]);
 
         $list = array_map(function ($submission) use ($firstfield) {
             $submission = fullname($submission) . ' (' . $submission->content . ')';

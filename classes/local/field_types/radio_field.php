@@ -213,6 +213,16 @@ class radio_field extends base_field {
     }
 
 
+    /**
+     * Resolve a parameter override, then fall back to per-type defaults, then the supplied default.
+     *
+     * Overrides {@see base_field::get_param()} so the radio-specific defaults are consulted.
+     *
+     * @param string $paramname Parameter key (e.g. 'param1').
+     * @param mixed $default Fallback if no override and no per-type default exists.
+     * @param array $defaults Per-type defaults to consult.
+     * @return mixed
+     */
     public function get_param($paramname, $default = null, array $defaults = []) {
 
         if (!isset($this->fielddata->$paramname) && !array_key_exists($paramname, $defaults)) {

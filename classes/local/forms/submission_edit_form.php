@@ -38,8 +38,10 @@ class submission_edit_form extends \moodleform {
     /** @var bool Whether we're editing an existing submission */
     private $editing;
 
+    /** @var \cm_info|\stdClass Course module record. */
     private $cm;
 
+    /** @var string Cached output of {@see parse_from_template()}; populated by render(). */
     protected $parsedformoutput;
 
     /**
@@ -57,6 +59,11 @@ class submission_edit_form extends \moodleform {
         parent::__construct($action, $customdata);
     }
 
+    /**
+     * Expose the underlying MoodleQuickForm so the template renderer can decorate it.
+     *
+     * @return \MoodleQuickForm
+     */
     public function get_form() {
         return $this->_form;
     }
