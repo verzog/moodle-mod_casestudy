@@ -273,9 +273,11 @@ class file_field extends base_field {
             $field->param2 = (int)$config['param2'];
         }
 
-        // Handle param3 for accepted file types
-        if (isset($config['param3']) && is_array($config['param3'])) {
-            $field->param3 = json_encode(array_values($config['param3']));
+        // Handle param3 for accepted file types. The 'filetypes' form element posts a
+        // single space-separated string like "image .pdf .docx" — store it verbatim so
+        // it can be handed straight back to the element on reload.
+        if (array_key_exists('param3', $config)) {
+            $field->param3 = is_string($config['param3']) ? trim($config['param3']) : '';
         }
     }
 
@@ -329,15 +331,49 @@ class file_field extends base_field {
 
         $fileconfig = $this->get_file_config($defaults);
 
-        $param1 = isset($defaults['param1']) ? json_decode($defaults['param1'], true) : [];
-
         $defaults[$prefix . 'param1[min]'] = $fileconfig['minfiles'];
         $defaults[$prefix . 'param1[max]'] = $fileconfig['maxfiles'];
         $defaults[$prefix . 'param2'] = $fileconfig['maxbytes'];
 
-        if (!empty($fileconfig['acceptedtypes']) && is_array($fileconfig['acceptedtypes'])) {
-            $defaults[$prefix . 'param3'] = implode("\n", $fileconfig['acceptedtypes']);
+        // The filetypes element wants the same space-separated token list it posted.
+        // Pull it from the stored value rather than the normalised array so anything
+        // the teacher typed (custom extensions, MIME groups) survives the round trip.
+        $defaults[$prefix . 'param3'] = self::read_param3_raw($defaults['param3'] ?? '');
+    }
+
+    /**
+     * Decode whatever shape param3 might be on disk into the raw space-separated string
+     * the moodleform `filetypes` element expects.
+     *
+     * Earlier versions of this plugin wrote `json_encode(["image .pdf"])`, sometimes
+     * even json_encoded a one-element array containing a newline-joined string. Handle
+     * those shapes alongside the current "plain string" form so existing field configs
+     * keep loading correctly.
+     *
+     * @param mixed $stored Raw value from the casestudy_fields.param3 column.
+     * @return string Space-separated token list (e.g. "image .pdf").
+     */
+    protected static function read_param3_raw($stored): string {
+        if (!is_string($stored) || $stored === '') {
+            return '';
         }
+
+        $decoded = json_decode($stored, true);
+        if (is_array($decoded)) {
+            $flat = [];
+            array_walk_recursive($decoded, function ($value) use (&$flat) {
+                if (is_string($value) && $value !== '') {
+                    $flat[] = $value;
+                }
+            });
+            $stored = implode(' ', $flat);
+        }
+
+        // Normalise newlines / commas / semicolons into single spaces so the form
+        // element parses every token the user originally meant.
+        $stored = preg_replace('/[\s,;]+/', ' ', $stored) ?? '';
+
+        return trim($stored);
     }
 
     /**
@@ -359,10 +395,12 @@ class file_field extends base_field {
             $config['param2'] = $data['param2'];
         }
 
-        // Process accepted file types
-        if (isset($data['param3'])) {
-            $types = array_filter(array_map('trim', explode("\n", $data['param3'])));
-            $config['param3'] = $types;
+        // Process accepted file types. Pass the raw string through — the
+        // moodleform filetypes element already returns its selection as a
+        // space-separated token list and core_form\filetypes_util understands
+        // that format directly.
+        if (array_key_exists('param3', $data)) {
+            $config['param3'] = is_string($data['param3']) ? trim($data['param3']) : '';
         }
 
         return $config;
@@ -425,18 +463,15 @@ class file_field extends base_field {
 
         $filecount = $this->get_param_decode('param1', [], $defaults);
         $maxbytes = $defaults['param2'] ?? 10485760; // Default to 10 MB.
-        $acceptedtypes = $this->get_param_decode('param3', ['*'], $defaults);
 
-        if (!empty($acceptedtypes)) {
-            $acceptedtypes = array_map(fn($type) => explode(",", $type), $acceptedtypes);
-        }
-        $acceptedtypes = $this->update_file_typesets($acceptedtypes[0]);
+        $param3raw = self::read_param3_raw($defaults['param3'] ?? ($this->fielddata->param3 ?? ''));
+        $acceptedtypes = $this->update_file_typesets($param3raw);
 
         return [
             'minfiles' => isset($filecount['min']) ? (int)$filecount['min'] : 0,
             'maxfiles' => isset($filecount['max']) ? (int)$filecount['max'] : 1,
             'maxbytes' => (int)$maxbytes,
-            'acceptedtypes' => is_array($acceptedtypes) ? $acceptedtypes : ['*'],
+            'acceptedtypes' => !empty($acceptedtypes) ? $acceptedtypes : ['*'],
         ];
     }
 
