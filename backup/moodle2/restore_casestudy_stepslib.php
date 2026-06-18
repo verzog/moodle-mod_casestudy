@@ -19,6 +19,8 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Define the complete casestudy structure for restore, with file and id annotations.
  */

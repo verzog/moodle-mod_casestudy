@@ -88,9 +88,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           moodle-plugin-ci phpcs \
-            --exclude=moodle.Files.BoilerplateComment \
-            --exclude=moodle.Commenting.FileExpectedTags \
-            --exclude=moodle.Files.MoodleInternal \
+            --exclude=moodle.Files.BoilerplateComment,moodle.Commenting.FileExpectedTags,moodle.Files.MoodleInternal \
             --max-warnings 0
 
       - name: Moodle PHPDoc Checker

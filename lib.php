@@ -704,8 +704,9 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
         }
 
         // Send the file. Force download only when the caller asked for it (e.g. download links);
-        // leave images and other web-renderable files to display inline.
-        send_stored_file($file, null, 0, $forcedownload, $options);
+        // leave images and other web-renderable files to display inline. Keep lifetime at 0 so
+        // replacing an attachment with the same filename does not serve stale cached content.
+        send_stored_file($file, 0, 0, $forcedownload, $options);
     } else {
         send_file_not_found();
     }
