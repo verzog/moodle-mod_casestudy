@@ -30,10 +30,12 @@ $string['addfields'] = 'Add Fields';
 $string['addoverride'] = 'Add override';
 $string['allowsubmissionsfromdate'] = 'Allow submissions from';
 $string['allowsubmissionsfromdate_help'] = 'If enabled, students will not be able to submit before this date. If disabled, students can submit immediately.';
+$string['allmysubmissions'] = 'All my submissions';
 $string['allsubmissions'] = 'All submissions';
 $string['anyvalue'] = 'Any value';
 $string['atleastoneoption'] = 'Please enable at least one override option';
 $string['attempt'] = 'Attempt';
+$string['attemptheading'] = 'Attempt {$a}';
 $string['availability'] = 'Availability';
 $string['availabletags'] = 'Available Tags';
 $string['cannotdeletesubmission'] = 'You cannot delete this submission. Only draft submissions can be deleted by the owner, or any submission can be deleted by users with manage permissions.';
@@ -416,6 +418,8 @@ $string['submissionnotificationtext'] = 'Hi,
 
 You can view and grade the submission here:
 {$a->url}';
+$string['submissionnavcounter'] = 'Submission {$a->current} of {$a->total}';
+$string['submissionnavlabel'] = 'Cycle through your submissions';
 $string['submissionreattempted'] = 'Submission re-attempted successfully';
 $string['submissions'] = 'Submissions';
 $string['submissionsaved'] = 'Submission saved successfully';

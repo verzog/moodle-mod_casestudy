@@ -1,0 +1,58 @@
+{{!
+    Copyright (c) Skin Cancer College Australasia.
+    All rights reserved. Proprietary — see file header in casestudy PHP files.
+}}
+{{!
+    @template mod_casestudy/student_navigation
+
+    Previous / next navigation shown to a student cycling through their own
+    case study submissions.
+
+    Example context (json):
+    {
+        "cmid": 12,
+        "currentindex": 2,
+        "totalcount": 4,
+        "hasprev": true,
+        "hasnext": true,
+        "prevurl": "view_casestudy.php?id=12&submissionid=41",
+        "nexturl": "view_casestudy.php?id=12&submissionid=43",
+        "listurl": "view.php?id=12",
+        "larrow": "&lt;",
+        "rarrow": "&gt;"
+    }
+}}
+<nav class="casestudy-student-navigation card mb-3" aria-label="{{#str}}submissionnavlabel, mod_casestudy{{/str}}">
+    <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+        <div class="casestudy-student-navigation__counter">
+            <strong>{{#str}}submissionnavcounter, mod_casestudy, {"current": {{currentindex}}, "total": {{totalcount}}}{{/str}}</strong>
+        </div>
+        <div class="casestudy-student-navigation__controls btn-group" role="group">
+            {{#hasprev}}
+                <a href="{{prevurl}}" class="btn btn-outline-primary" data-action="previous-submission">
+                    {{{larrow}}} {{#str}}previoussubmission, mod_casestudy{{/str}}
+                </a>
+            {{/hasprev}}
+            {{^hasprev}}
+                <button type="button" class="btn btn-outline-secondary" disabled aria-disabled="true">
+                    {{{larrow}}} {{#str}}previoussubmission, mod_casestudy{{/str}}
+                </button>
+            {{/hasprev}}
+
+            <a href="{{listurl}}" class="btn btn-outline-secondary">
+                {{#str}}allmysubmissions, mod_casestudy{{/str}}
+            </a>
+
+            {{#hasnext}}
+                <a href="{{nexturl}}" class="btn btn-outline-primary" data-action="next-submission">
+                    {{#str}}nextsubmission, mod_casestudy{{/str}} {{{rarrow}}}
+                </a>
+            {{/hasnext}}
+            {{^hasnext}}
+                <button type="button" class="btn btn-outline-secondary" disabled aria-disabled="true">
+                    {{#str}}nextsubmission, mod_casestudy{{/str}} {{{rarrow}}}
+                </button>
+            {{/hasnext}}
+        </div>
+    </div>
+</nav>

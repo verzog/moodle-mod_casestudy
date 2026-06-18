@@ -447,3 +447,24 @@ h3.popover-header {
     background-color: var(--primary, var(--bs-primary));
     color: #fff;
 }
+
+/* Student attempt header + own-submission navigation (view_casestudy.php). */
+.casestudy-attempt-header__title {
+    line-height: 1.2;
+}
+
+.casestudy-attempt-header__status {
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.casestudy-student-navigation .casestudy-student-navigation__counter {
+    margin-right: 1rem;
+}
+
+.casestudy-student-navigation .btn[disabled],
+.casestudy-student-navigation .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+}

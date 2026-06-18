@@ -734,9 +734,14 @@ class renderer extends plugin_renderer_base {
 
         // Add user navigation for users who can view all submissions
         $usernavigationhtml = '';
+        $studentnavigationhtml = '';
         $context = \context_module::instance($cm->id);
+        $submissionrecord = $submission->get_submission();
         if (has_capability('mod/casestudy:viewallsubmissions', $context)) {
-            $usernavigationhtml = $this->render_user_navigation($cm, $casestudy, $submission->get_submission());
+            $usernavigationhtml = $this->render_user_navigation($cm, $casestudy, $submissionrecord);
+        } else if ($submissionrecord->userid == $USER->id) {
+            // The viewer is the owner of the submission; offer prev / next through their own attempts.
+            $studentnavigationhtml = $this->render_student_submission_navigation($cm, $casestudy, $submissionrecord);
         }
 
         $submissiondata['customtemplate'] = $customtemplatehtml;
@@ -751,8 +756,30 @@ class renderer extends plugin_renderer_base {
         // Otherwise, use the mustache template with submission data.
         $submissiondata['actionmenu'] = $actionmenuhtml;
         $submissiondata['usernavigation'] = $usernavigationhtml;
+        $submissiondata['studentnavigation'] = $studentnavigationhtml;
         $submissiondata['gradeform'] = $gradeform;
         $submissiondata['issubmituser'] = (!$cangrade && !has_capability('mod/casestudy:grade', $context)) ? true : false;
+
+        // Header summary for the student so the attempt number + state is unmistakable.
+        $sublocal = $submission->get_submission();
+        $statuskey = 'status_' . $sublocal->status;
+        $submissiondata['attemptheader'] = [
+            'attempt' => (int) $sublocal->attempt,
+            'attemptlabel' => get_string('attemptheading', 'mod_casestudy', (int) $sublocal->attempt),
+            'statuslabel' => get_string($statuskey, 'mod_casestudy'),
+            'statusclass' => helper::get_status_info($sublocal->status, 'class'),
+            'isdraft' => $sublocal->status === CASESTUDY_STATUS_DRAFT,
+            'issubmitted' => in_array($sublocal->status, [
+                CASESTUDY_STATUS_SUBMITTED,
+                CASESTUDY_STATUS_IN_REVIEW,
+                CASESTUDY_STATUS_RESUBMITTED,
+                CASESTUDY_STATUS_RESUBMITTED_INREVIEW,
+            ], true),
+            'isgraded' => in_array($sublocal->status, [
+                CASESTUDY_STATUS_SATISFACTORY,
+                CASESTUDY_STATUS_UNSATISFACTORY,
+            ], true),
+        ];
 
         return $this->render_from_template('mod_casestudy/view_casestudy', $submissiondata);
     }
@@ -820,6 +847,60 @@ class renderer extends plugin_renderer_base {
         ];
 
         return $this->render_from_template('mod_casestudy/grading_navigation', $templatecontext);
+    }
+
+    /**
+     * Render previous/next navigation for a student cycling through their own submissions
+     * (drafts + finalised attempts) ordered by attempt number.
+     *
+     * @param object $cm Course module.
+     * @param \mod_casestudy\local\casestudy $casestudy Activity wrapper.
+     * @param object $currentsubmission The submission currently being viewed.
+     * @return string HTML, or '' when the student only has the one attempt.
+     */
+    protected function render_student_submission_navigation($cm, $casestudy, $currentsubmission) {
+        global $DB, $USER;
+
+        $submissions = $DB->get_records(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudy->casestudyid, 'userid' => $USER->id],
+            'attempt ASC, id ASC',
+            'id, attempt, status'
+        );
+
+        if (count($submissions) < 2) {
+            return '';
+        }
+
+        $ordered = array_values($submissions);
+        $currentindex = 0;
+        foreach ($ordered as $i => $row) {
+            if ((int) $row->id === (int) $currentsubmission->id) {
+                $currentindex = $i;
+                break;
+            }
+        }
+
+        $base = new \moodle_url('/mod/casestudy/view_casestudy.php', ['id' => $cm->id]);
+        $previd = $currentindex > 0 ? $ordered[$currentindex - 1]->id : null;
+        $nextid = $currentindex < count($ordered) - 1 ? $ordered[$currentindex + 1]->id : null;
+
+        $templatecontext = [
+            'cmid' => $cm->id,
+            'currentindex' => $currentindex + 1,
+            'totalcount' => count($ordered),
+            'hasprev' => $previd !== null,
+            'hasnext' => $nextid !== null,
+            'prevurl' => $previd
+                ? (new \moodle_url($base, ['submissionid' => $previd]))->out(false) : '',
+            'nexturl' => $nextid
+                ? (new \moodle_url($base, ['submissionid' => $nextid]))->out(false) : '',
+            'larrow' => $this->output->larrow(),
+            'rarrow' => $this->output->rarrow(),
+            'listurl' => (new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]))->out(false),
+        ];
+
+        return $this->render_from_template('mod_casestudy/student_navigation', $templatecontext);
     }
 
     /**
