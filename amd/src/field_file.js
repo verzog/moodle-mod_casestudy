@@ -32,11 +32,21 @@ const CONTENT_SELECTOR = [
 ].join(', ');
 
 // Things we never want to lightbox even if they live inside the submission body.
+// Includes the grading panel and any editor/form container so a grader clicking
+// an inline image in their feedback editor doesn't get intercepted.
 const SKIP_SELECTOR = [
     '.userpicture',
     '.icon',
     '[data-region="title"]',
-    '.modal'
+    '.modal',
+    '.right-section',
+    '#casestudy-gradeform-container',
+    'form',
+    '[contenteditable="true"]',
+    '.editor_tiny',
+    '.editor_atto',
+    '.tox-tinymce',
+    '.atto_wrap'
 ].join(', ');
 
 /**
@@ -101,8 +111,10 @@ const bindDelegatedHandler = () => {
             return;
         }
         // Skip if the image is inside a link that goes somewhere else — defer to the link.
+        // Compare resolved URLs so relative pluginfile.php hrefs don't look different to
+        // the browser-resolved img.src.
         const enclosingLink = img.closest('a[href]');
-        if (enclosingLink && enclosingLink.getAttribute('href') !== img.src) {
+        if (enclosingLink && enclosingLink.href !== img.src) {
             return;
         }
 
