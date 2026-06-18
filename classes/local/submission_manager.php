@@ -908,11 +908,81 @@ class submission_manager {
             if (!empty($previouscontent)) {
                 $this->save_submission_content($newsubmission->id, $previouscontent);
             }
+
+            // Also copy the files: file-field uploads (one filearea per field)
+            // and rich-text inline images (shared 'submission_richtext' area).
+            // Both use the submission id as itemid, so without this step the
+            // copied HTML/value rows would point at the parent itemid and the
+            // rendered URLs 404 on the resubmission.
+            $this->copy_submission_files($submission->id, $newsubmission->id);
         }
 
         $transaction->allow_commit();
 
         return $newsubmission;
+    }
+
+    /**
+     * Copy files from one submission's fileareas to another's. Used when
+     * recreating a submission for resubmission so that file-field uploads and
+     * rich-text inline images remain visible on the new attempt.
+     *
+     * @param int $fromsubmissionid Source submission id.
+     * @param int $tosubmissionid Destination submission id.
+     */
+    protected function copy_submission_files(int $fromsubmissionid, int $tosubmissionid): void {
+        global $DB;
+
+        if ($fromsubmissionid <= 0 || $tosubmissionid <= 0 || $fromsubmissionid === $tosubmissionid) {
+            return;
+        }
+
+        $fs = get_file_storage();
+        $context = $this->context;
+        if (!$context) {
+            $cm = get_coursemodule_from_instance('casestudy', $this->casestudyid);
+            if (!$cm) {
+                return;
+            }
+            $context = \context_module::instance($cm->id);
+        }
+        $contextid = $context->id;
+
+        // Shared rich-text inline image area (one per submission).
+        $this->copy_filearea($fs, $contextid, 'submission_richtext', $fromsubmissionid, $tosubmissionid);
+
+        // Per-field file areas (file fields keyed by field id).
+        $fieldids = $DB->get_fieldset_select(
+            'casestudy_fields',
+            'id',
+            'casestudyid = :casestudyid',
+            ['casestudyid' => $this->casestudy->id]
+        );
+        foreach ($fieldids as $fieldid) {
+            $this->copy_filearea($fs, $contextid, 'field_' . (int)$fieldid, $fromsubmissionid, $tosubmissionid);
+        }
+    }
+
+    /**
+     * Copy every file in a (component=mod_casestudy, filearea, itemid) area
+     * onto a new itemid in the same area.
+     *
+     * @param \file_storage $fs
+     * @param int $contextid
+     * @param string $filearea
+     * @param int $fromitemid
+     * @param int $toitemid
+     */
+    protected function copy_filearea(\file_storage $fs, int $contextid, string $filearea, int $fromitemid, int $toitemid): void {
+        $files = $fs->get_area_files($contextid, 'mod_casestudy', $filearea, $fromitemid, 'id', false);
+        foreach ($files as $file) {
+            $fs->create_file_from_storedfile([
+                'contextid' => $contextid,
+                'component' => 'mod_casestudy',
+                'filearea' => $filearea,
+                'itemid' => $toitemid,
+            ], $file);
+        }
     }
 
 
