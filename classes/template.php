@@ -1,25 +1,22 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// Copyright (c) Skin Cancer College Australasia.
+// All rights reserved.
 //
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// This file is part of a proprietary plugin developed by Skin Cancer
+// College Australasia for use with Moodle. It is NOT free software and is
+// NOT released under the GNU General Public License.
 //
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// Unauthorised copying, distribution, modification, or use of this file,
+// in whole or in part, via any medium, is strictly prohibited without the
+// prior written permission of Skin Cancer College Australasia. The software
+// is provided "as is", without warranty of any kind, express or implied.
 
 /**
  * Template class for case study submissions
  *
  * @package    mod_casestudy
- * @copyright  2025 Skin Cancer College Australasia
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  © Skin Cancer College Australasia
+ * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
 namespace mod_casestudy;
@@ -370,7 +367,7 @@ class template {
      * Form templates use field tags that get replaced with actual form input elements.
      *
      * @param array $fields Array of field objects
-     * @return array Available tags organized by category
+     * @return array Available tags organised by category
      */
     public function get_available_form_tags($fields) {
         $tags = [
