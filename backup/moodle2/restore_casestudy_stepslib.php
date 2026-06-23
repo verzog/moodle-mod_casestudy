@@ -26,6 +26,17 @@ defined('MOODLE_INTERNAL') || die();
  */
 class restore_casestudy_activity_structure_step extends restore_activity_structure_step {
     /**
+     * Original (pre-restore) ids of file-type fields, collected as fields are processed.
+     *
+     * File-field uploads live in per-field areas named field_<fieldid>. Because the field id
+     * is part of the area name (and gets remapped on restore), after_execute uses these to
+     * pull the files in under their original area name and then move them to the new id.
+     *
+     * @var int[]
+     */
+    protected $filefieldoldids = [];
+
+    /**
      * Define the structure of the restore workflow.
      *
      * @return restore_path_element $structure
@@ -114,6 +125,12 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
 
         $newitemid = $DB->insert_record('casestudy_fields', $data);
         $this->set_mapping('casestudy_field', $oldid, $newitemid);
+
+        // Remember file-type fields so after_execute can restore and remap their
+        // per-field file areas (field_<id>).
+        if (isset($data->type) && $data->type === 'file') {
+            $this->filefieldoldids[] = $oldid;
+        }
     }
 
     /**
@@ -283,8 +300,58 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         $this->add_related_files('mod_casestudy', 'intro', null);
         $this->add_related_files('mod_casestudy', 'graderinfo', null);
         $this->add_related_files('mod_casestudy', 'description', 'casestudy_field');
+        // Legacy/static content area: kept for backwards compatibility with any older backup
+        // that stored file content here. Current file-field uploads use field_<id> areas below.
         $this->add_related_files('mod_casestudy', 'content', 'casestudy_content');
         $this->add_related_files('mod_casestudy', 'feedback', 'casestudy_grade');
         $this->add_related_files('mod_casestudy', 'submission_richtext', 'casestudy_submission');
+
+        // Restore file-field uploads. They were backed up under their original field_<oldfieldid>
+        // area keyed by submission id. The filearea name embeds the field id, which Moodle remaps
+        // on restore, so the files have to be moved to field_<newfieldid>. This is done in two
+        // phases through a collision-free staging area, because a new field id can numerically
+        // equal a different field's old id (e.g. when restoring into a fresh site), and a naive
+        // in-place rename could otherwise overwrite another field's files.
+        $fs = get_file_storage();
+        $contextid = $this->task->get_contextid();
+
+        // Phase 1: pull each backed-up field_<oldfieldid> area in (remapping the submission
+        // itemid) and drain it into a staging area keyed by the new field id.
+        foreach ($this->filefieldoldids as $oldfieldid) {
+            $oldarea = 'field_' . $oldfieldid;
+            $this->add_related_files('mod_casestudy', $oldarea, 'casestudy_submission');
+
+            $newfieldid = $this->get_mappingid('casestudy_field', $oldfieldid);
+            if (empty($newfieldid) || (int)$newfieldid === (int)$oldfieldid) {
+                // No mapping, or the id is unchanged; files already sit in the correct area.
+                continue;
+            }
+
+            $stagearea = 'restorestage_field_' . $newfieldid;
+            $files = $fs->get_area_files($contextid, 'mod_casestudy', $oldarea, false, 'id', false);
+            foreach ($files as $file) {
+                $fs->create_file_from_storedfile((object)['filearea' => $stagearea], $file);
+                $file->delete();
+            }
+            $fs->delete_area_files($contextid, 'mod_casestudy', $oldarea);
+        }
+
+        // Phase 2: now that every source area has been cleared, move the staged files into their
+        // final field_<newfieldid> area.
+        foreach ($this->filefieldoldids as $oldfieldid) {
+            $newfieldid = $this->get_mappingid('casestudy_field', $oldfieldid);
+            if (empty($newfieldid) || (int)$newfieldid === (int)$oldfieldid) {
+                continue;
+            }
+
+            $stagearea = 'restorestage_field_' . $newfieldid;
+            $finalarea = 'field_' . $newfieldid;
+            $files = $fs->get_area_files($contextid, 'mod_casestudy', $stagearea, false, 'id', false);
+            foreach ($files as $file) {
+                $fs->create_file_from_storedfile((object)['filearea' => $finalarea], $file);
+                $file->delete();
+            }
+            $fs->delete_area_files($contextid, 'mod_casestudy', $stagearea);
+        }
     }
 }

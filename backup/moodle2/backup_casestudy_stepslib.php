@@ -31,6 +31,7 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
      * @return backup_nested_element
      */
     protected function define_structure() {
+        global $DB;
 
         // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
@@ -145,9 +146,25 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
         $casestudy->annotate_files('mod_casestudy', 'intro', null);
         $casestudy->annotate_files('mod_casestudy', 'graderinfo', null);
         $field->annotate_files('mod_casestudy', 'description', 'id');
-        $content->annotate_files('mod_casestudy', 'content', 'id');
         $grade->annotate_files('mod_casestudy', 'feedback', 'id');
         $submission->annotate_files('mod_casestudy', 'submission_richtext', 'id');
+
+        // File-field uploads are not stored in a single static area: each file field keeps
+        // its files in a per-field area named field_<fieldid>, keyed by the submission id.
+        // Enumerate this activity's file fields and annotate each real area so the uploaded
+        // files are actually included in the backup. (Files only exist alongside submissions,
+        // so this is only relevant when user info is included.)
+        if ($userinfo) {
+            $filefieldids = $DB->get_fieldset_select(
+                'casestudy_fields',
+                'id',
+                'casestudyid = :casestudyid AND type = :type',
+                ['casestudyid' => $this->task->get_activityid(), 'type' => 'file']
+            );
+            foreach ($filefieldids as $filefieldid) {
+                $submission->annotate_files('mod_casestudy', 'field_' . $filefieldid, 'id');
+            }
+        }
 
         // Return the root element (casestudy), wrapped into standard activity structure.
         return $this->prepare_activity_structure($casestudy);
