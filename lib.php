@@ -750,8 +750,11 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
         $file = $fs->get_file($context->id, 'mod_casestudy', $filearea, $itemid, $filepath, $filename);
     } else if ($filearea === 'intro' || $filearea === 'graderinfo') {
         // Activity-level rich-text areas always use itemid 0. Grader information is for markers
-        // only, so restrict it; the intro is visible to anyone who can reach the activity.
-        if ($filearea === 'graderinfo' && !has_capability('mod/casestudy:viewallsubmissions', $context)) {
+        // only, so restrict it; the intro is visible to anyone who can reach the activity. Anyone
+        // able to grade (mod/casestudy:grade) or to view all submissions counts as a marker.
+        $ismarker = has_capability('mod/casestudy:grade', $context)
+            || has_capability('mod/casestudy:viewallsubmissions', $context);
+        if ($filearea === 'graderinfo' && !$ismarker) {
             send_file_not_found();
         }
 
@@ -759,8 +762,9 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
         $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
         $file = $fs->get_file($context->id, 'mod_casestudy', $filearea, 0, $filepath, $filename);
     } else if ($filearea === 'feedback') {
-        // Grader feedback files: itemid is the casestudy_grades ID. Only the owning student
-        // and markers may view them.
+        // Grader feedback files: itemid is the casestudy_grades ID. Only the owning student and
+        // markers may view them. Markers are users who can grade or view all submissions, matching
+        // the capabilities that grant entry to the grading flow (view_casestudy.php / submission table).
         $itemid = array_shift($args);
         $filename = array_pop($args);
         $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
@@ -778,7 +782,9 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
             send_file_not_found();
         }
 
-        if ($submission->userid != $USER->id && !has_capability('mod/casestudy:viewallsubmissions', $context)) {
+        $ismarker = has_capability('mod/casestudy:grade', $context)
+            || has_capability('mod/casestudy:viewallsubmissions', $context);
+        if ($submission->userid != $USER->id && !$ismarker) {
             send_file_not_found();
         }
 
