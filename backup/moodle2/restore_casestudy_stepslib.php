@@ -37,6 +37,20 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
     protected $filefieldoldids = [];
 
     /**
+     * Restored content rows belonging to file-type fields, for legacy backups only.
+     *
+     * Older plugin versions backed up file-field uploads under the static 'content' area keyed
+     * by casestudy_content.id (the backup annotated `content`/`content.id`), even though the
+     * module serves uploads from field_<fieldid> keyed by submission id. For those backups,
+     * after_execute moves any restored 'content'-area files into the correct per-field area so
+     * they display. Each entry is an object with ->contentid, ->fieldid and ->submissionid
+     * (all post-restore ids). Empty for current-format backups, where it stays a harmless no-op.
+     *
+     * @var \stdClass[]
+     */
+    protected $legacyfilecontents = [];
+
+    /**
      * Define the structure of the restore workflow.
      *
      * @return restore_path_element $structure
@@ -248,6 +262,10 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
 
         $data->submissionid = $this->get_new_parentid('casestudy_submission');
 
+        // Remember whether this row belongs to a file-type field before the id is remapped,
+        // so legacy 'content'-area uploads can be moved to field_<id> in after_execute.
+        $isfilefield = !empty($data->fieldid) && in_array((int)$data->fieldid, $this->filefieldoldids, true);
+
         // Map fieldid.
         if (!empty($data->fieldid)) {
             $data->fieldid = $this->get_mappingid('casestudy_field', $data->fieldid);
@@ -257,6 +275,14 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         if ($data->fieldid) {
             $newitemid = $DB->insert_record('casestudy_content', $data);
             $this->set_mapping('casestudy_content', $oldid, $newitemid);
+
+            if ($isfilefield) {
+                $this->legacyfilecontents[] = (object) [
+                    'contentid' => $newitemid,
+                    'fieldid' => $data->fieldid,
+                    'submissionid' => $data->submissionid,
+                ];
+            }
         }
     }
 
@@ -351,6 +377,34 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
                 $file->delete();
             }
             $fs->delete_area_files($contextid, 'mod_casestudy', $stagearea);
+        }
+
+        // Legacy backups (older plugin versions) stored file-field uploads in the static 'content'
+        // area keyed by casestudy_content.id; line above already restored them into that area. The
+        // module serves uploads from field_<newfieldid> keyed by submission id, so move them there
+        // or they would never display. No-op for current-format backups, whose 'content' area holds
+        // no files.
+        foreach ($this->legacyfilecontents as $content) {
+            $finalarea = 'field_' . $content->fieldid;
+            $files = $fs->get_area_files($contextid, 'mod_casestudy', 'content', $content->contentid, 'id', false);
+            foreach ($files as $file) {
+                // If the current-format upload is already in the destination, just drop the legacy copy.
+                $exists = $fs->file_exists(
+                    $contextid,
+                    'mod_casestudy',
+                    $finalarea,
+                    $content->submissionid,
+                    $file->get_filepath(),
+                    $file->get_filename()
+                );
+                if (!$exists) {
+                    $fs->create_file_from_storedfile(
+                        (object) ['filearea' => $finalarea, 'itemid' => $content->submissionid],
+                        $file
+                    );
+                }
+                $file->delete();
+            }
         }
     }
 }
