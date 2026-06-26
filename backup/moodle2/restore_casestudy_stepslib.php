@@ -299,7 +299,6 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         // Add casestudy related files, no need to match by itemname (just internally handled context).
         $this->add_related_files('mod_casestudy', 'intro', null);
         $this->add_related_files('mod_casestudy', 'graderinfo', null);
-        $this->add_related_files('mod_casestudy', 'description', 'casestudy_field');
         // Legacy/static content area: kept for backwards compatibility with any older backup
         // that stored file content here. Current file-field uploads use field_<id> areas below.
         $this->add_related_files('mod_casestudy', 'content', 'casestudy_content');

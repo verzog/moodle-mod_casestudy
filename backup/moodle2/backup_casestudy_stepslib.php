@@ -145,7 +145,6 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
         // Define file annotations.
         $casestudy->annotate_files('mod_casestudy', 'intro', null);
         $casestudy->annotate_files('mod_casestudy', 'graderinfo', null);
-        $field->annotate_files('mod_casestudy', 'description', 'id');
         $grade->annotate_files('mod_casestudy', 'feedback', 'id');
         $submission->annotate_files('mod_casestudy', 'submission_richtext', 'id');
 
