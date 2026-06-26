@@ -406,5 +406,19 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
                 $file->delete();
             }
         }
+
+        // Optimise restored uploads when enabled, so restoring an old backup full of large
+        // originals does not bloat this site's storage and future backups. No-op for images
+        // already within bounds.
+        if (\mod_casestudy\local\image_optimizer::is_enabled_on_restore()) {
+            $fileids = \mod_casestudy\local\image_optimizer::get_field_file_ids($contextid);
+            $files = [];
+            foreach ($fileids as $fileid) {
+                if ($stored = $fs->get_file_by_id($fileid)) {
+                    $files[] = $stored;
+                }
+            }
+            \mod_casestudy\local\image_optimizer::optimize_files($fs, $files);
+        }
     }
 }
