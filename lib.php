@@ -93,10 +93,54 @@ function casestudy_add_instance(stdClass $casestudy, mod_casestudy_mod_form $mfo
 
     $casestudy->id = $DB->insert_record('casestudy', $casestudy);
 
+    // Persist grader-information editor content and its embedded files (needs the new id/context).
+    casestudy_save_graderinfo_editor($casestudy);
+
     casestudy_update_completion_criteria($casestudy);
     casestudy_grade_item_update($casestudy);
 
     return $casestudy->id;
+}
+
+/**
+ * Save the grader-information editor's HTML and embedded files into the graderinfo file area.
+ *
+ * The form supplies graderinfo as an editor element (graderinfo_editor); without this the text
+ * and any pasted images are silently dropped. Guarded so programmatic/restore paths that do not
+ * provide the editor element are left untouched.
+ *
+ * @param stdClass $casestudy Instance data from the module form (must have id and coursemodule)
+ * @return void
+ */
+function casestudy_save_graderinfo_editor(stdClass $casestudy) {
+    global $DB;
+
+    if (empty($casestudy->graderinfo_editor) || !is_array($casestudy->graderinfo_editor)
+            || empty($casestudy->coursemodule)) {
+        return;
+    }
+
+    $context = context_module::instance($casestudy->coursemodule);
+    $editoroptions = [
+        'maxfiles' => EDITOR_UNLIMITED_FILES,
+        'noclean' => true,
+        'context' => $context,
+        'subdirs' => true,
+    ];
+
+    $update = (object) ['id' => $casestudy->id];
+    $update->graderinfo = file_save_draft_area_files(
+        $casestudy->graderinfo_editor['itemid'],
+        $context->id,
+        'mod_casestudy',
+        'graderinfo',
+        0,
+        $editoroptions,
+        $casestudy->graderinfo_editor['text']
+    );
+    $update->graderinfoformat = $casestudy->graderinfo_editor['format'];
+
+    $DB->update_record('casestudy', $update);
 }
 
 /**
@@ -115,6 +159,9 @@ function casestudy_update_instance(stdClass $casestudy, mod_casestudy_mod_form $
     $casestudy->id = $casestudy->instance;
 
     $result = $DB->update_record('casestudy', $casestudy);
+
+    // Persist grader-information editor content and its embedded files.
+    casestudy_save_graderinfo_editor($casestudy);
 
     casestudy_update_completion_criteria($casestudy);
     casestudy_grade_item_update($casestudy);
@@ -664,7 +711,11 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
 
     require_login($course, true, $cm);
 
+    $fs = get_file_storage();
+    $file = null;
+
     if (strpos($filearea, 'field_') !== false || $filearea === 'submission_richtext') {
+        // Per-submission areas: itemid is the submission ID.
         $itemid = array_shift($args);
         $filename = array_pop($args);
         $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
@@ -696,20 +747,60 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
             }
         }
 
-        $fs = get_file_storage();
         $file = $fs->get_file($context->id, 'mod_casestudy', $filearea, $itemid, $filepath, $filename);
-
-        if (!$file || $file->is_directory()) {
+    } else if ($filearea === 'intro' || $filearea === 'graderinfo') {
+        // Activity-level rich-text areas always use itemid 0. Grader information is for markers
+        // only, so restrict it; the intro is visible to anyone who can reach the activity. Anyone
+        // able to grade (mod/casestudy:grade) or to view all submissions counts as a marker.
+        $ismarker = has_capability('mod/casestudy:grade', $context)
+            || has_capability('mod/casestudy:viewallsubmissions', $context);
+        if ($filearea === 'graderinfo' && !$ismarker) {
             send_file_not_found();
         }
 
-        // Send the file. Force download only when the caller asked for it (e.g. download links);
-        // leave images and other web-renderable files to display inline. Keep lifetime at 0 so
-        // replacing an attachment with the same filename does not serve stale cached content.
-        send_stored_file($file, 0, 0, $forcedownload, $options);
+        $filename = array_pop($args);
+        $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+        $file = $fs->get_file($context->id, 'mod_casestudy', $filearea, 0, $filepath, $filename);
+    } else if ($filearea === 'feedback') {
+        // Grader feedback files: itemid is the casestudy_grades ID. Only the owning student and
+        // markers may view them. Markers are users who can grade or view all submissions, matching
+        // the capabilities that grant entry to the grading flow (view_casestudy.php / submission table).
+        $itemid = array_shift($args);
+        $filename = array_pop($args);
+        $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+
+        $grade = $DB->get_record('casestudy_grades', ['id' => $itemid], 'submissionid', MUST_EXIST);
+        $submission = $DB->get_record(
+            'casestudy_submissions',
+            ['id' => $grade->submissionid],
+            'userid, casestudyid',
+            MUST_EXIST
+        );
+
+        // Verify this feedback belongs to this case study.
+        if ($submission->casestudyid != $cm->instance) {
+            send_file_not_found();
+        }
+
+        $ismarker = has_capability('mod/casestudy:grade', $context)
+            || has_capability('mod/casestudy:viewallsubmissions', $context);
+        if ($submission->userid != $USER->id && !$ismarker) {
+            send_file_not_found();
+        }
+
+        $file = $fs->get_file($context->id, 'mod_casestudy', $filearea, $itemid, $filepath, $filename);
     } else {
         send_file_not_found();
     }
+
+    if (!$file || $file->is_directory()) {
+        send_file_not_found();
+    }
+
+    // Send the file. Force download only when the caller asked for it (e.g. download links);
+    // leave images and other web-renderable files to display inline. Keep lifetime at 0 so
+    // replacing an attachment with the same filename does not serve stale cached content.
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }
 
 /**

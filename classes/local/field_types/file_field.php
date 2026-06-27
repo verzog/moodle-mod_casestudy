@@ -559,6 +559,12 @@ class file_field extends base_field {
             $itemid,
             $options
         );
+
+        // Downscale/re-encode large images so storage and backups stay manageable. Only oversized
+        // images are touched, and only once, so this is a no-op for already-optimised uploads.
+        if ($context !== null && \mod_casestudy\local\image_optimizer::is_enabled()) {
+            \mod_casestudy\local\image_optimizer::optimize_area($context->id, $filearea, (int) $itemid);
+        }
     }
 
     /**
