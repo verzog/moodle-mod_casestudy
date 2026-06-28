@@ -720,31 +720,25 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
         $filename = array_pop($args);
         $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
 
-        // For richtext fields, itemid is the submission ID - verify user can view it.
-        if ($filearea === 'submission_richtext') {
-            $submission = $DB->get_record('casestudy_submissions', ['id' => $itemid], 'userid, casestudyid', MUST_EXIST);
+        // Both file-field uploads (field_<id>) and rich-text embeds (submission_richtext) are keyed
+        // by submission ID. Verify the submission belongs to this case study and that the user is
+        // allowed to see it before serving the file, so one student cannot fetch another student's
+        // uploaded images by guessing the submission ID and filename.
+        $submission = $DB->get_record('casestudy_submissions', ['id' => $itemid], 'userid, casestudyid', MUST_EXIST);
 
-            // Verify this submission belongs to this case study.
-            if ($submission->casestudyid != $cm->instance) {
-                send_file_not_found();
-            }
+        // Verify this submission belongs to this case study.
+        if ($submission->casestudyid != $cm->instance) {
+            send_file_not_found();
+        }
 
-            // Check if user can view this submission.
-            $canview = false;
-
-            // User can view their own submission.
-            if ($submission->userid == $USER->id) {
-                $canview = true;
-            }
-
-            // Teachers/markers can view all submissions.
-            if (has_capability('mod/casestudy:viewallsubmissions', $context)) {
-                $canview = true;
-            }
-
-            if (!$canview) {
-                send_file_not_found();
-            }
+        // Check if user can view this submission: the owner, or a marker. Markers are users who can
+        // grade or view all submissions - this matches the capabilities that grant entry to the
+        // grading flow in view_casestudy.php, so a grade-only role (mod/casestudy:grade without
+        // viewallsubmissions) that can open and grade a submission can also load its uploaded files.
+        $ismarker = has_capability('mod/casestudy:grade', $context)
+            || has_capability('mod/casestudy:viewallsubmissions', $context);
+        if ($submission->userid != $USER->id && !$ismarker) {
+            send_file_not_found();
         }
 
         $file = $fs->get_file($context->id, 'mod_casestudy', $filearea, $itemid, $filepath, $filename);
