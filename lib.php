@@ -731,20 +731,13 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
             send_file_not_found();
         }
 
-        // Check if user can view this submission.
-        $canview = false;
-
-        // User can view their own submission.
-        if ($submission->userid == $USER->id) {
-            $canview = true;
-        }
-
-        // Teachers/markers can view all submissions.
-        if (has_capability('mod/casestudy:viewallsubmissions', $context)) {
-            $canview = true;
-        }
-
-        if (!$canview) {
+        // Check if user can view this submission: the owner, or a marker. Markers are users who can
+        // grade or view all submissions - this matches the capabilities that grant entry to the
+        // grading flow in view_casestudy.php, so a grade-only role (mod/casestudy:grade without
+        // viewallsubmissions) that can open and grade a submission can also load its uploaded files.
+        $ismarker = has_capability('mod/casestudy:grade', $context)
+            || has_capability('mod/casestudy:viewallsubmissions', $context);
+        if ($submission->userid != $USER->id && !$ismarker) {
             send_file_not_found();
         }
 
