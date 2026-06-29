@@ -63,6 +63,10 @@ EOT);
     exit(empty($options['cmid']) && !$options['help'] ? 1 : 0);
 }
 
+if (!is_numeric($options['cmid']) || (int) $options['cmid'] <= 0) {
+    cli_error('--cmid must be a positive integer.');
+}
+
 $report = \mod_casestudy\local\richtext_repair::diagnose((int) $options['cmid']);
 
 $totalpresent = 0;

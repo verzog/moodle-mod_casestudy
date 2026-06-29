@@ -46,25 +46,22 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('repairrichtexttitle', 'mod_casestudy'));
 echo $OUTPUT->box(get_string('repairrichtextintro', 'mod_casestudy'));
 
-// Scope form (course module id is optional; blank = whole site).
+// Scope form (course module id is optional; blank = whole site). Stable action tokens are sent
+// via the button value so PARAM_ALPHA does not mangle them (translated labels are display only).
 echo html_writer::start_tag('form', ['method' => 'get', 'action' => $baseurl->out(false), 'class' => 'form-inline mb-3']);
 echo html_writer::label(get_string('repairrichtextcmid', 'mod_casestudy'), 'cmid', true, ['class' => 'mr-2']);
 echo html_writer::empty_tag('input', [
     'type' => 'number', 'name' => 'cmid', 'id' => 'cmid', 'value' => $cmid ?: '',
     'class' => 'form-control mr-2', 'min' => 0, 'placeholder' => get_string('repairrichtextcmidall', 'mod_casestudy'),
 ]);
-echo html_writer::empty_tag('input', [
-    'type' => 'submit', 'name' => 'action', 'value' => get_string('repairrichtextdiagnose', 'mod_casestudy'),
-    'class' => 'btn btn-secondary mr-2',
-]);
-echo html_writer::empty_tag('input', [
-    'type' => 'submit', 'name' => 'action', 'value' => get_string('repairrichtextpreview', 'mod_casestudy'),
-    'class' => 'btn btn-secondary',
-]);
+echo html_writer::tag('button', get_string('repairrichtextdiagnose', 'mod_casestudy'),
+    ['type' => 'submit', 'name' => 'action', 'value' => 'diagnose', 'class' => 'btn btn-secondary mr-2']);
+echo html_writer::tag('button', get_string('repairrichtextpreview', 'mod_casestudy'),
+    ['type' => 'submit', 'name' => 'action', 'value' => 'preview', 'class' => 'btn btn-secondary']);
 echo html_writer::end_tag('form');
 
 // Diagnose: list each referenced image and whether the file exists. Needs a specific activity.
-if ($action === get_string('repairrichtextdiagnose', 'mod_casestudy')) {
+if ($action === 'diagnose') {
     if (!$cmid) {
         echo $OUTPUT->notification(get_string('repairrichtextneedcmid', 'mod_casestudy'), 'notifyproblem');
     } else {
@@ -99,7 +96,7 @@ if ($action === get_string('repairrichtextdiagnose', 'mod_casestudy')) {
 }
 
 // Preview (dry run): count what an apply would change, and offer the apply button.
-if ($action === get_string('repairrichtextpreview', 'mod_casestudy')) {
+if ($action === 'preview') {
     $stats = richtext_repair::normalise($cmid, false);
     echo $OUTPUT->heading(get_string('repairrichtextpreviewheading', 'mod_casestudy'), 4);
     echo html_writer::div(get_string('repairrichtextwouldrewrite', 'mod_casestudy',

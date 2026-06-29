@@ -70,9 +70,15 @@ EOT);
 
 $apply = empty($options['dry-run']);
 
+// Reject a mistyped --cmid rather than silently falling back to the whole-site (0) scope.
+if (!is_numeric($options['cmid']) || (int) $options['cmid'] < 0) {
+    cli_error('--cmid must be a positive integer (or omit it to process the whole site).');
+}
+$cmid = (int) $options['cmid'];
+
 cli_writeln($apply ? 'Normalising rich-text image URLs...' : '[dry run] Checking rich-text image URLs...');
 
-$stats = \mod_casestudy\local\richtext_repair::normalise((int) $options['cmid'], $apply);
+$stats = \mod_casestudy\local\richtext_repair::normalise($cmid, $apply);
 
 cli_writeln('');
 cli_writeln(sprintf('Scanned content rows:   %d', $stats->scanned));
