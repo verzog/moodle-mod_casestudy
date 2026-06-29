@@ -70,63 +70,20 @@ EOT);
 
 $apply = empty($options['dry-run']);
 
-// Build the row set: only content that actually mentions the rich-text area, optionally
-// limited to one activity.
-$needle = '%submission_richtext%';
-$params = ['needle' => $needle];
-
-if (!empty($options['cmid'])) {
-    $cm = get_coursemodule_from_id('casestudy', (int) $options['cmid'], 0, false, MUST_EXIST);
-    $sql = "SELECT cc.id, cc.content, cc.submissionid
-              FROM {casestudy_content} cc
-              JOIN {casestudy_submissions} cs ON cs.id = cc.submissionid
-             WHERE cs.casestudyid = :instance
-               AND " . $DB->sql_like('cc.content', ':needle');
-    $params['instance'] = $cm->instance;
-} else {
-    $sql = "SELECT id, content, submissionid
-              FROM {casestudy_content}
-             WHERE " . $DB->sql_like('content', ':needle');
+// Reject a mistyped --cmid rather than silently falling back to the whole-site (0) scope.
+if (!is_numeric($options['cmid']) || (int) $options['cmid'] < 0) {
+    cli_error('--cmid must be a positive integer (or omit it to process the whole site).');
 }
+$cmid = (int) $options['cmid'];
 
 cli_writeln($apply ? 'Normalising rich-text image URLs...' : '[dry run] Checking rich-text image URLs...');
 
-$scanned = 0;
-$changedrows = 0;
-$replacements = 0;
-
-$rs = $DB->get_recordset_sql($sql, $params);
-foreach ($rs as $row) {
-    $scanned++;
-    $subid = (int) $row->submissionid;
-    if ($subid <= 0 || $row->content === null || $row->content === '') {
-        continue;
-    }
-
-    // Only rewrite URLs that target this row's own submission rich-text area, so a
-    // (rare) reference to another submission's file is never silently retargeted.
-    $patterns = [
-        '~https?://[^"\'\s<>]+?/pluginfile\.php/\d+/mod_casestudy/submission_richtext/' . $subid . '/~i',
-        '~https?://[^"\'\s<>]+?/pluginfile\.php\?file=/\d+/mod_casestudy/submission_richtext/' . $subid . '/~i',
-    ];
-
-    $count = 0;
-    $updated = preg_replace($patterns, '@@PLUGINFILE@@/', $row->content, -1, $count);
-
-    if ($updated !== null && $count > 0 && $updated !== $row->content) {
-        $changedrows++;
-        $replacements += $count;
-        if ($apply) {
-            $DB->set_field('casestudy_content', 'content', $updated, ['id' => $row->id]);
-        }
-    }
-}
-$rs->close();
+$stats = \mod_casestudy\local\richtext_repair::normalise($cmid, $apply);
 
 cli_writeln('');
-cli_writeln(sprintf('Scanned content rows:   %d', $scanned));
+cli_writeln(sprintf('Scanned content rows:   %d', $stats->scanned));
 cli_writeln(sprintf('%s %d row(s), %d URL(s)',
-    $apply ? 'Rewrote:               ' : 'Would rewrite:         ', $changedrows, $replacements));
+    $apply ? 'Rewrote:               ' : 'Would rewrite:         ', $stats->rows, $stats->urls));
 
 if (!$apply) {
     cli_writeln('');
