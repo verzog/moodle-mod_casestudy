@@ -791,10 +791,13 @@ function casestudy_pluginfile($course, $cm, $context, $filearea, array $args, $f
         send_file_not_found();
     }
 
-    // Send the file. Force download only when the caller asked for it (e.g. download links);
-    // leave images and other web-renderable files to display inline. Keep lifetime at 0 so
-    // replacing an attachment with the same filename does not serve stale cached content.
-    send_stored_file($file, 0, 0, $forcedownload, $options);
+    // Raster images are safe to serve inline and cache; SVG and non-image
+    // uploads can carry script, so those keep the no-cache forced download.
+    $mimetype = $file->get_mimetype();
+    $inlinesafe = (strpos($mimetype, 'image/') === 0 && $mimetype !== 'image/svg+xml');
+    $lifetime = $inlinesafe ? DAYSECS : 0;
+    $download = $forcedownload || !$inlinesafe;
+    send_stored_file($file, $lifetime, 0, $download, $options);
 }
 
 /**
