@@ -63,52 +63,23 @@ EOT);
     exit(empty($options['cmid']) && !$options['help'] ? 1 : 0);
 }
 
-$cm = get_coursemodule_from_id('casestudy', (int) $options['cmid'], 0, false, MUST_EXIST);
-$context = context_module::instance($cm->id);
-$fs = get_file_storage();
-
-// Match both stored shapes: absolute submission_richtext URLs and the @@PLUGINFILE@@
-// placeholder (the normal editor save tokenises embedded files to the latter).
-$rows = $DB->get_records_sql(
-    "SELECT cc.id, cc.content, cc.submissionid
-       FROM {casestudy_content} cc
-       JOIN {casestudy_submissions} cs ON cs.id = cc.submissionid
-      WHERE cs.casestudyid = :instance
-        AND (" . $DB->sql_like('cc.content', ':needle1')
-        . " OR " . $DB->sql_like('cc.content', ':needle2') . ")",
-    ['instance' => $cm->instance, 'needle1' => '%submission_richtext%', 'needle2' => '%@@PLUGINFILE@@%']
-);
-
-cli_writeln(sprintf('Context %d — %d rich-text content row(s) reference images.', $context->id, count($rows)));
+$report = \mod_casestudy\local\richtext_repair::diagnose((int) $options['cmid']);
 
 $totalpresent = 0;
 $totalmissing = 0;
+$bysubmission = [];
+foreach ($report as $item) {
+    $bysubmission[$item->submissionid][] = $item;
+    $item->present ? $totalpresent++ : $totalmissing++;
+}
 
-foreach ($rows as $row) {
-    // Pull the filename that follows .../submission_richtext/<itemid>/ in absolute URLs,
-    // and the filename that follows @@PLUGINFILE@@/ for already-tokenised content.
-    preg_match_all(
-        '~(?:submission_richtext(?:/|%2F)\d+(?:/|%2F)|@@PLUGINFILE@@/)([^"\'\s<>?]+)~i',
-        $row->content,
-        $matches
-    );
-    $filenames = array_unique($matches[1] ?? []);
-    if (!$filenames) {
-        continue;
-    }
+cli_writeln(sprintf('%d submission(s) reference rich-text images.', count($bysubmission)));
 
+foreach ($bysubmission as $submissionid => $items) {
     cli_writeln('');
-    cli_writeln(sprintf('Submission %d (content row %d):', $row->submissionid, $row->id));
-    foreach ($filenames as $filename) {
-        $filename = rawurldecode($filename);
-        $exists = $fs->file_exists($context->id, 'mod_casestudy', 'submission_richtext',
-            $row->submissionid, '/', $filename);
-        if ($exists) {
-            $totalpresent++;
-        } else {
-            $totalmissing++;
-        }
-        cli_writeln(sprintf('  [%s] %s', $exists ? ' OK  ' : 'MISS', $filename));
+    cli_writeln(sprintf('Submission %d:', $submissionid));
+    foreach ($items as $item) {
+        cli_writeln(sprintf('  [%s] %s', $item->present ? ' OK  ' : 'MISS', $item->filename));
     }
 }
 
