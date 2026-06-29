@@ -51,6 +51,14 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
     protected $legacyfilecontents = [];
 
     /**
+     * New casestudy_content ids restored in this run, used to normalise rich-text
+     * pluginfile URLs once all files and mappings are in place.
+     *
+     * @var int[]
+     */
+    protected $restoredcontentids = [];
+
+    /**
      * Define the structure of the restore workflow.
      *
      * @return restore_path_element $structure
@@ -275,6 +283,7 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         if ($data->fieldid) {
             $newitemid = $DB->insert_record('casestudy_content', $data);
             $this->set_mapping('casestudy_content', $oldid, $newitemid);
+            $this->restoredcontentids[] = $newitemid;
 
             if ($isfilefield) {
                 $this->legacyfilecontents[] = (object) [
@@ -419,6 +428,46 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
                 }
             }
             \mod_casestudy\local\image_optimizer::optimize_files($fs, $files);
+        }
+
+        $this->normalise_richtext_pluginfile_urls();
+    }
+
+    /**
+     * Convert absolute submission_richtext pluginfile URLs in restored content to the
+     * @@PLUGINFILE@@ placeholder.
+     *
+     * Rich-text submission content can embed absolute pluginfile URLs that carry the
+     * original context and submission ids (for example images inserted as file links).
+     * Restore remaps the files themselves, but those baked-in URLs are not rewritten, so
+     * they 404 in the new course. The placeholder is context/itemid independent, so once
+     * normalised the URLs resolve against the restored files at display time.
+     *
+     * @return void
+     */
+    protected function normalise_richtext_pluginfile_urls() {
+        global $DB;
+
+        if (empty($this->restoredcontentids)) {
+            return;
+        }
+
+        $patterns = [
+            '~https?://[^"\'\s<>]+?/pluginfile\.php/\d+/mod_casestudy/submission_richtext/\d+/~i',
+            '~https?://[^"\'\s<>]+?/pluginfile\.php\?file=/\d+/mod_casestudy/submission_richtext/\d+/~i',
+        ];
+
+        foreach ($this->restoredcontentids as $contentid) {
+            $record = $DB->get_record('casestudy_content', ['id' => $contentid], 'id, content');
+            if (!$record || $record->content === null || $record->content === ''
+                    || strpos($record->content, 'submission_richtext') === false) {
+                continue;
+            }
+
+            $updated = preg_replace($patterns, '@@PLUGINFILE@@/', $record->content);
+            if ($updated !== null && $updated !== $record->content) {
+                $DB->set_field('casestudy_content', 'content', $updated, ['id' => $contentid]);
+            }
         }
     }
 }

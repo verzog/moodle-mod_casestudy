@@ -470,6 +470,16 @@ class richtext_field extends base_field {
             $value['text']                        // Text content
         );
 
+        // file_save_draft_area_files only tokenises draft URLs. Absolute pluginfile URLs that
+        // already point at this submission's own rich-text area (e.g. an image inserted as a
+        // file link) stay absolute and would 404 after a course backup/restore. Replace them
+        // with the @@PLUGINFILE@@ placeholder so the stored content is portable.
+        if (is_string($text) && $text !== '') {
+            $prefix = '/pluginfile\.php(?:\?file=)?/' . (int) $context->id
+                . '/mod_casestudy/submission_richtext/' . (int) $submissionid . '/';
+            $text = preg_replace('~https?://[^"\'\s<>]+?' . $prefix . '~i', '@@PLUGINFILE@@/', $text);
+        }
+
         return $text;
     }
 
