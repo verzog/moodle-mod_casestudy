@@ -271,7 +271,7 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         $data->timesubmitted = $this->apply_date_offset($data->timesubmitted);
 
         $newitemid = $DB->insert_record('casestudy_submissions', $data);
-        $this->set_mapping('casestudy_submission', $oldid, $newitemid);
+        $this->set_mapping('casestudy_submission', $oldid, $newitemid, true);
 
         // Remember this child→parent pair (using old ids) so after_execute can fill in
         // submission_richtext files that were absent because copy_submission_files() didn't
@@ -349,7 +349,7 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
         $newitemid = $DB->insert_record('casestudy_grades', $data);
-        $this->set_mapping('casestudy_grade', $oldid, $newitemid);
+        $this->set_mapping('casestudy_grade', $oldid, $newitemid, true);
     }
 
     /**
