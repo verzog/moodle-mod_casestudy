@@ -22,7 +22,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_casestudy';
-$plugin->version   = 2026062905;
+$plugin->version   = 2026062906;
 $plugin->requires  = 2025041400;
 $plugin->release   = '1.0';
 $plugin->maturity  = MATURITY_ALPHA;

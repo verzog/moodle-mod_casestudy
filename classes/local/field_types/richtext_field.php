@@ -143,6 +143,16 @@ class richtext_field extends base_field {
         }
 
         if ($submissionid) {
+            // Normalise any absolute pluginfile URLs that target this rich-text area (from a
+            // restored course, or content authored as a file link) to the @@PLUGINFILE@@
+            // placeholder first. They carry the original context/submission id, so without this
+            // they 404; the placeholder is rewritten below to this submission's current files.
+            $text = preg_replace(
+                '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?/\d+/mod_casestudy/submission_richtext/\d+/~i',
+                '@@PLUGINFILE@@/',
+                $text
+            );
+
             $text = file_rewrite_pluginfile_urls(
                 $text,
                 'pluginfile.php',
