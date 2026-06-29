@@ -50,6 +50,57 @@ const SKIP_SELECTOR = [
 ].join(', ');
 
 /**
+ * Decide whether a URL points at an image file we can show in the lightbox.
+ *
+ * Editor snippets (Bootstrap cards/modals) frequently link the filename to the
+ * raw pluginfile image rather than embedding an <img>, so a link whose target
+ * is an image should open the lightbox instead of navigating away.
+ *
+ * @param {String} url Absolute or relative URL.
+ * @returns {Boolean}
+ */
+const isImageUrl = (url) => {
+    if (!url) {
+        return false;
+    }
+    let path = url;
+    try {
+        path = new URL(url, window.location.href).pathname;
+    } catch (e) {
+        path = url;
+    }
+    return /\.(png|jpe?g|gif|webp|svg|bmp|avif)(?:$|[?#])/i.test(path);
+};
+
+/**
+ * Decide whether an enclosing link is genuine navigation we should defer to,
+ * rather than a lightbox trigger. Dead links (#, javascript:, modal toggles)
+ * and links that simply point at an image file are NOT navigation — the user
+ * wants to see the picture, so the lightbox should win.
+ *
+ * @param {HTMLAnchorElement} link The enclosing <a href> element.
+ * @param {HTMLImageElement} img The image that was clicked.
+ * @returns {Boolean} True when the click should be left to the link.
+ */
+const isNavigationalLink = (link, img) => {
+    const href = link.getAttribute('href') || '';
+    if (href === '' || href === '#' || href.charAt(0) === '#'
+        || href.toLowerCase().indexOf('javascript:') === 0) {
+        return false;
+    }
+    // Bootstrap / lightbox modal toggles are in-page affordances, not navigation.
+    if (link.matches('[data-toggle="modal"], [data-bs-toggle="modal"], '
+        + '[data-toggle="lightbox"], [data-bs-toggle="lightbox"]')) {
+        return false;
+    }
+    // A link that just points back at the image (or any image file) opens the lightbox.
+    if (link.href === img.src || isImageUrl(link.href)) {
+        return false;
+    }
+    return true;
+};
+
+/**
  * Open the lightbox with the image at the given src.
  *
  * @param {String} src Absolute or pluginfile URL of the image.
@@ -99,6 +150,24 @@ const bindDelegatedHandler = () => {
             }
         }
 
+        // Filename/link case: editor snippets often link the filename straight to the
+        // raw pluginfile image (Bootstrap cards/modals) instead of embedding an <img>.
+        // Clicking such a link should open the picture in the lightbox, not navigate
+        // away (or do nothing, when the link is a dead modal trigger).
+        const fileLink = e.target.closest('a[href]');
+        if (fileLink
+            && fileLink.closest(CONTENT_SELECTOR)
+            && !fileLink.closest(SKIP_SELECTOR)
+            && !fileLink.querySelector('img')
+            && isImageUrl(fileLink.href)) {
+            e.preventDefault();
+            openImageLightbox(
+                fileLink.href,
+                fileLink.getAttribute('title') || (fileLink.textContent || '').trim()
+            );
+            return;
+        }
+
         // Generic case: any image inside the submission body opens the lightbox.
         const img = e.target.closest('img');
         if (!img) {
@@ -110,11 +179,11 @@ const bindDelegatedHandler = () => {
         if (img.closest(SKIP_SELECTOR)) {
             return;
         }
-        // Skip if the image is inside a link that goes somewhere else — defer to the link.
-        // Compare resolved URLs so relative pluginfile.php hrefs don't look different to
-        // the browser-resolved img.src.
+        // Defer to an enclosing link only when it is genuine navigation elsewhere.
+        // Dead links (#, modal toggles) and links to the image itself fall through
+        // to the lightbox so snippet-wrapped images stay clickable.
         const enclosingLink = img.closest('a[href]');
-        if (enclosingLink && enclosingLink.href !== img.src) {
+        if (enclosingLink && isNavigationalLink(enclosingLink, img)) {
             return;
         }
 
