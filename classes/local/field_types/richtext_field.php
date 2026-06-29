@@ -143,13 +143,19 @@ class richtext_field extends base_field {
         }
 
         if ($submissionid) {
-            // Normalise any absolute pluginfile URLs that target this rich-text area (from a
-            // restored course, or content authored as a file link) to the @@PLUGINFILE@@
-            // placeholder first. They carry the original context/submission id, so without this
-            // they 404; the placeholder is rewritten below to this submission's current files.
-            $text = preg_replace(
-                '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?/\d+/mod_casestudy/submission_richtext/\d+/~i',
-                '@@PLUGINFILE@@/',
+            // Retarget absolute submission_richtext pluginfile URLs that carry a STALE context
+            // (e.g. from a course restore) to the @@PLUGINFILE@@ placeholder, so they resolve
+            // against this submission's files below instead of 404ing against the old context.
+            // URLs already in the current context are left untouched, preserving legitimate
+            // links to other submissions/attempts. Both the slash form and the ?file= form
+            // (with raw or %2F-encoded separators, for sites with slasharguments off) are handled.
+            $currentcontextid = (int) $this->fieldmanager->get_context()->id;
+            $text = preg_replace_callback(
+                '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?(?:/|%2F)(\d+)'
+                    . '(?:/|%2F)mod_casestudy(?:/|%2F)submission_richtext(?:/|%2F)\d+(?:/|%2F)~i',
+                function ($matches) use ($currentcontextid) {
+                    return ((int) $matches[1] === $currentcontextid) ? $matches[0] : '@@PLUGINFILE@@/';
+                },
                 $text
             );
 

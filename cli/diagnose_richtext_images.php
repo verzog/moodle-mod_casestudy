@@ -67,13 +67,16 @@ $cm = get_coursemodule_from_id('casestudy', (int) $options['cmid'], 0, false, MU
 $context = context_module::instance($cm->id);
 $fs = get_file_storage();
 
+// Match both stored shapes: absolute submission_richtext URLs and the @@PLUGINFILE@@
+// placeholder (the normal editor save tokenises embedded files to the latter).
 $rows = $DB->get_records_sql(
     "SELECT cc.id, cc.content, cc.submissionid
        FROM {casestudy_content} cc
        JOIN {casestudy_submissions} cs ON cs.id = cc.submissionid
       WHERE cs.casestudyid = :instance
-        AND " . $DB->sql_like('cc.content', ':needle'),
-    ['instance' => $cm->instance, 'needle' => '%submission_richtext%']
+        AND (" . $DB->sql_like('cc.content', ':needle1')
+        . " OR " . $DB->sql_like('cc.content', ':needle2') . ")",
+    ['instance' => $cm->instance, 'needle1' => '%submission_richtext%', 'needle2' => '%@@PLUGINFILE@@%']
 );
 
 cli_writeln(sprintf('Context %d — %d rich-text content row(s) reference images.', $context->id, count($rows)));
@@ -85,7 +88,7 @@ foreach ($rows as $row) {
     // Pull the filename that follows .../submission_richtext/<itemid>/ in absolute URLs,
     // and the filename that follows @@PLUGINFILE@@/ for already-tokenised content.
     preg_match_all(
-        '~(?:submission_richtext/\d+|@@PLUGINFILE@@)/([^"\'\s<>?]+)~i',
+        '~(?:submission_richtext(?:/|%2F)\d+(?:/|%2F)|@@PLUGINFILE@@/)([^"\'\s<>?]+)~i',
         $row->content,
         $matches
     );
