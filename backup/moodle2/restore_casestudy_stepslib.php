@@ -59,6 +59,19 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
     protected $restoredcontentids = [];
 
     /**
+     * Maps old child submission id → old parent submission id for resubmissions.
+     *
+     * Backups created before copy_submission_files() existed can contain resubmissions
+     * whose submission_richtext area is empty: the recreate_submission() code copied the
+     * content rows (so @@PLUGINFILE@@ references are in the HTML) but never copied the
+     * actual files to the new submission's area.  after_execute uses these pairs to
+     * propagate parent files into child areas so those images display after restore.
+     *
+     * @var array<int,int>  [oldchildid => oldparentid]
+     */
+    protected $submissionparentoldids = [];
+
+    /**
      * Define the structure of the restore workflow.
      *
      * @return restore_path_element $structure
@@ -240,6 +253,11 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
             $data->groupid = 0;
         }
 
+        // Record old parent id before remapping, so after_execute can propagate
+        // submission_richtext files from parent to child for resubmissions created
+        // before copy_submission_files() existed.
+        $oldparentid = (int)($data->parentid ?? 0);
+
         // Map parentid if it exists.
         if (!empty($data->parentid)) {
             $data->parentid = $this->get_mappingid('casestudy_submission', $data->parentid);
@@ -254,6 +272,13 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
 
         $newitemid = $DB->insert_record('casestudy_submissions', $data);
         $this->set_mapping('casestudy_submission', $oldid, $newitemid);
+
+        // Remember this child→parent pair (using old ids) so after_execute can fill in
+        // submission_richtext files that were absent because copy_submission_files() didn't
+        // exist yet when this resubmission was originally created.
+        if ($oldparentid > 0) {
+            $this->submissionparentoldids[$oldid] = $oldparentid;
+        }
     }
 
     /**
@@ -416,6 +441,14 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
             }
         }
 
+        // Propagate submission_richtext files from parent submissions to resubmissions whose
+        // richtext area is empty.  Backups taken before copy_submission_files() was added to
+        // recreate_submission() contain resubmissions where the HTML was copied from the parent
+        // (so @@PLUGINFILE@@ references are present) but the underlying files were not, making
+        // images 404 after restore.  Walking each parent→child pair and copying any missing
+        // files retroactively fixes those resubmissions without touching correctly-backed-up ones.
+        $this->propagate_richtext_files_to_resubmissions($fs, $contextid);
+
         // Optimise restored uploads when enabled, so restoring an old backup full of large
         // originals does not bloat this site's storage and future backups. No-op for images
         // already within bounds.
@@ -431,6 +464,58 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
         }
 
         $this->normalise_richtext_pluginfile_urls();
+    }
+
+    /**
+     * Copy submission_richtext files from parent submissions to child resubmissions that
+     * have no files of their own in that area.
+     *
+     * Backups created before copy_submission_files() was added to recreate_submission()
+     * contain resubmissions where the @@PLUGINFILE@@ references in the HTML came from the
+     * copied content rows, but the actual files were never copied to the child submission's
+     * area.  This method walks the recorded parent→child pairs (using the pre-restore old
+     * ids) and, for each child that has an empty submission_richtext area, copies every
+     * file from the already-restored parent area into the child area.  Idempotent: if the
+     * child already has files (current-format backups) nothing is touched.
+     *
+     * @param \file_storage $fs    Moodle file storage instance.
+     * @param int           $contextid  New module context id.
+     * @return void
+     */
+    protected function propagate_richtext_files_to_resubmissions(\file_storage $fs, int $contextid): void {
+        if (empty($this->submissionparentoldids)) {
+            return;
+        }
+
+        foreach ($this->submissionparentoldids as $oldchildid => $oldparentid) {
+            $newchildid  = (int) $this->get_mappingid('casestudy_submission', $oldchildid);
+            $newparentid = (int) $this->get_mappingid('casestudy_submission', $oldparentid);
+
+            if (!$newchildid || !$newparentid) {
+                continue;
+            }
+
+            // Only fill in missing files; leave correctly-backed-up children untouched.
+            $childfiles = $fs->get_area_files(
+                $contextid, 'mod_casestudy', 'submission_richtext', $newchildid, 'id', false
+            );
+            if (!empty($childfiles)) {
+                continue;
+            }
+
+            $parentfiles = $fs->get_area_files(
+                $contextid, 'mod_casestudy', 'submission_richtext', $newparentid, 'id', false
+            );
+            foreach ($parentfiles as $file) {
+                // file_storage deduplicates by content hash, so copying is always safe.
+                $fs->create_file_from_storedfile([
+                    'contextid' => $contextid,
+                    'component' => 'mod_casestudy',
+                    'filearea'  => 'submission_richtext',
+                    'itemid'    => $newchildid,
+                ], $file);
+            }
+        }
     }
 
     /**
