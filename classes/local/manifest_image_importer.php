@@ -84,11 +84,21 @@ class manifest_image_importer {
         foreach ($groups as $key => $rows) {
             [$activityname, $email] = explode("\0", $key, 2);
 
-            // Resolve target user by email.
+            // Resolve target user by email. Require a unique active account: on sites that allow
+            // duplicate emails (allowaccountssameemail) a non-unique match cannot safely identify
+            // the owner, and these are private images — flag the ambiguity instead of guessing.
             $userid = self::cache($usercache, $email, function() use ($DB, $email) {
-                $u = $DB->get_record('user', ['email' => $email, 'deleted' => 0], 'id');
-                return $u ? (int) $u->id : 0;
+                $matches = $DB->get_records('user', ['email' => $email, 'deleted' => 0], 'id', 'id');
+                if (count($matches) === 1) {
+                    return (int) reset($matches)->id;
+                }
+                // 0 = no account, -1 = ambiguous (more than one active account with this email).
+                return empty($matches) ? 0 : -1;
             });
+            if ($userid === -1) {
+                $stats->ambiguoususers[$email] = true;
+                continue;
+            }
             if (!$userid) {
                 $stats->unmatchedusers[$email] = true;
                 continue;
@@ -167,8 +177,16 @@ class manifest_image_importer {
                 }
 
                 $filearea = 'field_' . $fieldid;
-                if ($fs->file_exists($contextid, 'mod_casestudy', $filearea, $newsubid, '/', $row['filename'])) {
-                    $stats->alreadypresent++;
+                $existing = $fs->get_file($contextid, 'mod_casestudy', $filearea, $newsubid, '/', $row['filename']);
+                if ($existing) {
+                    // Only treat a same-named file as correct when its bytes match the manifest hash.
+                    // A differing file (partial run, restore, manual upload) is a conflict, not a skip:
+                    // silently leaving it would defeat the content-hash integrity guarantee.
+                    if ($existing->get_contenthash() === $row['contenthash']) {
+                        $stats->alreadypresent++;
+                    } else {
+                        $stats->conflicts[] = sprintf('%s/%s @sub %d', $filearea, $row['filename'], $newsubid);
+                    }
                     continue;
                 }
 
@@ -178,7 +196,11 @@ class manifest_image_importer {
                         $DB->insert_record('casestudy_content', (object) [
                             'submissionid' => $newsubid,
                             'fieldid' => $fieldid,
-                            'content' => '',
+                            // File fields store a draft item id here, never an empty string: the
+                            // display path treats empty content as "no value" (file_field::render_display
+                            // returns '-' and submission.php sets hasvalue=false), which would hide the
+                            // imported files. Mirror a real save by storing a non-empty draft item id.
+                            'content' => (string) file_get_unused_draft_itemid(),
                             'contentformat' => FORMAT_HTML,
                         ]);
                     }
@@ -200,6 +222,7 @@ class manifest_image_importer {
         }
 
         $stats->unmatchedusercount = count($stats->unmatchedusers);
+        $stats->ambiguoususercount = count($stats->ambiguoususers);
         $stats->unmatchedactivitycount = count($stats->unmatchedactivities);
         return $stats;
     }
@@ -327,9 +350,12 @@ class manifest_image_importer {
             'skippednomap' => 0,
             'missinglocal' => [],
             'submissionmismatch' => [],
+            'conflicts' => [],
             'unmatchedusers' => [],
+            'ambiguoususers' => [],
             'unmatchedactivities' => [],
             'unmatchedusercount' => 0,
+            'ambiguoususercount' => 0,
             'unmatchedactivitycount' => 0,
         ];
     }

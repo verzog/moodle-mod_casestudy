@@ -91,8 +91,10 @@ cli_writeln(sprintf('Manifest rows:          %d', $stats->rows));
 cli_writeln(sprintf('Files %s:        %d', $commit ? 'written ' : 'to write', $stats->written));
 cli_writeln(sprintf('Already present:        %d', $stats->alreadypresent));
 cli_writeln(sprintf('Skipped (no mapping):   %d', $stats->skippednomap));
+cli_writeln(sprintf('Content conflicts:      %d', count($stats->conflicts)));
 cli_writeln(sprintf('Missing local file:     %d', count($stats->missinglocal)));
 cli_writeln(sprintf('Unmatched students:     %d', $stats->unmatchedusercount));
+cli_writeln(sprintf('Ambiguous students:     %d', $stats->ambiguoususercount));
 cli_writeln(sprintf('Unmatched activities:   %d', $stats->unmatchedactivitycount));
 cli_writeln(sprintf('Submission-count mismatches: %d', count($stats->submissionmismatch)));
 
@@ -100,8 +102,14 @@ cli_writeln(sprintf('Submission-count mismatches: %d', count($stats->submissionm
 foreach (array_slice($stats->submissionmismatch, 0, 10) as $line) {
     cli_writeln('  ! ' . $line);
 }
+foreach (array_slice($stats->conflicts, 0, 10) as $line) {
+    cli_writeln('  ! existing file differs from manifest (left untouched): ' . $line);
+}
 foreach (array_slice(array_keys($stats->unmatchedusers), 0, 10) as $email) {
     cli_writeln('  ! no target user for email: ' . $email);
+}
+foreach (array_slice(array_keys($stats->ambiguoususers), 0, 10) as $email) {
+    cli_writeln('  ! multiple active accounts share email (skipped): ' . $email);
 }
 foreach (array_slice(array_keys($stats->unmatchedactivities), 0, 10) as $name) {
     cli_writeln('  ! no unique target activity named: ' . $name);
