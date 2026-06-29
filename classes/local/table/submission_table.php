@@ -374,11 +374,13 @@ class submission_table extends table_sql {
         $statustext = get_string('status_' . $row->status, 'mod_casestudy');
         $icon = \html_writer::tag('i', '', ['class' => $iconclass]);
 
+        // Mark resubmission attempts with a muted badge so the actual (often final)
+        // status stays the prominent label on the row.
         $reattemptstatus = '';
         if (!empty($row->parentid)) {
             $reattemptstatus = \html_writer::span(
                 get_string('reattempt', 'mod_casestudy'),
-                'badge badge-info ml-2',
+                'badge badge-light text-muted ml-2',
                 ['title' => get_string('titlesubmissionreattempt', 'mod_casestudy')]
             );
         }
@@ -607,6 +609,24 @@ class submission_table extends table_sql {
     }
 
     /**
+     * Get the id of the resubmission copy already created from this submission, if any.
+     *
+     * @param \stdClass $row Submission table row.
+     * @return int Child submission id, or 0 when none exists.
+     */
+    public function get_reattempt_child_id($row) {
+        global $DB;
+
+        $child = $DB->get_record('casestudy_submissions', [
+            'casestudyid' => $this->cm->instance,
+            'userid' => $row->userid,
+            'parentid' => $row->id,
+        ], 'id', IGNORE_MULTIPLE);
+
+        return $child ? (int) $child->id : 0;
+    }
+
+    /**
      * Format actions column
      *
      * @param object $row Table row
@@ -622,30 +642,42 @@ class submission_table extends table_sql {
             $isownsubmission
             && in_array($row->status, [CASESTUDY_STATUS_NEW, CASESTUDY_STATUS_DRAFT, CASESTUDY_STATUS_AWAITING_RESUBMISSION])
         ) {
-            $submissionurl = new moodle_url('/mod/casestudy/submission.php', ['id' => $this->cm->id, 'submissionid' => $row->id]);
-            $editicon = new pix_icon('i/customfield', get_string('edit'));
-            $title = get_string('edit');
-
-            $recreated = false;
-
-            // If awaiting resubmission, set action to reattempt.
             if ($row->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION) {
-                $submissionurl->param('action', 'reattempt');
-                $submissionurl->param('sesskey', $this->sesskey);
-                $editicon = new pix_icon('i/reload', get_string('recreate', 'mod_casestudy'));
-                $title = get_string('recreate', 'mod_casestudy');
-
-                $recreated = $this->is_reattempt_created($row);
+                // The student was asked to resubmit. The graded attempt itself stays read-only;
+                // give them an editable copy to fix instead. If a resubmission copy was already
+                // created, take them straight to it; otherwise create one through the
+                // attempt-limit-checked re-attempt flow (which carries the previous content and
+                // images across when "Pre-fill resubmissions" is enabled).
+                $childid = $this->get_reattempt_child_id($row);
+                if ($childid) {
+                    $submissionurl = new moodle_url('/mod/casestudy/submission.php',
+                        ['id' => $this->cm->id, 'submissionid' => $childid]);
+                    $editicon = new pix_icon('i/customfield', get_string('edit'));
+                    $title = get_string('edit');
+                } else {
+                    $submissionurl = new moodle_url('/mod/casestudy/submission.php', [
+                        'id' => $this->cm->id,
+                        'submissionid' => $row->id,
+                        'action' => 'reattempt',
+                        'sesskey' => $this->sesskey,
+                    ]);
+                    $editicon = new pix_icon('i/reload', get_string('recreate', 'mod_casestudy'));
+                    $title = get_string('recreate', 'mod_casestudy');
+                }
+            } else {
+                // New or draft attempt: edit in place.
+                $submissionurl = new moodle_url('/mod/casestudy/submission.php',
+                    ['id' => $this->cm->id, 'submissionid' => $row->id]);
+                $editicon = new pix_icon('i/customfield', get_string('edit'));
+                $title = get_string('edit');
             }
 
-            if (!$recreated) {
-                $actions[] = $OUTPUT->action_icon(
-                    $submissionurl,
-                    $editicon,
-                    null,
-                    ['title' => $title, 'class' => 'btn btn-sm btn-outline-secondary']
-                );
-            }
+            $actions[] = $OUTPUT->action_icon(
+                $submissionurl,
+                $editicon,
+                null,
+                ['title' => $title, 'class' => 'btn btn-sm btn-outline-secondary']
+            );
         }
 
         // View submission action.
