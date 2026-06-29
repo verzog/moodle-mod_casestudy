@@ -622,32 +622,28 @@ class submission_table extends table_sql {
             $isownsubmission
             && in_array($row->status, [CASESTUDY_STATUS_NEW, CASESTUDY_STATUS_DRAFT, CASESTUDY_STATUS_AWAITING_RESUBMISSION])
         ) {
-            // Direct in-place edit, available for every editable status. This is offered for
-            // awaiting-resubmission too so a student who has been asked to resubmit can always
-            // reopen and amend their work, rather than being left with no actionable button when
-            // a re-attempt has already been created (or cannot be).
-            $editurl = new moodle_url('/mod/casestudy/submission.php', ['id' => $this->cm->id, 'submissionid' => $row->id]);
-            $actions[] = $OUTPUT->action_icon(
-                $editurl,
-                new pix_icon('i/customfield', get_string('edit')),
-                null,
-                ['title' => get_string('edit'), 'class' => 'btn btn-sm btn-outline-secondary']
-            );
+            $submissionurl = new moodle_url('/mod/casestudy/submission.php', ['id' => $this->cm->id, 'submissionid' => $row->id]);
+            $editicon = new pix_icon('i/customfield', get_string('edit'));
+            $title = get_string('edit');
 
-            // For awaiting resubmission, also offer a fresh attempt (preserving the graded
-            // attempt as history) until one has been created.
-            if ($row->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION && !$this->is_reattempt_created($row)) {
-                $reattempturl = new moodle_url('/mod/casestudy/submission.php', [
-                    'id' => $this->cm->id,
-                    'submissionid' => $row->id,
-                    'action' => 'reattempt',
-                    'sesskey' => $this->sesskey,
-                ]);
+            $recreated = false;
+
+            // If awaiting resubmission, set action to reattempt.
+            if ($row->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION) {
+                $submissionurl->param('action', 'reattempt');
+                $submissionurl->param('sesskey', $this->sesskey);
+                $editicon = new pix_icon('i/reload', get_string('recreate', 'mod_casestudy'));
+                $title = get_string('recreate', 'mod_casestudy');
+
+                $recreated = $this->is_reattempt_created($row);
+            }
+
+            if (!$recreated) {
                 $actions[] = $OUTPUT->action_icon(
-                    $reattempturl,
-                    new pix_icon('i/reload', get_string('recreate', 'mod_casestudy')),
+                    $submissionurl,
+                    $editicon,
                     null,
-                    ['title' => get_string('recreate', 'mod_casestudy'), 'class' => 'btn btn-sm btn-outline-secondary']
+                    ['title' => $title, 'class' => 'btn btn-sm btn-outline-secondary']
                 );
             }
         }

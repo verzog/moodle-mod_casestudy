@@ -159,12 +159,42 @@ class richtext_field extends base_field {
             '',
             ['class' => 'casestudy-field-label font-weight-bold field-label']
         );
+        $formatted = format_text($text, $format, ['context' => $this->fieldmanager->get_context()]);
+        $formatted = $this->embed_image_file_links($formatted);
         $content = \html_writer::div(
-            format_text($text, $format, ['context' => $this->fieldmanager->get_context()]),
+            $formatted,
             'casestudy-field-richtext field-' . $this->fielddata->id
         );
 
         return $content;
+    }
+
+    /**
+     * Turn links that point straight at an image file into inline images.
+     *
+     * Images inserted through the editor as file links (for example the Bootstrap
+     * card/snippet markup the editor produces) otherwise render as just the
+     * filename link and never display the picture. Converting those anchors to
+     * inline <img> tags makes the image show, and the existing field_file lightbox
+     * AMD then makes it clickable to enlarge. Anchors that already wrap an <img>
+     * (the thumbnail → full-size pattern) and SVG targets (which can carry script)
+     * are left untouched.
+     *
+     * @param string $html Formatted field HTML.
+     * @return string HTML with standalone image-file links replaced by images.
+     */
+    protected function embed_image_file_links(string $html): string {
+        $pattern = '~<a\b[^>]*?\bhref="([^"]+\.(?:png|jpe?g|gif|webp|bmp|avif)(?:\?[^"]*)?)"[^>]*>(.*?)</a>~is';
+
+        return preg_replace_callback($pattern, function ($matches) {
+            // Leave anchors that already contain an image (thumbnail markup) alone.
+            if (stripos($matches[2], '<img') !== false) {
+                return $matches[0];
+            }
+            $alt = trim(html_entity_decode(strip_tags($matches[2]), ENT_QUOTES, 'UTF-8'));
+
+            return \html_writer::img($matches[1], $alt, ['class' => 'img-fluid casestudy-richtext-image']);
+        }, $html);
     }
 
     /**
