@@ -162,12 +162,27 @@ if ($multi) {
         cli_writeln(sprintf('  %-40s %s', $label, casestudy_outcome_label($outcome, $files, $images)));
     }
     cli_writeln('');
+
+    // Count archives that could not be read so the closing verdict can be scoped to the
+    // backups actually inspected rather than implying the whole directory was covered.
+    $skipped = 0;
+    foreach ($summaries as [, $outcome]) {
+        if ($outcome === 'unreadable') {
+            $skipped++;
+        }
+    }
+    $scope = $skipped > 0 ? 'No readable backup here' : 'No backup here';
+
     if ($worstoutcome === 'images') {
         cli_writeln('At least one backup contains case study image bytes (marked IMAGES above).');
     } else if ($worstoutcome === 'files') {
-        cli_writeln('Submission files were found, but none are images. No backup here holds case study images.');
+        cli_writeln('Submission files were found, but none are images. ' . $scope . ' holds case study images.');
     } else {
-        cli_writeln('No backup here contains any case study submission file bytes.');
+        cli_writeln($scope . ' contains any case study submission file bytes.');
+    }
+    if ($skipped > 0) {
+        cli_writeln(sprintf('NOTE: %d archive(s) could not be read and were skipped (listed above); this '
+            . 'verdict covers only the backups that were inspected.', $skipped));
     }
 }
 
@@ -200,7 +215,12 @@ function casestudy_resolve_filesxml(string $kind, string $path, bool $lenient): 
         return casestudy_unreadable($path, $lenient, 'unrecognised format (expected gzip-tar or zip)', false);
     }
 
-    $tmparchive = make_request_directory() . '/backup' . ($iszip ? '.zip' : '.tar.gz');
+    // Stage under a filename unique to this call. The phar:// wrapper caches archive
+    // contents by path, so reusing one pathname across archives in a directory scan
+    // could otherwise return an earlier archive's files.xml.
+    static $seq = 0;
+    $seq++;
+    $tmparchive = make_request_directory() . '/backup' . $seq . ($iszip ? '.zip' : '.tar.gz');
     if (!@copy($path, $tmparchive)) {
         return casestudy_unreadable($path, $lenient, 'could not stage archive for reading', $iszip);
     }
