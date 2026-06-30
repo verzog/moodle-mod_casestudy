@@ -68,9 +68,10 @@ Examples:
   php mod/casestudy/cli/inspect_backup_images.php --backup=/path/to/backup.mbz
   php mod/casestudy/cli/inspect_backup_images.php --backup=/path/to/extracted-backup-dir
 
-If automatic .mbz reading fails (unusual archive format), extract it first and
-point --backup at the folder:
-  mkdir /tmp/bk && tar xzf /path/to/backup.mbz -C /tmp/bk
+If automatic .mbz reading fails, extract it first and point --backup at the
+folder. A .mbz is either a gzip-tar or a zip:
+  mkdir /tmp/bk && tar xzf /path/to/backup.mbz -C /tmp/bk   # gzip-tar backups
+  mkdir /tmp/bk && unzip -q /path/to/backup.mbz -d /tmp/bk  # zip backups
   php mod/casestudy/cli/inspect_backup_images.php --backup=/tmp/bk
 EOT);
     exit(empty($options['backup']) && !$options['help'] ? 1 : 0);
@@ -82,11 +83,10 @@ if (!file_exists($backup)) {
 }
 
 // Resolve a readable source for the backup's root files.xml. Accept either an
-// already-extracted backup directory or a .mbz archive (a gzip-compressed tar),
-// which we read in place via the phar:// stream wrapper so the (potentially huge)
-// file pool is never extracted.
+// already-extracted backup directory or a .mbz archive, which we read in place via
+// the phar:// stream wrapper so the (potentially huge) file pool is never extracted.
 $filesxmlsource = null;
-$tmptar = null;
+$tmparchive = null;
 
 if (is_dir($backup)) {
     $candidate = rtrim($backup, '/') . '/files.xml';
@@ -96,24 +96,38 @@ if (is_dir($backup)) {
     }
     $filesxmlsource = $candidate;
 } else {
-    // PharData needs a recognised archive extension, so copy the .mbz to a temp
-    // file ending in .tar.gz and read files.xml out of it without full extraction.
-    $tmptar = make_request_directory() . '/backup.tar.gz';
-    if (!@copy($backup, $tmptar)) {
+    // A .mbz is either a gzip-compressed tar or a zip — Moodle's mbz_packer supports
+    // both, depending on the source site's configuration. Detect which by magic bytes
+    // and stage the archive with the extension PharData needs to recognise the format,
+    // then read files.xml out of it in place (no full extraction).
+    $magic = (string) @file_get_contents($backup, false, null, 0, 4);
+    $iszip = (strncmp($magic, "PK\x03\x04", 4) === 0) || (strncmp($magic, 'PK', 2) === 0);
+    $isgzip = (strncmp($magic, "\x1f\x8b", 2) === 0);
+    if (!$iszip && !$isgzip) {
+        cli_error("Unrecognised .mbz format (expected gzip-tar or zip): {$backup}\n"
+            . "Extract it manually and re-run against the folder it produces:\n"
+            . "  php mod/casestudy/cli/inspect_backup_images.php --backup=/path/to/extracted-dir");
+    }
+
+    $tmparchive = make_request_directory() . '/backup' . ($iszip ? '.zip' : '.tar.gz');
+    if (!@copy($backup, $tmparchive)) {
         cli_error("Could not stage backup archive for reading: {$backup}");
     }
     try {
-        // Touch the archive so PharData validates it as a tar.
-        new PharData($tmptar);
-        $candidate = 'phar://' . $tmptar . '/files.xml';
+        // Validate the archive (PharData reads both tar and zip) and confirm files.xml.
+        new PharData($tmparchive);
+        $candidate = 'phar://' . $tmparchive . '/files.xml';
         if (!@file_exists($candidate)) {
             throw new Exception('files.xml not found inside archive');
         }
         $filesxmlsource = $candidate;
     } catch (Throwable $e) {
+        $extracthint = $iszip
+            ? '  mkdir /tmp/bk && unzip -q ' . escapeshellarg($backup) . ' -d /tmp/bk'
+            : '  mkdir /tmp/bk && tar xzf ' . escapeshellarg($backup) . ' -C /tmp/bk';
         cli_error("Could not read the .mbz archive automatically ({$e->getMessage()}).\n"
             . "Extract it manually and re-run against the folder:\n"
-            . "  mkdir /tmp/bk && tar xzf " . escapeshellarg($backup) . " -C /tmp/bk\n"
+            . $extracthint . "\n"
             . "  php mod/casestudy/cli/inspect_backup_images.php --backup=/tmp/bk");
     }
 }
@@ -125,7 +139,8 @@ if (!@$reader->open($filesxmlsource)) {
     cli_error("Could not open files.xml for reading: {$filesxmlsource}");
 }
 
-$areas = [];        // filearea => ['count' => int, 'bytes' => int, 'contexts' => [contextid => true]].
+// filearea => ['count' => int, 'images' => int, 'bytes' => int, 'contexts' => [contextid => true]].
+$areas = [];
 $othercomponents = 0;
 
 while ($reader->read()) {
@@ -149,10 +164,18 @@ while ($reader->read()) {
     if ($filearea === '') {
         $filearea = '(none)';
     }
+    // A file field accepts any file type (the default accepted-types list is ['*']), so
+    // not every stored file is an image. Classify by the recorded mimetype, falling back
+    // to the filename extension, so the verdict can speak to images specifically rather
+    // than counting PDFs or other attachments as image bytes.
+    $mimetype = (string) $xml->mimetype;
+    $isimage = (strncmp($mimetype, 'image/', 6) === 0)
+        || (bool) preg_match('/\.(png|jpe?g|gif|webp|bmp|svg|svgz|tiff?|heic|avif)$/i', $filename);
     if (!isset($areas[$filearea])) {
-        $areas[$filearea] = ['count' => 0, 'bytes' => 0, 'contexts' => []];
+        $areas[$filearea] = ['count' => 0, 'images' => 0, 'bytes' => 0, 'contexts' => []];
     }
     $areas[$filearea]['count']++;
+    $areas[$filearea]['images'] += $isimage ? 1 : 0;
     $areas[$filearea]['bytes'] += (int) $xml->filesize;
     $areas[$filearea]['contexts'][(string) $xml->contextid] = true;
 }
@@ -169,9 +192,10 @@ if (empty($areas)) {
     ksort($areas);
     foreach ($areas as $name => $info) {
         cli_writeln(sprintf(
-            '  %-22s %6d file(s)  %10s   across %d context(s)',
+            '  %-22s %6d file(s) (%d image)  %10s   across %d context(s)',
             $name,
             $info['count'],
+            $info['images'],
             display_size($info['bytes']),
             count($info['contexts'])
         ));
@@ -179,30 +203,54 @@ if (empty($areas)) {
 }
 cli_writeln('');
 
-// The two areas that hold student-supplied submission images.
+// Areas that hold student-supplied submission files, and whether each carries images.
+// submission_richtext = embedded rich-text images; field_<id> = file-field uploads (any
+// type); content = the legacy upload area that restore migrates into field_<id> (see
+// legacyfilecontents in restore_casestudy_stepslib.php), so it counts as recoverable too.
 $richtext = $areas['submission_richtext']['count'] ?? 0;
+$richtextimages = $areas['submission_richtext']['images'] ?? 0;
 $fieldfiles = 0;
+$fieldimages = 0;
 foreach ($areas as $name => $info) {
     if (strpos($name, 'field_') === 0) {
         $fieldfiles += $info['count'];
+        $fieldimages += $info['images'];
     }
 }
+$legacyfiles = $areas['content']['count'] ?? 0;
+$legacyimages = $areas['content']['images'] ?? 0;
+
+$recoverablefiles = $richtext + $fieldfiles + $legacyfiles;
+$recoverableimages = $richtextimages + $fieldimages + $legacyimages;
 
 cli_writeln(sprintf('Rich-text submission images (submission_richtext): %d', $richtext));
-cli_writeln(sprintf('File-field uploads (field_<id>):                  %d', $fieldfiles));
+cli_writeln(sprintf('File-field uploads (field_<id>):                  %d (%d image)', $fieldfiles, $fieldimages));
+if ($legacyfiles > 0) {
+    cli_writeln(sprintf('Legacy content-area uploads (migrated on restore): %d (%d image)', $legacyfiles, $legacyimages));
+}
 cli_writeln('');
 
-if ($richtext === 0 && $fieldfiles === 0) {
-    cli_writeln('VERDICT: This backup contains NO submission image bytes.');
+if ($recoverablefiles === 0) {
+    cli_writeln('VERDICT: This backup contains NO submission file bytes.');
     cli_writeln('');
-    cli_writeln('The source site stored these images at runtime, but the mod_casestudy');
+    cli_writeln('The source site stored these files at runtime, but the mod_casestudy');
     cli_writeln('version it ran did not annotate the submission_richtext / field_<id> areas');
-    cli_writeln('for backup, so the image files were never written into this .mbz. A restore');
-    cli_writeln('therefore has nothing to bring across, and the images CANNOT be recovered');
+    cli_writeln('for backup, so the files were never written into this .mbz. A restore');
+    cli_writeln('therefore has nothing to bring across, and they CANNOT be recovered');
     cli_writeln('from this archive. Recovery requires the original files from the source');
     cli_writeln('site (a fresh backup taken with a current plugin version, or the bytes');
     cli_writeln('pulled directly from the source moodledata / via an authenticated download).');
     exit(2);
+}
+
+if ($recoverableimages === 0) {
+    cli_writeln('VERDICT: This backup contains submission file bytes, but NONE are images.');
+    cli_writeln('');
+    cli_writeln(sprintf('It holds %d submission file(s), none of which are image files. If you are', $recoverablefiles));
+    cli_writeln('specifically chasing missing images, they are not in this archive — only');
+    cli_writeln('non-image attachments are present. Those files will still restore with the');
+    cli_writeln('current plugin version (ensure "Include user data" is enabled for the restore).');
+    exit(0);
 }
 
 cli_writeln('VERDICT: This backup DOES contain submission image bytes.');
