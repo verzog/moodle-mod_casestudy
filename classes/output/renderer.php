@@ -749,7 +749,7 @@ class renderer extends plugin_renderer_base {
         // Get submission history
         $manager = new \mod_casestudy\local\submission_manager($casestudyrecord->id, $casestudyrecord, $cm);
         $history = $manager->get_submission_history($submission->get_submission()->id);
-        $submissiondata['history'] = $this->format_submission_history($history);
+        $submissiondata['history'] = $this->format_submission_history($history, $context);
         $submissiondata['hashistory'] = count($history) > 1; // Only show if there are multiple attempts
 
         $submissiondata['showgraderinfo'] = !$casestudy->get_casestudy_record()->hidegrader;
@@ -935,9 +935,10 @@ class renderer extends plugin_renderer_base {
      * Format submission history for template display
      *
      * @param array $history Array of history records
+     * @param \context|null $context Module context, used to resolve feedback image URLs
      * @return array Formatted history for template
      */
-    private function format_submission_history($history) {
+    private function format_submission_history($history, $context = null) {
         global $DB;
 
         $formatted = [];
@@ -966,7 +967,7 @@ class renderer extends plugin_renderer_base {
                 $status = $submission->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION
                     ? get_string('requestresubmission', 'mod_casestudy') : $statuslist[$submission->status];
                 $grader = $DB->get_record('user', ['id' => $grade->graderid]);
-                $historyitem['feedback'] = format_text($grade->feedback, $grade->feedbackformat ?? FORMAT_HTML);
+                $historyitem['feedback'] = $this->format_feedback_text($grade, $context);
                 $historyitem['grader'] = fullname($grader);
                 $historyitem['timegraded'] = userdate($grade->timemodified, get_string('strftimedatetime', 'langconfig'));
                 $historyitem['gradestatus'] = $status;
@@ -977,6 +978,57 @@ class renderer extends plugin_renderer_base {
         }
 
         return $formatted;
+    }
+
+    /**
+     * Format grader feedback for display, resolving embedded image URLs.
+     *
+     * Grader feedback is an editor field whose inline images live in the
+     * 'feedback' filearea keyed by the grade id. Like the rich-text submission
+     * fields, the stored HTML keeps @@PLUGINFILE@@ placeholders (or, after a
+     * course restore, absolute pluginfile URLs that carry the source site's
+     * context id). Without rewriting these the images never render — the
+     * placeholder is left literal and a restored absolute URL 404s against the
+     * old context. This mirrors richtext_field::display(): retarget any stale
+     * absolute feedback URL to the placeholder, then rewrite the placeholders to
+     * real pluginfile URLs in this context before formatting.
+     *
+     * @param \stdClass $grade Grade record (provides ->id, ->feedback, ->feedbackformat).
+     * @param \context|null $context Module context; when absent, feedback is formatted as-is.
+     * @return string Formatted feedback HTML.
+     */
+    private function format_feedback_text($grade, $context) {
+        $text = (string) $grade->feedback;
+        $format = $grade->feedbackformat ?? FORMAT_HTML;
+
+        if ($context === null || $text === '') {
+            return format_text($text, $format);
+        }
+
+        // Retarget stale absolute feedback pluginfile URLs (carrying a different context,
+        // e.g. from a course restore) to the @@PLUGINFILE@@ placeholder so they resolve
+        // against this context's files below. URLs already in the current context are left
+        // untouched. Both the slash form and the ?file= form (raw or %2F-encoded) are handled.
+        $contextid = (int) $context->id;
+        $text = preg_replace_callback(
+            '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?(?:/|%2F)(\d+)'
+                . '(?:/|%2F)mod_casestudy(?:/|%2F)feedback(?:/|%2F)\d+(?:/|%2F)~i',
+            function ($matches) use ($contextid) {
+                return ((int) $matches[1] === $contextid) ? $matches[0] : '@@PLUGINFILE@@/';
+            },
+            $text
+        );
+
+        $text = file_rewrite_pluginfile_urls(
+            $text,
+            'pluginfile.php',
+            $contextid,
+            'mod_casestudy',
+            'feedback',
+            $grade->id
+        );
+
+        return format_text($text, $format, ['context' => $context]);
     }
 
     /**
