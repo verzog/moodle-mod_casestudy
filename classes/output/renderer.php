@@ -967,7 +967,7 @@ class renderer extends plugin_renderer_base {
                 $status = $submission->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION
                     ? get_string('requestresubmission', 'mod_casestudy') : $statuslist[$submission->status];
                 $grader = $DB->get_record('user', ['id' => $grade->graderid]);
-                $historyitem['feedback'] = $this->format_feedback_text($grade, $context);
+                $historyitem['feedback'] = helper::format_feedback_text($grade, $context);
                 $historyitem['grader'] = fullname($grader);
                 $historyitem['timegraded'] = userdate($grade->timemodified, get_string('strftimedatetime', 'langconfig'));
                 $historyitem['gradestatus'] = $status;
@@ -978,73 +978,6 @@ class renderer extends plugin_renderer_base {
         }
 
         return $formatted;
-    }
-
-    /**
-     * Format grader feedback for display, resolving embedded image URLs.
-     *
-     * Grader feedback is an editor field whose inline images live in the
-     * 'feedback' filearea keyed by the grade id. The stored HTML should keep
-     * @@PLUGINFILE@@ placeholders, but feedback saved before save_feedback()
-     * tokenised the text kept the editor's draft URLs (draftfile.php/.../user/
-     * draft/<id>/), and a course restore can also leave absolute pluginfile URLs
-     * that carry the source site's context id. In all three cases the image never
-     * renders without rewriting: the placeholder is left literal, the draft URL is
-     * dead once the session draft is cleaned up, and a restored absolute URL 404s
-     * against the old context. This mirrors richtext_field::display(): retarget any
-     * stale feedback URL (draft or cross-context pluginfile) to @@PLUGINFILE@@,
-     * then rewrite the placeholders to real pluginfile URLs in this context before
-     * formatting.
-     *
-     * @param \stdClass $grade Grade record (provides ->id, ->feedback, ->feedbackformat).
-     * @param \context|null $context Module context; when absent, feedback is formatted as-is.
-     * @return string Formatted feedback HTML.
-     */
-    private function format_feedback_text($grade, $context) {
-        $text = (string) $grade->feedback;
-        $format = $grade->feedbackformat ?? FORMAT_HTML;
-
-        if ($context === null || $text === '') {
-            return format_text($text, $format);
-        }
-
-        $contextid = (int) $context->id;
-
-        // Older feedback was saved without tokenising the editor's draft URLs, so the stored
-        // HTML can still embed draftfile.php/.../user/draft/<id>/<filename> URLs (per-session
-        // draft area, never backed up). These are always stale in stored content, so retarget
-        // every one to @@PLUGINFILE@@ — the filename is kept and resolves against the feedback
-        // files below. Both the slash form and the ?file= form (raw or %2F-encoded) are handled.
-        $text = preg_replace(
-            '~https?://[^"\'\s<>]+?/draftfile\.php(?:\?file=)?(?:/|%2F)\d+(?:/|%2F)user'
-                . '(?:/|%2F)draft(?:/|%2F)\d+(?:/|%2F)~i',
-            '@@PLUGINFILE@@/',
-            $text
-        );
-
-        // Retarget stale absolute feedback pluginfile URLs (carrying a different context,
-        // e.g. from a course restore) to the @@PLUGINFILE@@ placeholder so they resolve
-        // against this context's files below. URLs already in the current context are left
-        // untouched. Both the slash form and the ?file= form (raw or %2F-encoded) are handled.
-        $text = preg_replace_callback(
-            '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?(?:/|%2F)(\d+)'
-                . '(?:/|%2F)mod_casestudy(?:/|%2F)feedback(?:/|%2F)\d+(?:/|%2F)~i',
-            function ($matches) use ($contextid) {
-                return ((int) $matches[1] === $contextid) ? $matches[0] : '@@PLUGINFILE@@/';
-            },
-            $text
-        );
-
-        $text = file_rewrite_pluginfile_urls(
-            $text,
-            'pluginfile.php',
-            $contextid,
-            'mod_casestudy',
-            'feedback',
-            $grade->id
-        );
-
-        return format_text($text, $format, ['context' => $context]);
     }
 
     /**

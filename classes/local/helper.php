@@ -131,4 +131,76 @@ class helper {
             CASESTUDY_STATUS_UNSATISFACTORY => get_string('status_unsatisfactory', 'mod_casestudy'),
         ];
     }
+
+    /**
+     * Format grader feedback for display, resolving embedded image URLs.
+     *
+     * Grader feedback is an editor field whose inline images live in the 'feedback' filearea
+     * keyed by the grade id. The stored HTML should keep @@PLUGINFILE@@ placeholders, but:
+     *  - feedback saved before save_feedback() tokenised the text kept the editor's draft URLs
+     *    (draftfile.php/.../user/draft/<id>/), which die once the session draft is cleaned up
+     *    and are never backed up; and
+     *  - a course restore can leave absolute pluginfile URLs that carry the source site's host
+     *    and/or context id, which 404 against this site.
+     * In every case the image fails to render without rewriting. This mirrors
+     * richtext_field::display(): retarget any stale feedback URL (draft, or a pluginfile URL on a
+     * different site/context) to @@PLUGINFILE@@, then rewrite the placeholders to real pluginfile
+     * URLs in this context before formatting. Used by both the submission-history renderer and the
+     * single-view template's [[feedback]] tag so every feedback display path behaves the same.
+     *
+     * @param \stdClass $grade Grade record (provides ->id, ->feedback, ->feedbackformat).
+     * @param \context|null $context Module context; when absent, feedback is formatted as-is.
+     * @return string Formatted feedback HTML.
+     */
+    public static function format_feedback_text($grade, $context) {
+        global $CFG;
+
+        $text = (string) ($grade->feedback ?? '');
+        $format = $grade->feedbackformat ?? FORMAT_HTML;
+
+        if ($context === null || $text === '') {
+            return format_text($text, $format);
+        }
+
+        $contextid = (int) $context->id;
+
+        // Editor draft URLs are always stale in stored content, so retarget every one to the
+        // @@PLUGINFILE@@ placeholder — the trailing filename is kept and resolves against the
+        // feedback files below. Both the slash form and the ?file= form (raw or %2F-encoded)
+        // are handled.
+        $text = preg_replace(
+            '~https?://[^"\'\s<>]+?/draftfile\.php(?:\?file=)?(?:/|%2F)\d+(?:/|%2F)user'
+                . '(?:/|%2F)draft(?:/|%2F)\d+(?:/|%2F)~i',
+            '@@PLUGINFILE@@/',
+            $text
+        );
+
+        // Retarget stale absolute feedback pluginfile URLs to @@PLUGINFILE@@. A URL is left
+        // untouched only when it is a genuine link to this submission's feedback on this site:
+        // it must sit under this site's wwwroot AND carry this module's current context id.
+        // Anything else — a different host, or a different (e.g. pre-restore) context id that may
+        // collide numerically with this one — is stale and retargeted so file_rewrite_pluginfile_urls()
+        // can resolve it against the restored files.
+        $wwwroot = rtrim($CFG->wwwroot, '/');
+        $text = preg_replace_callback(
+            '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?(?:/|%2F)(\d+)'
+                . '(?:/|%2F)mod_casestudy(?:/|%2F)feedback(?:/|%2F)\d+(?:/|%2F)~i',
+            function ($matches) use ($contextid, $wwwroot) {
+                $samesite = strpos($matches[0], $wwwroot . '/') === 0;
+                return ($samesite && (int) $matches[1] === $contextid) ? $matches[0] : '@@PLUGINFILE@@/';
+            },
+            $text
+        );
+
+        $text = file_rewrite_pluginfile_urls(
+            $text,
+            'pluginfile.php',
+            $contextid,
+            'mod_casestudy',
+            'feedback',
+            $grade->id
+        );
+
+        return format_text($text, $format, ['context' => $context]);
+    }
 }
