@@ -180,7 +180,7 @@ class template {
         // Grade information.
         if ($grade) {
             $replacements['[[grade]]'] = $this->get_grade_display($grade);
-            $replacements['[[feedback]]'] = format_text($grade->feedback, $grade->feedbackformat);
+            $replacements['[[feedback]]'] = \mod_casestudy\local\helper::format_feedback_text($grade, $this->context);
             $replacements['[[grader]]'] = $this->get_grader_name($grade->graderid);
             $replacements['[[gradetime]]'] = userdate($grade->timemodified);
         } else {

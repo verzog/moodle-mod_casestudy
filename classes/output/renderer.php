@@ -749,7 +749,7 @@ class renderer extends plugin_renderer_base {
         // Get submission history
         $manager = new \mod_casestudy\local\submission_manager($casestudyrecord->id, $casestudyrecord, $cm);
         $history = $manager->get_submission_history($submission->get_submission()->id);
-        $submissiondata['history'] = $this->format_submission_history($history);
+        $submissiondata['history'] = $this->format_submission_history($history, $context);
         $submissiondata['hashistory'] = count($history) > 1; // Only show if there are multiple attempts
 
         $submissiondata['showgraderinfo'] = !$casestudy->get_casestudy_record()->hidegrader;
@@ -935,9 +935,10 @@ class renderer extends plugin_renderer_base {
      * Format submission history for template display
      *
      * @param array $history Array of history records
+     * @param \context|null $context Module context, used to resolve feedback image URLs
      * @return array Formatted history for template
      */
-    private function format_submission_history($history) {
+    private function format_submission_history($history, $context = null) {
         global $DB;
 
         $formatted = [];
@@ -966,7 +967,7 @@ class renderer extends plugin_renderer_base {
                 $status = $submission->status == CASESTUDY_STATUS_AWAITING_RESUBMISSION
                     ? get_string('requestresubmission', 'mod_casestudy') : $statuslist[$submission->status];
                 $grader = $DB->get_record('user', ['id' => $grade->graderid]);
-                $historyitem['feedback'] = format_text($grade->feedback, $grade->feedbackformat ?? FORMAT_HTML);
+                $historyitem['feedback'] = helper::format_feedback_text($grade, $context);
                 $historyitem['grader'] = fullname($grader);
                 $historyitem['timegraded'] = userdate($grade->timemodified, get_string('strftimedatetime', 'langconfig'));
                 $historyitem['gradestatus'] = $status;
