@@ -984,14 +984,17 @@ class renderer extends plugin_renderer_base {
      * Format grader feedback for display, resolving embedded image URLs.
      *
      * Grader feedback is an editor field whose inline images live in the
-     * 'feedback' filearea keyed by the grade id. Like the rich-text submission
-     * fields, the stored HTML keeps @@PLUGINFILE@@ placeholders (or, after a
-     * course restore, absolute pluginfile URLs that carry the source site's
-     * context id). Without rewriting these the images never render — the
-     * placeholder is left literal and a restored absolute URL 404s against the
-     * old context. This mirrors richtext_field::display(): retarget any stale
-     * absolute feedback URL to the placeholder, then rewrite the placeholders to
-     * real pluginfile URLs in this context before formatting.
+     * 'feedback' filearea keyed by the grade id. The stored HTML should keep
+     * @@PLUGINFILE@@ placeholders, but feedback saved before save_feedback()
+     * tokenised the text kept the editor's draft URLs (draftfile.php/.../user/
+     * draft/<id>/), and a course restore can also leave absolute pluginfile URLs
+     * that carry the source site's context id. In all three cases the image never
+     * renders without rewriting: the placeholder is left literal, the draft URL is
+     * dead once the session draft is cleaned up, and a restored absolute URL 404s
+     * against the old context. This mirrors richtext_field::display(): retarget any
+     * stale feedback URL (draft or cross-context pluginfile) to @@PLUGINFILE@@,
+     * then rewrite the placeholders to real pluginfile URLs in this context before
+     * formatting.
      *
      * @param \stdClass $grade Grade record (provides ->id, ->feedback, ->feedbackformat).
      * @param \context|null $context Module context; when absent, feedback is formatted as-is.
@@ -1005,11 +1008,24 @@ class renderer extends plugin_renderer_base {
             return format_text($text, $format);
         }
 
+        $contextid = (int) $context->id;
+
+        // Older feedback was saved without tokenising the editor's draft URLs, so the stored
+        // HTML can still embed draftfile.php/.../user/draft/<id>/<filename> URLs (per-session
+        // draft area, never backed up). These are always stale in stored content, so retarget
+        // every one to @@PLUGINFILE@@ — the filename is kept and resolves against the feedback
+        // files below. Both the slash form and the ?file= form (raw or %2F-encoded) are handled.
+        $text = preg_replace(
+            '~https?://[^"\'\s<>]+?/draftfile\.php(?:\?file=)?(?:/|%2F)\d+(?:/|%2F)user'
+                . '(?:/|%2F)draft(?:/|%2F)\d+(?:/|%2F)~i',
+            '@@PLUGINFILE@@/',
+            $text
+        );
+
         // Retarget stale absolute feedback pluginfile URLs (carrying a different context,
         // e.g. from a course restore) to the @@PLUGINFILE@@ placeholder so they resolve
         // against this context's files below. URLs already in the current context are left
         // untouched. Both the slash form and the ?file= form (raw or %2F-encoded) are handled.
-        $contextid = (int) $context->id;
         $text = preg_replace_callback(
             '~https?://[^"\'\s<>]+?/pluginfile\.php(?:\?file=)?(?:/|%2F)(\d+)'
                 . '(?:/|%2F)mod_casestudy(?:/|%2F)feedback(?:/|%2F)\d+(?:/|%2F)~i',

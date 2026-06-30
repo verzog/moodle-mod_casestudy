@@ -489,17 +489,27 @@ class casestudy {
             $graderecord = $feedbackrecord;
         }
 
-        // Handle file uploads if any
+        // Handle file uploads if any.
         if ($feedback['files']) {
             $context = $this->context;
-            file_save_draft_area_files(
+            // Pass the feedback text through so the editor's draft URLs (draftfile.php/.../user/
+            // draft/<id>/) are tokenised to @@PLUGINFILE@@ and the rewritten text is persisted.
+            // Without this the stored HTML keeps per-session draft URLs that break as soon as the
+            // draft is cleaned up — and are meaningless after a course backup/restore — even though
+            // the image bytes were saved correctly to the 'feedback' area.
+            $rewritten = file_save_draft_area_files(
                 $feedback['files'],
                 $context->id,
                 'mod_casestudy',
                 'feedback',
                 $feedbackid,
-                $form->get_editor_options()
+                $form->get_editor_options(),
+                $feedback['text']
             );
+            if ($rewritten !== null && $rewritten !== $feedback['text']) {
+                $DB->set_field('casestudy_grades', 'feedback', $rewritten, ['id' => $feedbackid]);
+                $graderecord->feedback = $rewritten;
+            }
         }
 
         // Trigger submission graded event
