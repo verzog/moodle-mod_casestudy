@@ -121,14 +121,17 @@ Because the target course was restored from this same source, the activity names
 field shortnames and per-user submission sets already match, so these line up by
 construction.
 
-### Caveat: submission pairing needs equal counts
+### Submission pairing
 
-The current importer pairs submissions positionally and **skips a
-(student, activity) group if the number of source submissions that carry images
-differs from the number of target submissions** (reported as
-`Submission-count mismatches`). That happens when a student has some submissions
-with no uploaded image. If the dry run shows many such mismatches, tell us: the
-importer can be hardened to match submissions by `attempt` (already exported as
-`old_attempt`), which removes the equal-count requirement. Files are only ever
-written for confidently matched submissions, so a mismatch skips — it never
-misfiles.
+The importer matches each file's source submission to the target submission by
+**attempt number** (the `old_attempt` column the export includes). The attempt is
+stable across backup/restore, so this needs no equal-count assumption: a student
+with some image-less attempts still maps correctly, and any source attempt with no
+matching target is left unmapped (its files are reported under
+`Skipped (no mapping)` rather than misfiled).
+
+For older manifests that carry no `old_attempt` column, the importer falls back to
+positional id-order pairing, which does require equal source/target counts — a
+mismatch there is recorded as a `Submission-count mismatch` and that group is
+skipped rather than placed on a guessed pairing. Keeping `old_attempt` in the
+export (the default) avoids that fallback entirely.
