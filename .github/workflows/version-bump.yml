@@ -1,0 +1,41 @@
+name: Version bump check
+
+# Enforces the project convention that every pull request bumps
+# $plugin->version in version.php (see CLAUDE.md), so the version number always
+# uniquely identifies the deployed codebase — even for tooling/docs-only changes.
+
+on:
+  pull_request:
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure $plugin->version was bumped versus the base branch
+        run: |
+          set -euo pipefail
+          get_version() {
+            git show "$1:version.php" 2>/dev/null \
+              | grep -oE '\$plugin->version[[:space:]]*=[[:space:]]*[0-9]+' \
+              | grep -oE '[0-9]+' || true
+          }
+
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          BASE_VER="$(get_version FETCH_HEAD)"
+          HEAD_VER="$(get_version HEAD)"
+          echo "base (${{ github.base_ref }})=$BASE_VER  head=$HEAD_VER"
+
+          if [ -z "$BASE_VER" ] || [ -z "$HEAD_VER" ]; then
+            echo "::error::Could not read \$plugin->version from version.php on both sides."
+            exit 1
+          fi
+          if [ "$HEAD_VER" -le "$BASE_VER" ]; then
+            echo "::error::version.php \$plugin->version must be bumped on every PR: base=$BASE_VER, head=$HEAD_VER. Increase it (YYYYMMDDXX) so it is strictly greater than the base branch."
+            exit 1
+          fi
+          echo "OK: \$plugin->version bumped $BASE_VER -> $HEAD_VER"
