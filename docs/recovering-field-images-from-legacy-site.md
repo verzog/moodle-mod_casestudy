@@ -43,16 +43,23 @@ conflict instead).
 ## Step 1 — export the manifest (SOURCE, read-only)
 
 Run `tools/export_field_images_manifest.sql` against the source database and save
-the result as CSV **with a header row**. Edit the table prefix first (and,
-optionally, the course filter).
+the result as **properly-quoted CSV with a header row**. Edit the table prefix
+first (and, optionally, the course filter).
 
-- MySQL/MariaDB:
+> Do **not** just convert the `mysql` client's tab output to commas (e.g.
+> `sed 's/\t/,/g'`): that does not quote or escape values, so an activity name or
+> filename containing a comma (`Case, week 1`) shifts the columns and the importer
+> (`fgetcsv`) then mis-maps emails/filenames/hashes. Use a CSV-aware exporter:
+
+- MySQL/MariaDB — use MySQL Shell, which emits real CSV:
   ```bash
-  mysql -u USER -p DBNAME < mod/casestudy/tools/export_field_images_manifest.sql \
-      | sed 's/\t/,/g' > casestudy_manifest.csv
+  mysqlsh --sql --result-format=csv -u USER -p -h HOST DBNAME \
+      < mod/casestudy/tools/export_field_images_manifest.sql > casestudy_manifest.csv
   ```
-  (or run it in a client that exports CSV directly)
-- PostgreSQL — wrap the SELECT in `COPY (...) TO STDOUT WITH CSV HEADER`, e.g.:
+  No `mysqlsh`? Run the query in a GUI/admin tool (phpMyAdmin, Adminer, DBeaver)
+  and use its **Export → CSV** (quoted). Or `SELECT ... INTO OUTFILE` with
+  `FIELDS OPTIONALLY ENCLOSED BY '"'` if the server allows it.
+- PostgreSQL — `\copy` already quotes correctly:
   ```bash
   psql -d DBNAME -c "\copy (<paste the SELECT>) TO 'casestudy_manifest.csv' WITH CSV HEADER"
   ```
