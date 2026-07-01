@@ -364,11 +364,13 @@ class manifest_image_importer {
             }
 
             $key = $row['casestudy'] . "\0" . $row['email'];
+            if (!isset($groups[$key])) {
+                $groups[$key] = ['files' => [], 'submissions' => []];
+            }
             $groups[$key]['files'][] = $row;
             // Keep a non-null attempt if any row for this submission carries one.
             $oldsubid = $row['old_submissionid'];
-            if (!array_key_exists($oldsubid, $groups[$key]['submissions'])
-                    || $groups[$key]['submissions'][$oldsubid] === null) {
+            if (($groups[$key]['submissions'][$oldsubid] ?? null) === null) {
                 $groups[$key]['submissions'][$oldsubid] = $attempt;
             }
         }
