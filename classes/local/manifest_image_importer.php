@@ -125,29 +125,20 @@ class manifest_image_importer {
             }
             $contextid = \context_module::instance($cm->id)->id;
 
-            // Pair source submissions to target submissions by id order within this (activity, user).
-            $oldsubids = array_keys($rows['submissions']);
-            sort($oldsubids, SORT_NUMERIC);
+            // Pair source submissions to target submissions within this (activity, user). Prefer
+            // matching by attempt number (stable across restore, no equal-count assumption); fall
+            // back to positional id-order pairing for legacy manifests with no attempt column.
             $targetsubs = $DB->get_records(
                 'casestudy_submissions',
                 ['casestudyid' => $casestudyid, 'userid' => $userid],
                 'id ASC',
-                'id'
+                'id, attempt'
             );
-            $targetsubids = array_keys($targetsubs);
-
-            if (count($oldsubids) !== count($targetsubids)) {
-                // Counts differ — pairing by index would be unsafe; flag for manual review.
-                $stats->submissionmismatch[] = sprintf(
-                    '%s / %s: source %d vs target %d submissions',
-                    $activityname, $email, count($oldsubids), count($targetsubids)
-                );
+            $oldtonew = self::pair_submissions(
+                $rows['submissions'], $targetsubs, $stats, $activityname, $email
+            );
+            if ($oldtonew === null) {
                 continue;
-            }
-
-            $oldtonew = [];
-            foreach ($oldsubids as $i => $oldid) {
-                $oldtonew[$oldid] = $targetsubids[$i];
             }
 
             // Resolve this activity's file fields by shortname (cached).
@@ -260,10 +251,75 @@ class manifest_image_importer {
     }
 
     /**
+     * Map source submission ids to target submission ids for one (activity, student).
+     *
+     * Preferred: match by attempt number. The attempt survives backup/restore unchanged, so this
+     * needs no equal-count assumption — a source submission whose attempt is absent from the target
+     * is left unmapped (its files are reported as skippednomap), and image-less submissions that
+     * never appear in the manifest are simply irrelevant. Used whenever the manifest carries an
+     * attempt for every source submission in the group and the target attempts are unique.
+     *
+     * Fallback (legacy manifests with no attempt column): pair by id order, which requires equal
+     * counts; a mismatch is recorded and the group skipped so files are never placed on a guessed
+     * pairing.
+     *
+     * @param array $oldsubs [old submission id => attempt int|null] from the manifest.
+     * @param array $targetsubs [target id => record with ->id, ->attempt] ordered by id.
+     * @param \stdClass $stats Import stats (mutated to record any mismatch).
+     * @param string $activityname For mismatch messages.
+     * @param string $email For mismatch messages.
+     * @return array|null [old id => new id], or null if the group cannot be paired safely.
+     */
+    protected static function pair_submissions(array $oldsubs, array $targetsubs, \stdClass $stats,
+            string $activityname, string $email): ?array {
+        // Attempt-based matching, when the manifest carries an attempt for every source submission
+        // and the target attempts are unique (they always are within one activity+user chain).
+        $haveattempts = $oldsubs !== [] && !in_array(null, $oldsubs, true);
+        $byattempt = [];
+        $targetunique = true;
+        foreach ($targetsubs as $t) {
+            $att = (int) $t->attempt;
+            if (isset($byattempt[$att])) {
+                $targetunique = false;
+                break;
+            }
+            $byattempt[$att] = (int) $t->id;
+        }
+
+        if ($haveattempts && $targetunique) {
+            $map = [];
+            foreach ($oldsubs as $oldid => $attempt) {
+                if (isset($byattempt[(int) $attempt])) {
+                    $map[$oldid] = $byattempt[(int) $attempt];
+                }
+                // No target with this attempt: leave unmapped; the file loop records skippednomap.
+            }
+            return $map;
+        }
+
+        // Positional fallback: only safe when the counts match exactly.
+        $oldids = array_keys($oldsubs);
+        sort($oldids, SORT_NUMERIC);
+        $targetids = array_keys($targetsubs);
+        if (count($oldids) !== count($targetids)) {
+            $stats->submissionmismatch[] = sprintf(
+                '%s / %s: source %d vs target %d submissions (no attempt data to disambiguate)',
+                $activityname, $email, count($oldids), count($targetids)
+            );
+            return null;
+        }
+        $map = [];
+        foreach ($oldids as $i => $oldid) {
+            $map[$oldid] = $targetids[$i];
+        }
+        return $map;
+    }
+
+    /**
      * Read the manifest CSV and group rows by (activity name, email).
      *
      * @param string $path CSV path (first row is the header)
-     * @return array key "name\0email" => ['files' => rows[], 'submissions' => [oldsubid => true]]
+     * @return array key "name\0email" => ['files' => rows[], 'submissions' => [oldsubid => attempt|null]]
      */
     protected static function read_manifest_grouped(string $path): array {
         $handle = fopen($path, 'r');
@@ -298,9 +354,23 @@ class manifest_image_importer {
                 'filename' => $data[$col['filename']],
                 'contenthash' => trim($data[$col['contenthash']]),
             ];
+            // Capture the source attempt when the manifest provides it, so import can match
+            // submissions by attempt (robust) rather than positionally. Absent/blank => null,
+            // which makes pair_submissions() fall back to positional matching for this group.
+            $attempt = null;
+            if (isset($col['old_attempt'], $data[$col['old_attempt']])
+                    && trim($data[$col['old_attempt']]) !== '') {
+                $attempt = (int) $data[$col['old_attempt']];
+            }
+
             $key = $row['casestudy'] . "\0" . $row['email'];
             $groups[$key]['files'][] = $row;
-            $groups[$key]['submissions'][$row['old_submissionid']] = true;
+            // Keep a non-null attempt if any row for this submission carries one.
+            $oldsubid = $row['old_submissionid'];
+            if (!array_key_exists($oldsubid, $groups[$key]['submissions'])
+                    || $groups[$key]['submissions'][$oldsubid] === null) {
+                $groups[$key]['submissions'][$oldsubid] = $attempt;
+            }
         }
         fclose($handle);
         return $groups;
