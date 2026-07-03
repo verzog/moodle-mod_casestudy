@@ -33,15 +33,64 @@ defined('MOODLE_INTERNAL') || die();
  */
 class completion_counter {
     /**
-     * SQL expression that collapses a case's attempts to a single identity.
+     * Map of id => parentid for every submission by a user in an activity.
      *
-     * A resubmission carries parentid = the original submission id; an original has parentid 0.
-     * Grouping by "parent if set, else self" yields one identity per case.
+     * Used to resolve each submission to the root of its resubmission chain. parentid points at
+     * the immediate parent (a chain can be several rounds deep when maxattempts allows it), so the
+     * root is found by walking, not by reading parentid directly.
      *
-     * @return string SQL fragment referencing alias s (casestudy_submissions).
+     * @param int $casestudyid Case study instance id.
+     * @param int $userid User id.
+     * @return array<int,int> Submission id => immediate parent id (0 for a root).
      */
-    private static function case_expr(): string {
-        return "CASE WHEN s.parentid > 0 THEN s.parentid ELSE s.id END";
+    private static function parent_map(int $casestudyid, int $userid): array {
+        global $DB;
+
+        $map = $DB->get_records_menu(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudyid, 'userid' => $userid],
+            '',
+            'id, parentid'
+        );
+
+        $result = [];
+        foreach ($map as $id => $parentid) {
+            $result[(int) $id] = (int) $parentid;
+        }
+        return $result;
+    }
+
+    /**
+     * Resolve a submission id to the root of its resubmission chain.
+     *
+     * @param array<int,int> $parentmap Submission id => immediate parent id.
+     * @param int $id Submission id to resolve.
+     * @return int Root submission (case) id.
+     */
+    private static function root_id(array $parentmap, int $id): int {
+        $seen = [];
+        $current = $id;
+        // Walk up to the top of the chain; $seen guards against any accidental cycle.
+        while (!empty($parentmap[$current]) && empty($seen[$current])) {
+            $seen[$current] = true;
+            $current = $parentmap[$current];
+        }
+        return $current;
+    }
+
+    /**
+     * Count the distinct root cases the given submission ids belong to.
+     *
+     * @param array<int,int> $parentmap Submission id => immediate parent id.
+     * @param int[] $ids Submission ids to collapse to their root cases.
+     * @return int Number of distinct root cases.
+     */
+    private static function distinct_roots(array $parentmap, array $ids): int {
+        $roots = [];
+        foreach ($ids as $id) {
+            $roots[self::root_id($parentmap, (int) $id)] = true;
+        }
+        return count($roots);
     }
 
     /**
@@ -54,19 +103,24 @@ class completion_counter {
     public static function count_total(int $casestudyid, int $userid): int {
         global $DB;
 
-        $expr = self::case_expr();
-        return (int) $DB->count_records_sql(
-            "SELECT COUNT(DISTINCT $expr)
-               FROM {casestudy_submissions} s
-              WHERE s.casestudyid = :casestudyid
-                AND s.userid = :userid
-                AND s.status = :status",
-            [
-                'casestudyid' => $casestudyid,
-                'userid' => $userid,
-                'status' => CASESTUDY_STATUS_SATISFACTORY,
-            ]
+        // Fetch every submission once: build the parent map and collect satisfactory ids together.
+        $subs = $DB->get_records(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudyid, 'userid' => $userid],
+            '',
+            'id, parentid, status'
         );
+
+        $parentmap = [];
+        $satisfactory = [];
+        foreach ($subs as $s) {
+            $parentmap[(int) $s->id] = (int) $s->parentid;
+            if ($s->status === CASESTUDY_STATUS_SATISFACTORY) {
+                $satisfactory[] = (int) $s->id;
+            }
+        }
+
+        return self::distinct_roots($parentmap, $satisfactory);
     }
 
     /**
@@ -95,9 +149,8 @@ class completion_counter {
             $contentwhere = "AND c.content IS NOT NULL AND c.content != ''";
         }
 
-        $expr = self::case_expr();
-        return (int) $DB->count_records_sql(
-            "SELECT COUNT(DISTINCT $expr)
+        $ids = $DB->get_fieldset_sql(
+            "SELECT DISTINCT s.id
                FROM {casestudy_submissions} s
                JOIN {casestudy_content} c ON s.id = c.submissionid
               WHERE s.casestudyid = :casestudyid
@@ -107,6 +160,12 @@ class completion_counter {
                 $contentwhere",
             $params
         );
+
+        if (empty($ids)) {
+            return 0;
+        }
+
+        return self::distinct_roots(self::parent_map($casestudyid, $userid), $ids);
     }
 
     /**

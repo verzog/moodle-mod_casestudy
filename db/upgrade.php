@@ -44,5 +44,19 @@ function xmldb_casestudy_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026020201, 'casestudy');
     }
 
+    if ($oldversion < 2026070320) {
+        // Widen casestudy_grades.grade to a decimal column so fractional point grades (e.g. 7.5)
+        // are stored without truncation. Existing integer values are preserved by the widening.
+        $table = new xmldb_table('casestudy_grades');
+        $field = new xmldb_field('grade', XMLDB_TYPE_NUMBER, '10, 5', null, null, null, null, 'feedbackformat');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_type($table, $field);
+        }
+
+        // Casestudy savepoint reached.
+        upgrade_mod_savepoint(true, 2026070320, 'casestudy');
+    }
+
     return true;
 }

@@ -430,79 +430,33 @@ class summary_table extends table_sql {
      * @return bool True if completed
      */
     protected function check_user_completion($userid) {
-        global $DB;
-
         if (empty($this->completionrules)) {
             return false;
         }
 
         $results = [];
 
-        // Check each completion rule.
+        // Check each completion rule via the shared counter so the badge, the progress columns
+        // and activity completion always agree (case-based counts, not raw submission rows).
         foreach ($this->completionrules as $rule) {
             if ($rule->ruletype == CASESTUDY_COMPLETION_TOTAL) {
-                // Check total satisfactory.
-                $count = $DB->count_records('casestudy_submissions', [
-                    'casestudyid' => $this->casestudy->id,
-                    'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY,
-                ]);
+                $count = \mod_casestudy\local\completion_counter::count_total(
+                    $this->casestudy->id,
+                    (int) $userid
+                );
                 $results[] = ($count >= $rule->count);
             } else if ($rule->ruletype == CASESTUDY_COMPLETION_CATEGORY) {
-                // Check category completion.
-                $actualvalue = null;
-                if (!empty($rule->categoryvalue)) {
-                    $fields = $DB->get_records(
-                        'casestudy_fields',
-                        ['casestudyid' => $this->casestudy->id, 'category' => 1],
-                        'sortorder ASC',
-                        'id, param1'
-                    );
-
-                    $optionindex = 1;
-                    foreach ($fields as $field) {
-                        $values = $field->param1 ? json_decode($field->param1, true) : [];
-                        if (is_array($values)) {
-                            foreach ($values as $v) {
-                                if ($optionindex == $rule->categoryvalue && $field->id == $rule->fieldid) {
-                                    $actualvalue = $v;
-                                    break 2;
-                                }
-                                $optionindex++;
-                            }
-                        }
-                    }
-                }
-
-                if (!empty($actualvalue)) {
-                    $contentwhere = 'AND c.content = :content';
-                    $params = [
-                        'casestudyid' => $this->casestudy->id,
-                        'userid' => $userid,
-                        'status' => CASESTUDY_STATUS_SATISFACTORY,
-                        'fieldid' => $rule->fieldid,
-                        'content' => $actualvalue,
-                    ];
-                } else {
-                    $contentwhere = 'AND c.content IS NOT NULL AND c.content != \'\'';
-                    $params = [
-                        'casestudyid' => $this->casestudy->id,
-                        'userid' => $userid,
-                        'status' => CASESTUDY_STATUS_SATISFACTORY,
-                        'fieldid' => $rule->fieldid,
-                    ];
-                }
-
-                $count = $DB->count_records_sql(
-                    "
-                    SELECT COUNT(DISTINCT s.id)
-                    FROM {casestudy_submissions} s
-                    JOIN {casestudy_content} c ON s.id = c.submissionid
-                    WHERE s.casestudyid = :casestudyid AND s.userid = :userid AND s.status = :status AND c.fieldid = :fieldid
-                    $contentwhere",
-                    $params
+                $actualvalue = \mod_casestudy\local\completion_counter::resolve_category_value(
+                    $this->casestudy->id,
+                    (int) $rule->fieldid,
+                    (int) $rule->categoryvalue
                 );
-
+                $count = \mod_casestudy\local\completion_counter::count_category(
+                    $this->casestudy->id,
+                    (int) $userid,
+                    (int) $rule->fieldid,
+                    $actualvalue
+                );
                 $results[] = ($count >= $rule->count);
             }
         }

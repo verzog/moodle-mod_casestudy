@@ -390,8 +390,15 @@ class casestudy {
 
         // Check for advanced grading data
         if (!isset($data->advancedgrading) || empty($data->advancedgrading)) {
-            // Fall back to traditional grading
-            return isset($data->grade) && $data->grade !== '' ? (int)$data->grade : null;
+            // Fall back to traditional grading. Preserve decimals (e.g. 7.5): point grades can be
+            // fractional and are compared against grade-to-pass, so truncating to int here could
+            // wrongly mark a passing case unsatisfactory. unformat_float also handles localised
+            // decimal separators. Scale ids are integers, so this is lossless for scales too.
+            if (!isset($data->grade) || $data->grade === '') {
+                return null;
+            }
+            $parsed = unformat_float($data->grade);
+            return ($parsed === false) ? null : $parsed;
         }
 
         $cm = $this->cm ?: get_coursemodule_from_instance('casestudy', $casestudyid);
