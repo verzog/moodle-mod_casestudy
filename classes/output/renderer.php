@@ -374,11 +374,7 @@ class renderer extends plugin_renderer_base {
         foreach ($completionrules as $rule) {
             // Handle total satisfactory completion rule
             if ($rule->ruletype == CASESTUDY_COMPLETION_TOTAL) {
-                $current = $DB->count_records('casestudy_submissions', [
-                    'casestudyid' => $casestudy->id,
-                    'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY,
-                ]);
+                $current = \mod_casestudy\local\completion_counter::count_total($casestudy->id, $userid);
 
                 $criteria[] = [
                     'label' => get_string('totalsatisfactory', 'mod_casestudy'),
@@ -398,76 +394,23 @@ class renderer extends plugin_renderer_base {
                     continue;
                 }
 
-                // Determine the actual category value from the global index
-                $actualvalue = null;
-                if (!empty($rule->categoryvalue)) {
-                    // Rebuild the global index-to-value mapping to find the actual value
-                    $fields = $DB->get_records(
-                        'casestudy_fields',
-                        ['casestudyid' => $casestudy->id, 'category' => 1],
-                        'sortorder ASC',
-                        'id, param1'
-                    );
+                // Resolve the stored global index to the actual option value, then count
+                // matching satisfactory cases (per case, not per attempt).
+                $actualvalue = \mod_casestudy\local\completion_counter::resolve_category_value(
+                    $casestudy->id,
+                    (int) $rule->fieldid,
+                    (int) $rule->categoryvalue
+                );
+                $current = \mod_casestudy\local\completion_counter::count_category(
+                    $casestudy->id,
+                    $userid,
+                    (int) $rule->fieldid,
+                    $actualvalue
+                );
 
-                    $optionindex = 1;
-                    foreach ($fields as $fielditem) {
-                        $values = $fielditem->param1 ? json_decode($fielditem->param1, true) : [];
-                        if (is_array($values)) {
-                            foreach ($values as $v) {
-                                if ($optionindex == $rule->categoryvalue && $fielditem->id == $rule->fieldid) {
-                                    $actualvalue = $v;
-                                    break 2;
-                                }
-                                $optionindex++;
-                            }
-                        }
-                    }
-                }
-
-                // Build query based on whether we need a specific value or any value
-                if (!empty($actualvalue)) {
-                    // Count submissions with specific category value
-                    $current = $DB->count_records_sql(
-                        "
-                        SELECT COUNT(DISTINCT s.id)
-                          FROM {casestudy_submissions} s
-                          JOIN {casestudy_content} c ON s.id = c.submissionid
-                         WHERE s.casestudyid = :casestudyid
-                           AND s.userid = :userid
-                           AND s.status = :status
-                           AND c.fieldid = :fieldid
-                           AND c.content = :content",
-                        [
-                            'casestudyid' => $casestudy->id,
-                            'userid' => $userid,
-                            'status' => CASESTUDY_STATUS_SATISFACTORY,
-                            'fieldid' => $rule->fieldid,
-                            'content' => $actualvalue,
-                        ]
-                    );
-
+                if ($actualvalue !== null && $actualvalue !== '') {
                     $label = $field->name . ' (' . format_string($actualvalue) . ')';
                 } else {
-                    // Count submissions with any value in this category field
-                    $current = $DB->count_records_sql(
-                        "
-                        SELECT COUNT(DISTINCT s.id)
-                          FROM {casestudy_submissions} s
-                          JOIN {casestudy_content} c ON s.id = c.submissionid
-                         WHERE s.casestudyid = :casestudyid
-                           AND s.userid = :userid
-                           AND s.status = :status
-                           AND c.fieldid = :fieldid
-                           AND c.content IS NOT NULL
-                           AND c.content != ''",
-                        [
-                            'casestudyid' => $casestudy->id,
-                            'userid' => $userid,
-                            'status' => CASESTUDY_STATUS_SATISFACTORY,
-                            'fieldid' => $rule->fieldid,
-                        ]
-                    );
-
                     $label = format_string($field->name);
                 }
 

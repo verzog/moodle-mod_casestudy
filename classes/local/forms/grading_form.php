@@ -150,6 +150,19 @@ class grading_form extends \core_form\dynamic_form {
 
             $actiongroup = [];
 
+            // Point/rubric modes: a single "mark" button finalises the grade to
+            // satisfactory/unsatisfactory via grade-to-pass (parallel to the scale buttons above,
+            // which scales render instead). The generic template JS copies its name into the
+            // hidden submitaction, so no extra client wiring is needed.
+            if ($mode === 'point' || $mode === 'advanced') {
+                $actiongroup[] = $mform->createElement(
+                    'submit',
+                    'markgrade',
+                    get_string('markgrade', 'mod_casestudy'),
+                    ['class' => 'grade-primary']
+                );
+            }
+
             // Save feedback.
             $actiongroup[] = $mform->createElement(
                 'submit',

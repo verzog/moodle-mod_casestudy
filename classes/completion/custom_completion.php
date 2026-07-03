@@ -57,20 +57,8 @@ class custom_completion extends activity_custom_completion {
                 return COMPLETION_INCOMPLETE;
             }
 
-            // Count total satisfactory submissions for this user.
-            $count = $DB->count_records_sql(
-                "
-                SELECT COUNT(DISTINCT s.id)
-                FROM {casestudy_submissions} s
-                WHERE s.casestudyid = :casestudyid
-                  AND s.userid = :userid
-                  AND s.status = :status",
-                [
-                    'casestudyid' => $casestudy->id,
-                    'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY,
-                ]
-            );
+            // Count total satisfactory cases for this user (per case, not per attempt).
+            $count = \mod_casestudy\local\completion_counter::count_total($casestudy->id, $userid);
 
             return ($count >= $totalrule->count) ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
         }
@@ -94,68 +82,24 @@ class custom_completion extends activity_custom_completion {
             $results = [];
 
             foreach ($categoryrules as $completionrule) {
-                $fieldid = $completionrule->fieldid;
-                $categoryvalueindex = $completionrule->categoryvalue;
-                $requiredcount = $completionrule->count;
+                $fieldid = (int) $completionrule->fieldid;
 
-                $actualvalue = null;
-                if (!empty($categoryvalueindex)) {
-                    $fields = $DB->get_records(
-                        'casestudy_fields',
-                        ['casestudyid' => $casestudy->id, 'category' => 1],
-                        'sortorder ASC',
-                        'id, param1'
-                    );
-
-                    $optionindex = 1;
-                    foreach ($fields as $field) {
-                        $values = $field->param1 ? json_decode($field->param1, true) : [];
-                        if (is_array($values)) {
-                            foreach ($values as $v) {
-                                if ($optionindex == $categoryvalueindex && $field->id == $fieldid) {
-                                    $actualvalue = $v;
-                                    break 2;
-                                }
-                                $optionindex++;
-                            }
-                        }
-                    }
-                }
-
-                if (!empty($actualvalue)) {
-                    $contentwhere = 'AND c.content = :content';
-                    $params = [
-                        'casestudyid' => $casestudy->id,
-                        'userid' => $userid,
-                        'status' => CASESTUDY_STATUS_SATISFACTORY,
-                        'fieldid' => $fieldid,
-                        'content' => $actualvalue,
-                    ];
-                } else {
-                    $contentwhere = 'AND c.content IS NOT NULL AND c.content != \'\'';
-                    $params = [
-                        'casestudyid' => $casestudy->id,
-                        'userid' => $userid,
-                        'status' => CASESTUDY_STATUS_SATISFACTORY,
-                        'fieldid' => $fieldid,
-                    ];
-                }
-
-                // Count satisfactory submissions matching this category rule.
-                $count = $DB->count_records_sql(
-                    "
-                    SELECT COUNT(DISTINCT s.id)
-                    FROM {casestudy_submissions} s
-                    JOIN {casestudy_content} c ON s.id = c.submissionid
-                    WHERE s.casestudyid = :casestudyid
-                      AND s.userid = :userid
-                      AND s.status = :status
-                      AND c.fieldid = :fieldid
-                      $contentwhere",
-                    $params
+                // Resolve the stored global index to the actual option value, then count the
+                // distinct satisfactory cases matching it (per case, not per attempt).
+                $actualvalue = \mod_casestudy\local\completion_counter::resolve_category_value(
+                    $casestudy->id,
+                    $fieldid,
+                    (int) $completionrule->categoryvalue
                 );
+                $count = \mod_casestudy\local\completion_counter::count_category(
+                    $casestudy->id,
+                    $userid,
+                    $fieldid,
+                    $actualvalue
+                );
+
                 // Check if this specific rule is met.
-                $results[] = ($count >= $requiredcount);
+                $results[] = ($count >= $completionrule->count);
             }
 
             // Apply aggregation logic.

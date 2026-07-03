@@ -342,26 +342,29 @@ class casestudy {
         // Just save feedback without changing grade/status.
         $this->save_feedback($submission, $feedback, $grade, $data->saverequestresubmission, $form);
 
-        // Scale-button submissions arrive as submitaction='markscale' with the
-        // chosen scale item id in $data->grade. The highest scale item maps to
-        // satisfactory; everything else maps to unsatisfactory.
-        $scalestatus = null;
-        if (($data->submitaction ?? '') === 'markscale' && $this->casestudy->grade < 0) {
-            $scaleitems = make_grades_menu($this->casestudy->grade);
-            if (!empty($scaleitems)) {
-                $maxkey = max(array_keys($scaleitems));
-                $chosen = isset($data->grade) ? (int)$data->grade : 0;
-                $scalestatus = ($chosen === $maxkey)
+        // A finalising action ('markscale' for scales, 'markgrade' for numeric/rubric) resolves
+        // the grade to satisfactory/unsatisfactory via the activity's grade-to-pass, regardless
+        // of grading method. Saving feedback or requesting a resubmission are workflow states
+        // that do not finalise the grade.
+        $inreview = !empty($submission->parentid)
+            ? CASESTUDY_STATUS_RESUBMITTED_INREVIEW
+            : CASESTUDY_STATUS_IN_REVIEW;
+
+        $gradedstatus = $inreview;
+        if (in_array($data->submitaction ?? '', ['markscale', 'markgrade'], true)) {
+            $satisfactory = $this->is_grade_satisfactory($grade);
+            if ($satisfactory !== null) {
+                $gradedstatus = $satisfactory
                     ? CASESTUDY_STATUS_SATISFACTORY
                     : CASESTUDY_STATUS_UNSATISFACTORY;
             }
         }
 
         $status = match ($data->submitaction) {
-            'savefeedback' => !empty($submission->parentid) ? CASESTUDY_STATUS_RESUBMITTED_INREVIEW : CASESTUDY_STATUS_IN_REVIEW,
+            'savefeedback' => $inreview,
             'saverequestresubmission' => CASESTUDY_STATUS_AWAITING_RESUBMISSION,
-            'markscale' => $scalestatus ?? CASESTUDY_STATUS_IN_REVIEW,
-            default => CASESTUDY_STATUS_IN_REVIEW,
+            'markscale', 'markgrade' => $gradedstatus,
+            default => $inreview,
         };
 
         // Get notifystudent value from form data (default true for backward compatibility)
@@ -410,11 +413,9 @@ class casestudy {
                 // Update the grading instance with form data
                 $gradinginstance->submit_and_get_grade($data->advancedgrading, $grade->id ?? 0);
 
-                // Get the calculated grade
+                // Return the rubric-calculated grade. Whether it counts as satisfactory is
+                // decided later by is_grade_satisfactory() against the activity's grade-to-pass.
                 $grade = $gradinginstance->get_grade();
-
-                // Convert to satisfactory/unsatisfactory scale (0/1)
-                // This depends on your grading scale setup
                 return $grade;
             }
         }
@@ -618,6 +619,49 @@ class casestudy {
                                        'Cannot load the grade item.');
         }
         return $this->gradeitem;
+    }
+
+    /**
+     * Decide whether a grade value counts as "satisfactory" for completion purposes.
+     *
+     * Unifies the three supported grading methods behind Moodle's grade-to-pass so completion
+     * works the same regardless of how a case is marked:
+     *  - Scale (casestudy->grade < 0): the chosen scale item is satisfactory when it is at or
+     *    above the grade-to-pass scale item. With no grade-to-pass set, the top scale item is
+     *    treated as satisfactory (preserves the original scale-button behaviour).
+     *  - Numeric / rubric (casestudy->grade > 0): satisfactory when grade >= grade-to-pass.
+     *
+     * @param mixed $grade Raw grade value (scale item id for scales, points otherwise).
+     * @return bool|null True/false, or null when satisfaction cannot be determined: no grade
+     *                   given, no grading configured, or numeric/rubric with no grade-to-pass set.
+     */
+    public function is_grade_satisfactory($grade): ?bool {
+        if ($grade === null || $grade === '') {
+            return null;
+        }
+
+        // Scale grading: grade holds a 1-based scale item id.
+        if ($this->casestudy->grade < 0) {
+            $scaleitems = make_grades_menu($this->casestudy->grade);
+            if (empty($scaleitems)) {
+                return null;
+            }
+            $gradepass = (int) round((float) ($this->get_grade_item()->gradepass ?? 0));
+            $threshold = ($gradepass > 0) ? $gradepass : max(array_keys($scaleitems));
+            return (int) $grade >= $threshold;
+        }
+
+        // Numeric / rubric grading: satisfactory when the grade meets grade-to-pass.
+        if ($this->casestudy->grade > 0) {
+            $gradepass = (float) ($this->get_grade_item()->gradepass ?? 0);
+            if ($gradepass <= 0) {
+                // No pass mark configured — cannot derive satisfaction (settings form warns of this).
+                return null;
+            }
+            return (float) $grade >= $gradepass;
+        }
+
+        return null;
     }
 
     /**

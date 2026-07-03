@@ -672,6 +672,15 @@ class mod_casestudy_mod_form extends moodleform_mod {
             }
         }
 
+        // Point grading covers both numeric and rubric (a rubric produces a point grade). When the
+        // activity counts satisfactory cases for completion but has no grade to pass, nothing can
+        // ever be marked satisfactory and completion could never be met — flag it for the author.
+        $gradetype = $data['grade']['modgrade_type'] ?? '';
+        $gradepass = isset($data['gradepass']) ? (float) unformat_float($data['gradepass']) : 0.0;
+        if ($gradetype === 'point' && $gradepass <= 0 && $this->completion_rule_enabled($data)) {
+            $errors['gradepass'] = get_string('markgradenopass', 'mod_casestudy');
+        }
+
         return $errors;
     }
 }
