@@ -412,12 +412,11 @@ class notification_helper {
 
         foreach ($completionrules as $rule) {
             if ($rule->ruletype == CASESTUDY_COMPLETION_TOTAL) {
-                // Total satisfactory count.
-                $current = $DB->count_records('casestudy_submissions', [
-                    'casestudyid' => $casestudy->id,
-                    'userid' => $userid,
-                    'status' => CASESTUDY_STATUS_SATISFACTORY,
-                ]);
+                // Total satisfactory count (case-based, via the shared counter).
+                $current = \mod_casestudy\local\completion_counter::count_total(
+                    $casestudy->id,
+                    (int) $userid
+                );
 
                 $completed = ($current >= $rule->count);
                 if (!$completed) {
@@ -439,62 +438,17 @@ class notification_helper {
 
                 $fieldname = format_string($field->name);
 
-                // Resolve category value.
-                $actualvalue = null;
-                if (!empty($rule->categoryvalue)) {
-                    $fields = $DB->get_records(
-                        'casestudy_fields',
-                        ['casestudyid' => $casestudy->id, 'category' => 1],
-                        'sortorder ASC',
-                        'id, param1'
-                    );
-
-                    $optionindex = 1;
-                    foreach ($fields as $f) {
-                        $values = $f->param1 ? json_decode($f->param1, true) : [];
-                        if (is_array($values)) {
-                            foreach ($values as $v) {
-                                if ($optionindex == $rule->categoryvalue && $f->id == $rule->fieldid) {
-                                    $actualvalue = $v;
-                                    break 2;
-                                }
-                                $optionindex++;
-                            }
-                        }
-                    }
-                }
-
-                // Count satisfactory submissions for this category.
-                if (!empty($actualvalue)) {
-                    $contentwhere = 'AND c.content = :content';
-                    $params = [
-                        'casestudyid' => $casestudy->id,
-                        'userid' => $userid,
-                        'status' => CASESTUDY_STATUS_SATISFACTORY,
-                        'fieldid' => $rule->fieldid,
-                        'content' => $actualvalue,
-                    ];
-                } else {
-                    $contentwhere = 'AND c.content IS NOT NULL AND c.content != \'\'';
-                    $params = [
-                        'casestudyid' => $casestudy->id,
-                        'userid' => $userid,
-                        'status' => CASESTUDY_STATUS_SATISFACTORY,
-                        'fieldid' => $rule->fieldid,
-                    ];
-                }
-
-                $current = $DB->count_records_sql(
-                    "
-                    SELECT COUNT(DISTINCT s.id)
-                    FROM {casestudy_submissions} s
-                    JOIN {casestudy_content} c ON s.id = c.submissionid
-                    WHERE s.casestudyid = :casestudyid
-                      AND s.userid = :userid
-                      AND s.status = :status
-                      AND c.fieldid = :fieldid
-                      $contentwhere",
-                    $params
+                // Resolve the category value and count matching cases via the shared counter.
+                $actualvalue = \mod_casestudy\local\completion_counter::resolve_category_value(
+                    $casestudy->id,
+                    (int) $rule->fieldid,
+                    (int) $rule->categoryvalue
+                );
+                $current = \mod_casestudy\local\completion_counter::count_category(
+                    $casestudy->id,
+                    (int) $userid,
+                    (int) $rule->fieldid,
+                    $actualvalue
                 );
 
                 $completed = ($current >= $rule->count);

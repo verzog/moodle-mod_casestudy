@@ -47,6 +47,56 @@ class restore_casestudy_activity_task extends restore_activity_task {
     }
 
     /**
+     * Recalculate custom completion after the whole activity has been restored.
+     *
+     * Restore copies course_modules_completion verbatim from the source site, so a migrated
+     * learner keeps whatever completion verdict the *source* engine produced. Because this
+     * plugin derives completion from its own satisfactory-submission and category rules
+     * (see \mod_casestudy\completion\custom_completion), we recompute here so restored
+     * completion reflects THIS site's rules and marking rather than the source's.
+     *
+     * This runs in after_restore() — not in the structure step's after_execute() — so it
+     * executes after the standard userscompletion step and is not overwritten by it.
+     */
+    public function after_restore() {
+        global $DB, $CFG;
+        require_once($CFG->libdir . '/completionlib.php');
+
+        $courseid = $this->get_courseid();
+        $cmid = $this->get_moduleid();
+        $instanceid = $this->get_activityid();
+        if (empty($cmid) || empty($instanceid)) {
+            return;
+        }
+
+        $course = $DB->get_record('course', ['id' => $courseid]);
+        $cm = get_coursemodule_from_id('casestudy', $cmid, $courseid, false, IGNORE_MISSING);
+        if (!$course || !$cm) {
+            return;
+        }
+
+        // Only automatic tracking with completion enabled derives state from our custom rules.
+        $completion = new \completion_info($course);
+        if (!$completion->is_enabled($cm) || (int)$cm->completion !== COMPLETION_TRACKING_AUTOMATIC) {
+            return;
+        }
+
+        // Recompute for every user who has a restored submission; COMPLETION_UNKNOWN forces a
+        // full recalculation via the module's custom completion rules.
+        $userids = $DB->get_fieldset_select(
+            'casestudy_submissions',
+            'DISTINCT userid',
+            'casestudyid = :casestudyid',
+            ['casestudyid' => $instanceid]
+        );
+        foreach ($userids as $userid) {
+            if (!empty($userid)) {
+                $completion->update_state($cm, COMPLETION_UNKNOWN, (int)$userid);
+            }
+        }
+    }
+
+    /**
      * Define the contents in the activity that must be processed by the link decoder
      *
      * @return array
