@@ -43,7 +43,7 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
             'requireacceptance', 'grade', 'hidegrader', 'graderinfo', 'graderinfoformat',
             'notifygraders', 'notifyemail', 'notifystudentdefault',
             'completionaggr', 'completionsatisfactory', 'cmpsatisfactorysubmissions',
-            'completioncategory', 'singletemplate', 'csstemplate',
+            'completioncategory', 'singletemplate', 'formtemplate', 'csstemplate',
             'timecreated', 'timemodified',
         ]);
 
