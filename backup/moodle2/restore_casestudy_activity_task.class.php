@@ -56,6 +56,9 @@ class restore_casestudy_activity_task extends restore_activity_task {
 
         $contents[] = new restore_decode_content('casestudy', ['intro'], 'casestudy');
         $contents[] = new restore_decode_content('casestudy', ['graderinfo'], 'casestudy');
+        // HTML-editor templates can embed course/module links, so decode them too.
+        $contents[] = new restore_decode_content('casestudy', ['singletemplate'], 'casestudy');
+        $contents[] = new restore_decode_content('casestudy', ['formtemplate'], 'casestudy');
         $contents[] = new restore_decode_content('casestudy_fields', ['description'], 'casestudy_field');
 
         return $contents;
