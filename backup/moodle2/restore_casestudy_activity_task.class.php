@@ -90,8 +90,20 @@ class restore_casestudy_activity_task extends restore_activity_task {
             ['casestudyid' => $instanceid]
         );
         foreach ($userids as $userid) {
-            if (!empty($userid)) {
-                $completion->update_state($cm, COMPLETION_UNKNOWN, (int)$userid);
+            if (empty($userid)) {
+                continue;
+            }
+            try {
+                $completion->update_state($cm, COMPLETION_UNKNOWN, (int) $userid);
+            } catch (\Throwable $e) {
+                // The data is already restored; a completion recalculation problem must never
+                // fail the whole (async) restore. Log and carry on — completion can be recomputed
+                // later via cron/regrade.
+                debugging(
+                    'mod_casestudy: completion recalculation after restore failed for user '
+                        . (int) $userid . ': ' . $e->getMessage(),
+                    DEBUG_DEVELOPER
+                );
             }
         }
     }

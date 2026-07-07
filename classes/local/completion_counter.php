@@ -100,8 +100,13 @@ class completion_counter {
      * @param int $userid User id.
      * @return int Number of distinct satisfactory cases.
      */
-    public static function count_total(int $casestudyid, int $userid): int {
+    public static function count_total($casestudyid, $userid): int {
         global $DB;
+
+        // Moodle's DB layer returns record fields as strings; cast so strict_types callers
+        // (e.g. custom_completion) can pass $record->id straight through without a TypeError.
+        $casestudyid = (int) $casestudyid;
+        $userid = (int) $userid;
 
         // Fetch every submission once: build the parent map and collect satisfactory ids together.
         $subs = $DB->get_records(
@@ -132,8 +137,13 @@ class completion_counter {
      * @param string|null $value Required option value, or null/'' to match any non-empty answer.
      * @return int Number of distinct satisfactory cases matching the rule.
      */
-    public static function count_category(int $casestudyid, int $userid, int $fieldid, ?string $value): int {
+    public static function count_category($casestudyid, $userid, $fieldid, ?string $value): int {
         global $DB;
+
+        // See count_total(): DB ids arrive as strings; cast for strict_types callers.
+        $casestudyid = (int) $casestudyid;
+        $userid = (int) $userid;
+        $fieldid = (int) $fieldid;
 
         $params = [
             'casestudyid' => $casestudyid,
@@ -180,8 +190,13 @@ class completion_counter {
      * @param int|null $index Stored categoryvalue index (null/0 means "any value").
      * @return string|null The option value, or null when the index resolves to nothing.
      */
-    public static function resolve_category_value(int $casestudyid, int $fieldid, ?int $index): ?string {
+    public static function resolve_category_value($casestudyid, $fieldid, $index): ?string {
         global $DB;
+
+        // See count_total(): DB ids arrive as strings; cast for strict_types callers.
+        $casestudyid = (int) $casestudyid;
+        $fieldid = (int) $fieldid;
+        $index = (int) $index;
 
         if (empty($index)) {
             return null;
