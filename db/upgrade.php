@@ -58,5 +58,23 @@ function xmldb_casestudy_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026070320, 'casestudy');
     }
 
+    if ($oldversion < 2026070340) {
+        // Re-run the formtemplate column addition for sites coming from the vendor stream.
+        // The vendor lineage reached version 2026070201 without ever having this column, so the
+        // original 2026020201 step above is skipped on those sites (their installed version is
+        // already higher) and the column silently never gets created — after which saving a form
+        // template, or restoring a backup that contains one, fails with a DB write error.
+        // field_exists makes this a no-op on sites that already ran the original step.
+        $table = new xmldb_table('casestudy');
+        $field = new xmldb_field('formtemplate', XMLDB_TYPE_TEXT, null, null, null, null, null, 'singletemplate');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Casestudy savepoint reached.
+        upgrade_mod_savepoint(true, 2026070340, 'casestudy');
+    }
+
     return true;
 }
