@@ -27,8 +27,8 @@ require_once($CFG->dirroot . '/mod/casestudy/backup/moodle2/restore_casestudy_st
  * Casestudy restore task that provides all the settings and steps to perform one complete restore of the activity
  *
  * @package   mod_casestudy
- * @copyright 2025 Skin Cancer College Australasia
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  © Skin Cancer College Australasia
+ * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 class restore_casestudy_activity_task extends restore_activity_task {
     /**
