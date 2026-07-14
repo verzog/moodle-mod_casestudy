@@ -30,8 +30,8 @@ use core_grades\local\gradeitem\advancedgrading_mapping;
  * Grade item mappings for the activity.
  *
  * @package   mod_casestudy
- * @copyright 2025 Skin Cancer College Australasia
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  © Skin Cancer College Australasia
+ * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 class gradeitems implements advancedgrading_mapping, itemnumber_mapping {
     /**

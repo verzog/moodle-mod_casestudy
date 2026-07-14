@@ -25,8 +25,8 @@ namespace mod_casestudy\event;
  * The mod_casestudy course module instance list viewed event class.
  *
  * @package    mod_casestudy
- * @copyright  2025 Skin Cancer College Australasia
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  © Skin Cancer College Australasia
+ * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
     // No need to override anything.

@@ -35,8 +35,8 @@ require_once($CFG->libdir . '/formslib.php');
  * Form for editing case study override settings.
  *
  * @package    mod_casestudy
- * @copyright  2025 Skin Cancer College Australasia
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  © Skin Cancer College Australasia
+ * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 class edit_override_form extends moodleform {
     /** @var cm_info course module object. */
