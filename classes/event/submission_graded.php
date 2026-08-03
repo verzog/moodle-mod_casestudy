@@ -37,7 +37,7 @@ class submission_graded extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'casestudy_gradess';
+        $this->data['objecttable'] = 'casestudy_grades';
     }
 
     /**
@@ -121,7 +121,7 @@ class submission_graded extends \core\event\base {
             ],
         ];
         $event = self::create($data);
-        $event->add_record_snapshot('casestudy_gradess', $grade);
+        $event->add_record_snapshot('casestudy_grades', $grade);
         $event->add_record_snapshot('casestudy_submissions', $submission);
         $event->add_record_snapshot('casestudy', $casestudy);
         return $event;
