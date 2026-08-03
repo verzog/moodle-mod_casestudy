@@ -408,7 +408,15 @@ function casestudy_grade_item_update($casestudy, $grades = null) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    $item = ['itemname' => clean_param($casestudy->name, PARAM_NOTAGS), 'idnumber' => $casestudy->cmidnumber];
+    // cmidnumber is only present on the object during the module-edit flow (add/update instance).
+    // Grade-recompute callers (after grading, or after deleting a submission) pass a raw {casestudy}
+    // record that has no cmidnumber, so coalesce to '' to avoid an undefined-property warning and to
+    // avoid passing null as the idnumber. grade_update() never overwrites an existing non-empty
+    // idnumber with an empty one, so the idnumber set at grade-item creation time is preserved here.
+    $item = [
+        'itemname' => clean_param($casestudy->name, PARAM_NOTAGS),
+        'idnumber' => $casestudy->cmidnumber ?? '',
+    ];
 
     if ($casestudy->grade > 0) {
         $item['gradetype'] = GRADE_TYPE_VALUE;
@@ -459,7 +467,11 @@ function casestudy_get_user_grades($casestudy, $userid = 0) {
         $params['userid'] = $userid;
     }
 
-    $sql = "SELECT s.userid, f.grade, f.timemodified as dategraded, f.graderid as usermodified
+    // Select the grade row id as the first column so get_records_sql() keys the result set by that
+    // unique id and returns every row. Keying by s.userid instead (a non-unique first column) would
+    // collapse a user's rows down to one before the loop, keeping the last row of the DESC ordering
+    // — i.e. the oldest grade — and silently defeating the "keep the latest" isset() guard below.
+    $sql = "SELECT f.id AS gradeid, s.userid, f.grade, f.timemodified as dategraded, f.graderid as usermodified
               FROM {casestudy_submissions} s
               JOIN {casestudy_grades} f ON s.id = f.submissionid
              WHERE s.casestudyid = :casestudyid";
