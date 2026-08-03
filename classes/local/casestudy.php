@@ -484,6 +484,10 @@ class casestudy {
             // Create new feedback record
             $feedbackrecord = new \stdClass();
             $feedbackrecord->submissionid = $submission->id;
+            // casestudy_grades.userid is NOT NULL with no default: it must be the graded student.
+            // Omitting it makes the insert fail on databases that enforce NOT NULL (PostgreSQL,
+            // strict-mode MySQL) whenever a grade row was not already pre-created for the submission.
+            $feedbackrecord->userid = $submission->userid;
             $feedbackrecord->graderid = $USER->id;
             $feedbackrecord->feedback = $feedback['text'];
             $feedbackrecord->feedbackformat = $feedback['format'];
@@ -677,9 +681,16 @@ class casestudy {
      * @param int $userid The ID of the user whose grade should be removed.
      */
     public function remove_usergrade($userid) {
-        global $DB;
-
-        $gradeitem = $this->get_grade_item();
+        // Fetch the grade item directly rather than via get_grade_item(), which throws when no
+        // item exists. A case study with grade type "none" (grade == 0) has no grade item, so a
+        // throwing lookup here would turn an ordinary submission deletion into a fatal error.
+        $gradeitem = \grade_item::fetch([
+            'itemtype' => 'mod',
+            'itemmodule' => 'casestudy',
+            'iteminstance' => $this->casestudy->id,
+            'courseid' => $this->casestudy->course,
+            'itemnumber' => 0,
+        ]);
         if (!$gradeitem) {
             return;
         }

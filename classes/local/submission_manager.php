@@ -856,10 +856,26 @@ class submission_manager {
         [$insql, $params] = $DB->get_in_or_equal($submissionids);
         $DB->delete_records_select('casestudy_submissions', "id $insql", $params);
 
-        // Update user grade
-        $this->casestudyman->remove_usergrade($submission->userid);
-
         $transaction->allow_commit();
+
+        // After the deletion is committed, re-derive the gradebook grade and completion state from
+        // whatever the user has left. A user may hold more than one case (maxsubmissions > 1), so
+        // deleting one chain must recompute from the remaining graded submissions rather than
+        // blanket-clearing the grade (the previous remove_usergrade() call). casestudy_update_grades
+        // re-derives from the remaining submissions, or clears the grade when none remain.
+        $userid = $submission->userid;
+        casestudy_update_grades($this->casestudy, $userid);
+
+        // Completion is derived from the count of satisfactory cases, so deleting a satisfactory
+        // submission can drop a user below the threshold. Recompute so a user is not left marked
+        // complete after the submission that completed them is gone.
+        if ($this->cm) {
+            $course = get_course($this->casestudy->course);
+            $completion = new \completion_info($course);
+            if ($completion->is_enabled($this->cm) && $this->cm->completion == COMPLETION_TRACKING_AUTOMATIC) {
+                $completion->update_state($this->cm, COMPLETION_UNKNOWN, $userid);
+            }
+        }
 
         return true;
     }
