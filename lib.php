@@ -659,6 +659,18 @@ function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
     $context = context_module::instance($cm->id);
     $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
+    // Reports - available to staff with the viewreports capability.
+    if (has_capability('mod/casestudy:viewreports', $context)) {
+        $casestudynode->add(
+            get_string('reports', 'mod_casestudy'),
+            new moodle_url('/mod/casestudy/reports.php', ['id' => $cm->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'casestudy_reports',
+            new pix_icon('i/report', get_string('reports', 'mod_casestudy'))
+        );
+    }
+
     if (!has_capability('mod/casestudy:managefields', $context)) {
         return;
     }

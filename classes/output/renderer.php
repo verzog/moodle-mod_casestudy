@@ -129,6 +129,8 @@ class renderer extends plugin_renderer_base {
      * @return string HTML output
      */
     public function grader_interface($cm) {
+        global $DB;
+
         $output = '';
 
         // Use dynamic submissions table for all submissions (graders can see all).
@@ -156,6 +158,27 @@ class renderer extends plugin_renderer_base {
         $actionmenu->set_current_view('submissions');
 
         $output .= $this->render($actionmenu);
+
+        // When a grader has filtered the list down to a single user, show that user's
+        // completion progress summary (the same one students see for themselves).
+        $context = \context_module::instance($cm->id);
+        $selecteduserid = optional_param('userid', 0, PARAM_INT);
+        $canviewuser = $selecteduserid > 0
+            && is_enrolled($context, $selecteduserid, 'mod/casestudy:submit');
+        // In separate-groups mode, a grader without accessallgroups may only see users
+        // who share one of the grader's allowed groups (mirrors the submissions table).
+        if (
+            $canviewuser && !has_capability('moodle/site:accessallgroups', $context)
+                && groups_get_activity_groupmode($cm) == SEPARATEGROUPS
+        ) {
+            $allowedgroups = groups_get_activity_allowed_groups($cm);
+            $usergroups = groups_get_all_groups($cm->course, $selecteduserid);
+            $canviewuser = !empty($allowedgroups) && !empty(array_intersect_key($allowedgroups, $usergroups));
+        }
+        if ($canviewuser) {
+            $casestudyrecord = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
+            $output .= $this->render_completion_summary($casestudyrecord, $selecteduserid);
+        }
 
         if (empty($tableoutput) || strpos($tableoutput, 'Nothing to display') !== false) {
             $output .= \html_writer::div(
@@ -222,6 +245,56 @@ class renderer extends plugin_renderer_base {
         // Render the table.
         ob_start();
         $table->out(25, true);
+        $tableoutput = ob_get_clean();
+
+        if (empty($tableoutput) || strpos($tableoutput, 'Nothing to display') !== false) {
+            $output .= \html_writer::div(
+                get_string('nostudents', 'mod_casestudy'),
+                'alert alert-info'
+            );
+        } else {
+            $output .= $tableoutput;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Render the staff reports interface: per-user submission counts by status.
+     *
+     * @param object $cm Course module
+     * @param int $groupid Group ID for filtering
+     * @return string HTML output
+     */
+    public function reports_interface($cm, $groupid = 0) {
+        $output = '';
+
+        $context = \context_module::instance($cm->id);
+
+        $table = new \mod_casestudy\local\table\report_table(
+            'casestudy-report-' . $cm->id,
+            $cm,
+            $context,
+            $groupid
+        );
+
+        // Tertiary navigation (view selector), with this view marked current.
+        $baseurl = new \moodle_url('/mod/casestudy/reports.php', ['id' => $cm->id]);
+        $casestudyobj = \mod_casestudy\local\casestudy::instance($cm->instance);
+        $actionmenu = new \mod_casestudy\output\submission_actionmenu($casestudyobj, $baseurl);
+        $actionmenu->set_current_view('reports');
+        // The per-user and status filters do not apply to the aggregate report.
+        $actionmenu->disable_filters(['user', 'initials', 'status']);
+        $output .= $this->render($actionmenu);
+
+        // Explain the "cases (attempts)" figures shown in each count column.
+        $output .= \html_writer::div(
+            get_string('reportcountlegend', 'mod_casestudy'),
+            'text-muted small mb-2'
+        );
+
+        ob_start();
+        $table->out(50, true);
         $tableoutput = ob_get_clean();
 
         if (empty($tableoutput) || strpos($tableoutput, 'Nothing to display') !== false) {
@@ -342,6 +415,24 @@ class renderer extends plugin_renderer_base {
         }
 
         return $buttons;
+    }
+
+    /**
+     * Render the completion progress summary for a single user.
+     *
+     * Returns an empty string when the activity has no completion rules configured,
+     * so callers can safely concatenate the result unconditionally.
+     *
+     * @param object $casestudy Case study DB record (contains completion criteria directly)
+     * @param int $userid User ID to report on
+     * @return string HTML output (empty string if there is nothing to show)
+     */
+    public function render_completion_summary($casestudy, $userid) {
+        $summary = $this->format_completion_summary($casestudy, $userid);
+        if (empty($summary['hascompletion'])) {
+            return '';
+        }
+        return $this->render_from_template('mod_casestudy/completion_summary', $summary);
     }
 
     /**

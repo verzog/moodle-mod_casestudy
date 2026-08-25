@@ -167,10 +167,12 @@ class submission_actionmenu implements renderable, templatable {
             $gs = new group_selector($PAGE->context);
             $templatecontext['groupselector'] = $gs->export_for_template($output);
 
+            // Reload the current view (submissions/summaries/reports) when the group
+            // changes, rather than always returning to the submissions view.
             $PAGE->requires->js_call_amd(
                 'core_course/actionbar/group',
                 'init',
-                [$resetlink->out(false), $this->casestudy->get_cm()->id]
+                [$this->baseurl->out(false), $this->casestudy->get_cm()->id]
             );
         }
 
@@ -204,6 +206,7 @@ class submission_actionmenu implements renderable, templatable {
 
         $submissionsurl = new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]);
         $summariesurl = new \moodle_url('/mod/casestudy/summaries.php', ['id' => $cm->id]);
+        $reportsurl = new \moodle_url('/mod/casestudy/reports.php', ['id' => $cm->id]);
 
         $viewmenu = [
             $submissionsurl->out(false) => get_string('submissions', 'mod_casestudy'),
@@ -211,8 +214,12 @@ class submission_actionmenu implements renderable, templatable {
 
         // Only add summaries option if user has viewallsubmissions capability.
         if (has_capability('mod/casestudy:viewallsubmissions', $context)) {
-            $summariesurl = new \moodle_url('/mod/casestudy/summaries.php', ['id' => $cm->id]);
             $viewmenu[$summariesurl->out(false)] = get_string('summaries', 'mod_casestudy');
+        }
+
+        // Only add reports option if user has viewreports capability.
+        if (has_capability('mod/casestudy:viewreports', $context)) {
+            $viewmenu[$reportsurl->out(false)] = get_string('reports', 'mod_casestudy');
         }
 
         // Only show the dropdown if there are multiple options.
@@ -220,8 +227,13 @@ class submission_actionmenu implements renderable, templatable {
             return null;
         }
 
-        $currentvalue = $this->currentview === 'summaries' && isset($summariesurl)
-            ? $summariesurl->out(false) : $submissionsurl->out(false);
+        if ($this->currentview === 'summaries') {
+            $currentvalue = $summariesurl->out(false);
+        } else if ($this->currentview === 'reports') {
+            $currentvalue = $reportsurl->out(false);
+        } else {
+            $currentvalue = $submissionsurl->out(false);
+        }
 
         $viewselect = new \core\output\select_menu('view', $viewmenu, $currentvalue);
         $viewselect->set_label(get_string('gradeitem:submissions', 'mod_assign'), [], true);
