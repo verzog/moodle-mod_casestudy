@@ -1,0 +1,54 @@
+{{!
+    Copyright (c) Skin Cancer College Australasia.
+    All rights reserved.
+
+    This file is part of a proprietary plugin developed by Skin Cancer
+    College Australasia for use with Moodle. It is NOT free software and is
+    NOT released under the GNU General Public License.
+
+    Unauthorised copying, distribution, modification, or use of this file,
+    in whole or in part, via any medium, is strictly prohibited without the
+    prior written permission of Skin Cancer College Australasia. The software
+    is provided "as is", without warranty of any kind, express or implied.
+}}
+{{!
+    @template mod_casestudy/completion_summary
+
+    Completion progress summary for a single user.
+
+    Context variables required for this template:
+    * hascompletion - Boolean, whether any completion rules are configured
+    * criteria - Array of criteria rows (label, current, required, completed)
+
+    Example context (json):
+    {
+        "hascompletion": true,
+        "criteria": [
+            {"label": "Total satisfactory cases", "current": 20, "required": 20, "completed": true}
+        ]
+    }
+}}
+{{#hascompletion}}
+<div class="casestudy-completion-summary mb-3">
+
+    <h4 class="card-title">{{#str}}completionsummary, mod_casestudy{{/str}}</h4>
+    <table class="table generaltable">
+    {{#criteria}}
+        <tr>
+            <td><span class="mr-2 completion-criteria">{{label}}</span></td>
+            <td> {{current}} </td>
+            <td> <span class="bold"> / {{required}} </span> </td>
+            <td>
+                {{#completed}}
+                <span class="badge badge-success">{{#str}} completed {{/str}}</span>
+                {{/completed}}
+                {{^completed}}
+                <span class="badge badge-secondary">{{#str}} todo, completion {{/str}}</span>
+                {{/completed}}
+            </td>
+        </tr>
+        {{/criteria}}
+        </table>
+
+</div>
+{{/hascompletion}}

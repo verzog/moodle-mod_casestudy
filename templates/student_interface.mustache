@@ -71,30 +71,9 @@
         </div>
         {{/cansubmitmore}}
 
-        {{#completionsummary.hascompletion}}
-        <div class="casestudy-completion-summary mb-3">
-
-            <h4 class="card-title">{{#str}}completionsummary, mod_casestudy{{/str}}</h4>
-            <table class="table generaltable">
-            {{#completionsummary.criteria}}
-                <tr>
-                    <td><span class="mr-2 completion-criteria">{{label}}</span></td>
-                    <td> {{current}} </td>
-                    <td> <span class="bold"> / {{required}} </span> </td>
-                    <td>
-                        {{#completed}}
-                        <span class="badge badge-success">{{#str}} completed {{/str}}</span>
-                        {{/completed}}
-                        {{^completed}}
-                        <span class="badge badge-secondary">{{#str}} todo, completion {{/str}}</span>
-                        {{/completed}}
-                    </td>
-                </tr>
-                {{/completionsummary.criteria}}
-                </table>
-
-        </div>
-        {{/completionsummary.hascompletion}}
+        {{#completionsummary}}
+        {{> mod_casestudy/completion_summary}}
+        {{/completionsummary}}
 
         <div class="casestudy-submissions-section">
             <h4>{{#str}}yourcasestudies, mod_casestudy{{/str}}</h4>
