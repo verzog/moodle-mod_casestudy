@@ -22,6 +22,7 @@
 namespace mod_casestudy\local\table;
 
 use moodle_url;
+use mod_casestudy\local\report_stats;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -29,6 +30,9 @@ require_once($CFG->libdir . '/tablelib.php');
 
 /**
  * Staff-facing report table: one row per enrolled user with submission counts by status.
+ *
+ * Each count is shown as "cases (attempts)": the number of distinct cases (resubmission
+ * chains) followed by the number of individual submission attempts in brackets.
  */
 class report_table extends \table_sql {
     /** @var object Course module. */
@@ -79,15 +83,9 @@ class report_table extends \table_sql {
         $this->define_columns($columns);
         $this->define_headers($headers);
 
-        // Derived and per-row-computed columns cannot be sorted at the SQL level safely.
+        // Counts are computed in PHP (per-case collapsing needs the resubmission chain),
+        // so they cannot be sorted at the SQL level.
         $this->sortable(false);
-        $this->no_sorting('groups');
-        $this->no_sorting('cntsubmitted');
-        $this->no_sorting('cntunmarked');
-        $this->no_sorting('cntmarked');
-        $this->no_sorting('cntsatisfactory');
-        $this->no_sorting('cntunsatisfactory');
-
         $this->set_attribute('class', 'generaltable casestudy-report-table');
         $this->collapsible(false);
 
@@ -95,38 +93,17 @@ class report_table extends \table_sql {
     }
 
     /**
-     * Build the enrolled-users query with per-user submission counts.
+     * Build the enrolled-users query (counts are attached later in {@see query_db()}).
      */
     protected function set_sql_and_params() {
-        global $DB, $USER;
+        global $DB;
 
-        $submitted = 'SELECT COUNT(*) FROM {casestudy_submissions} sub
-                        WHERE sub.casestudyid = :cs_sub AND sub.userid = u.id
-                          AND sub.status NOT IN (:st_new, :st_draft)';
-        $satisfactory = 'SELECT COUNT(*) FROM {casestudy_submissions} sub2
-                           WHERE sub2.casestudyid = :cs_sat AND sub2.userid = u.id
-                             AND sub2.status = :st_sat';
-        $unsatisfactory = 'SELECT COUNT(*) FROM {casestudy_submissions} sub3
-                             WHERE sub3.casestudyid = :cs_unsat AND sub3.userid = u.id
-                               AND sub3.status = :st_unsat';
-
-        $fields = 'u.id, u.*, ' . $DB->sql_fullname('u.firstname', 'u.lastname') . ' AS fullname,
-                   (' . $submitted . ') AS cntsubmitted,
-                   (' . $satisfactory . ') AS cntsatisfactory,
-                   (' . $unsatisfactory . ') AS cntunsatisfactory';
+        $fields = 'u.id, u.*, ' . $DB->sql_fullname('u.firstname', 'u.lastname') . ' AS fullname';
         $from = '{user} u';
 
         [$enrolledsql, $enrolledparams] = get_enrolled_sql($this->context, 'mod/casestudy:submit', 0, true);
         $where = "u.id IN ($enrolledsql)";
         $params = $enrolledparams;
-
-        $params['cs_sub'] = $this->cm->instance;
-        $params['cs_sat'] = $this->cm->instance;
-        $params['cs_unsat'] = $this->cm->instance;
-        $params['st_new'] = CASESTUDY_STATUS_NEW;
-        $params['st_draft'] = CASESTUDY_STATUS_DRAFT;
-        $params['st_sat'] = CASESTUDY_STATUS_SATISFACTORY;
-        $params['st_unsat'] = CASESTUDY_STATUS_UNSATISFACTORY;
 
         // Group filtering, mirroring the summaries table behaviour.
         $groupmode = groups_get_activity_groupmode($this->cm);
@@ -154,6 +131,19 @@ class report_table extends \table_sql {
 
         $this->set_sql($fields, $from, $where, $params);
         $this->set_count_sql("SELECT COUNT(DISTINCT u.id) FROM $from WHERE $where", $params);
+    }
+
+    /**
+     * Fetch the page of users, then attach per-user submission statistics.
+     *
+     * @param int $pagesize Number of rows per page.
+     * @param bool $useinitialsbar Whether to use the initials bar.
+     */
+    public function query_db($pagesize, $useinitialsbar = true) {
+        parent::query_db($pagesize, $useinitialsbar);
+        foreach ($this->rawdata as $row) {
+            $row->stats = report_stats::for_user((int) $this->cm->instance, (int) $row->id);
+        }
     }
 
     /**
@@ -195,23 +185,66 @@ class report_table extends \table_sql {
     }
 
     /**
-     * Render the "marked" count (satisfactory + unsatisfactory).
+     * Submitted count (cases and attempts).
      *
      * @param object $row Table row
-     * @return int
+     * @return string
      */
-    public function col_cntmarked($row) {
-        return (int) $row->cntsatisfactory + (int) $row->cntunsatisfactory;
+    public function col_cntsubmitted($row) {
+        return $this->format_count($row->stats->submittedcases, $row->stats->submittedattempts);
     }
 
     /**
-     * Render the "unmarked" count (submitted minus marked).
+     * Unmarked count (cases and attempts).
      *
      * @param object $row Table row
-     * @return int
+     * @return string
      */
     public function col_cntunmarked($row) {
-        $marked = (int) $row->cntsatisfactory + (int) $row->cntunsatisfactory;
-        return max(0, (int) $row->cntsubmitted - $marked);
+        return $this->format_count($row->stats->unmarkedcases, $row->stats->unmarkedattempts);
+    }
+
+    /**
+     * Marked count (cases and attempts).
+     *
+     * @param object $row Table row
+     * @return string
+     */
+    public function col_cntmarked($row) {
+        return $this->format_count($row->stats->markedcases, $row->stats->markedattempts);
+    }
+
+    /**
+     * Satisfactory count (cases and attempts).
+     *
+     * @param object $row Table row
+     * @return string
+     */
+    public function col_cntsatisfactory($row) {
+        return $this->format_count($row->stats->satisfactorycases, $row->stats->satisfactoryattempts);
+    }
+
+    /**
+     * Unsatisfactory count (cases and attempts).
+     *
+     * @param object $row Table row
+     * @return string
+     */
+    public function col_cntunsatisfactory($row) {
+        return $this->format_count($row->stats->unsatisfactorycases, $row->stats->unsatisfactoryattempts);
+    }
+
+    /**
+     * Format a count as "cases (attempts)".
+     *
+     * @param int $cases Number of distinct cases.
+     * @param int $attempts Number of submission attempts.
+     * @return string
+     */
+    protected function format_count($cases, $attempts) {
+        if ($this->is_downloading()) {
+            return $cases . ' (' . $attempts . ')';
+        }
+        return $cases . ' ' . \html_writer::span('(' . $attempts . ')', 'text-muted');
     }
 }

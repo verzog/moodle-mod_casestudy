@@ -275,6 +275,12 @@ class renderer extends plugin_renderer_base {
         $actionmenu->disable_filters(['user', 'initials', 'status']);
         $output .= $this->render($actionmenu);
 
+        // Explain the "cases (attempts)" figures shown in each count column.
+        $output .= \html_writer::div(
+            get_string('reportcountlegend', 'mod_casestudy'),
+            'text-muted small mb-2'
+        );
+
         ob_start();
         $table->out(50, true);
         $tableoutput = ob_get_clean();
