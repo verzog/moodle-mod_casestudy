@@ -79,7 +79,7 @@ class submission_manager {
     public function create_submission($userid, $groupid = 0, int $parentid = 0) {
         global $DB;
 
-        // Get next attempt number
+        // Get next attempt number.
         $attempt = $this->get_next_attempt_number($userid);
 
         $submission = new \stdClass();
@@ -95,7 +95,7 @@ class submission_manager {
 
         $submission->id = $DB->insert_record('casestudy_submissions', $submission);
 
-        // Trigger submission created event
+        // Trigger submission created event.
         if ($this->cm) {
             $event = \mod_casestudy\event\submission_created::create_from_submission(
                 $this->casestudy,
@@ -160,7 +160,7 @@ class submission_manager {
 
         $result = $DB->update_record('casestudy_submissions', $submission);
 
-        // Trigger submission updated event
+        // Trigger submission updated event.
         if ($result && $triggerupdate && $this->cm) {
             $event = \mod_casestudy\event\submission_updated::create_from_submission(
                 $this->casestudy,
@@ -328,7 +328,7 @@ class submission_manager {
         $success = true;
 
         foreach ($content as $fieldid => $fieldcontent) {
-            // Check if content already exists
+            // Check if content already exists.
             $existing = $DB->get_record('casestudy_content', [
                 'submissionid' => $submissionid,
                 'fieldid' => $fieldid,
@@ -337,7 +337,7 @@ class submission_manager {
             $fieldcontent = (array) $fieldcontent;
 
             if ($existing) {
-                // Update existing content
+                // Update existing content.
                 $existing->content = $fieldcontent['content'] ?? '';
                 $existing->contentformat = $fieldcontent['contentformat'] ?? FORMAT_PLAIN;
                 $existing->content1 = $fieldcontent['content1'] ?? null;
@@ -347,7 +347,7 @@ class submission_manager {
 
                 $success = $DB->update_record('casestudy_content', $existing);
             } else {
-                // Create new content record
+                // Create new content record.
                 $contentrecord = new \stdClass();
                 $contentrecord->submissionid = $submissionid;
                 $contentrecord->fieldid = $fieldid;
@@ -399,10 +399,10 @@ class submission_manager {
             return false;
         }
 
-        // Create new submission
+        // Create new submission.
         $newsubmission = $this->create_submission($userid, $previoussubmission->groupid);
 
-        // Copy content from previous submission if resubmission is based on previous attempt
+        // Copy content from previous submission if resubmission is based on previous attempt.
         if ($this->casestudy->resubmissionbased) {
             $previouscontent = $this->get_submission_content($previoussubmissionid);
             if (!empty($previouscontent)) {
@@ -422,10 +422,10 @@ class submission_manager {
     public function can_user_submit($userid) {
         global $DB;
 
-        // Get effective settings including any user overrides
+        // Get effective settings including any user overrides.
         $effective = casestudy_get_effective_settings($this->casestudy, $userid);
 
-        // Check maximum submissions (entries) limit
+        // Check maximum submissions (entries) limit.
         if ($effective->maxsubmissions > 0) {
             $sql = "SELECT COUNT(*)
                       FROM {casestudy_submissions}
@@ -442,7 +442,7 @@ class submission_manager {
             }
         }
 
-        // Check time limits
+        // Check time limits.
         $now = time();
         if ($this->casestudy->timeopen > 0 && $now < $this->casestudy->timeopen) {
             return false;
@@ -470,7 +470,7 @@ class submission_manager {
         $status = $issubmit ? CASESTUDY_STATUS_SUBMITTED : CASESTUDY_STATUS_DRAFT;
 
         if ($submissionid) {
-            // Update existing submission
+            // Update existing submission.
             $submission = $this->get_submission_record($submissionid);
 
             if (!empty($submission->parentid)) {
@@ -490,7 +490,7 @@ class submission_manager {
 
             $this->update_submission($submission);
         } else {
-            // Create new submission
+            // Create new submission.
             $submission = $this->create_submission($userid);
             $submission->status = $status;
 
@@ -521,21 +521,21 @@ class submission_manager {
         $success = true;
 
         foreach ($fielddata as $fieldid => $value) {
-            // Check if content already exists
+            // Check if content already exists.
             $existing = $DB->get_record('casestudy_content', [
                 'submissionid' => $submissionid,
                 'fieldid' => $fieldid,
             ]);
 
             if ($existing) {
-                // Update existing content
+                // Update existing content.
                 $existing->contentformat = FORMAT_PLAIN;
                 $contentdata = $value->to_record();
                 $existing = (object) array_merge((array) $existing, (array) $contentdata);
 
                 $success = $success && $DB->update_record('casestudy_content', $existing);
             } else {
-                // Create new content
+                // Create new content.
                 $content = new \stdClass();
                 $content->submissionid = $submissionid;
                 $content->fieldid = $fieldid;
@@ -561,7 +561,7 @@ class submission_manager {
 
         $formdata = [];
 
-        // Get existing submission content
+        // Get existing submission content.
         $contentrecords = $DB->get_records('casestudy_content', ['submissionid' => $submissionid]);
         foreach ($contentrecords as $content) {
             $formdata[$content->fieldid] = $content;
@@ -581,7 +581,7 @@ class submission_manager {
         global $DB;
 
         if ($submissionid) {
-            // Get specific submission
+            // Get specific submission.
             $submission = $DB->get_record('casestudy_submissions', [
                 'id' => $submissionid, 'userid' => $userid, 'casestudyid' => $this->casestudyid,
             ]);
@@ -589,11 +589,11 @@ class submission_manager {
             return $submission;
         }
 
-        // Check for existing draft
+        // Check for existing draft.
         $submission = $this->get_user_submission($userid, CASESTUDY_STATUS_NEW);
 
         if (!$submission) {
-            // Check if user can submit more
+            // Check if user can submit more.
             if ($this->can_user_submit($userid)) {
                 $submission = $this->create_submission($userid);
                 return $submission;
@@ -613,12 +613,12 @@ class submission_manager {
      * @return bool Can edit
      */
     public function can_edit_submission($submission, $userid, $createnotification = false) {
-        // Must be the owner
+        // Must be the owner.
         if ($submission->userid != $userid) {
             return false;
         }
 
-        // Can only edit draft or awaiting resubmission
+        // Can only edit draft or awaiting resubmission.
         $result = in_array($submission->status, [
             CASESTUDY_STATUS_DRAFT,
             CASESTUDY_STATUS_NEW,
@@ -646,18 +646,18 @@ class submission_manager {
     public function process_form_submission($userid, $formdata, $submissionid = 0, $issubmit = false, $form = null) {
         global $DB;
 
-        // Start transaction
+        // Start transaction.
         $transaction = $DB->start_delegated_transaction();
 
         try {
-            // Save submission
+            // Save submission.
             $submission = $this->save_submission_from_form($userid, $formdata, $submissionid, $issubmit);
 
-            // Get processed field data from form
+            // Get processed field data from form.
             if ($form && method_exists($form, 'get_submission_data')) {
                 $fielddata = $form->get_submission_data($formdata);
             } else {
-                // Fallback: extract field data directly and process through field types
+                // Fallback: extract field data directly and process through field types.
                 $fielddata = [];
                 $fieldmanager = field_manager::instance($this->casestudyid);
                 $fields = $fieldmanager->get_fields();
@@ -666,29 +666,29 @@ class submission_manager {
                     $fieldname = 'field_' . $field->id;
                     if (isset($formdata->$fieldname)) {
                         $value = $formdata->$fieldname;
-                        // Process the value through the field type
+                        // Process the value through the field type.
                         $fieldclass = $fieldmanager->get_field_type_class($field->type, $field);
                         if ($fieldclass) {
                             $fielddata[$field->id] = $fieldclass->process_input($value, $formdata);
                         } else {
-                            // If no field class, create a basic field_data object
+                            // If no field class, create a basic field_data object.
                             $fielddata[$field->id] = field_data::create((object)['content' => $value]);
                         }
                     }
                 }
             }
 
-            // Save field content
+            // Save field content.
             if (!empty($fielddata)) {
                 $this->save_field_content_from_form($submission->id, $fielddata);
             }
 
-            // Save files if form provided
+            // Save files if form provided.
             if ($form && method_exists($form, 'save_area_files')) {
                 $form->save_area_files($formdata, $submission->id);
             }
 
-            // Commit transaction
+            // Commit transaction.
             $transaction->allow_commit();
 
             return $submission;
@@ -706,13 +706,14 @@ class submission_manager {
      * @return bool Can delete
      */
     public function can_delete_submission($submission, $userid) {
-        // Must be the owner
+        // Must be the owner.
         if ($submission->userid != $userid && !has_capability('mod/casestudy:managesubmissions', $this->context)) {
             return false;
         }
 
-        // Can only delete draft submissions
-        return in_array($submission->status, [CASESTUDY_STATUS_DRAFT, CASESTUDY_STATUS_NEW]) || has_capability('mod/casestudy:managesubmissions', $this->context);
+        // Can only delete draft submissions.
+        return in_array($submission->status, [CASESTUDY_STATUS_DRAFT, CASESTUDY_STATUS_NEW])
+            || has_capability('mod/casestudy:managesubmissions', $this->context);
     }
 
     /**
@@ -725,18 +726,18 @@ class submission_manager {
     public function can_reattempt_submission($submission, $userid) {
         global $DB;
 
-        // Must be the owner
+        // Must be the owner.
         if ($submission->userid != $userid) {
             return false;
         }
 
-        // Must be in awaiting resubmission status
+        // Must be in awaiting resubmission status.
         if ($submission->status != CASESTUDY_STATUS_AWAITING_RESUBMISSION) {
             return false;
         }
         $effective = casestudy_get_effective_settings($this->casestudy, $userid);
 
-        // If maxattempts is 0, unlimited attempts are allowed
+        // If maxattempts is 0, unlimited attempts are allowed.
         if ($effective->maxattempts == 0) {
             return true;
         }
@@ -744,7 +745,7 @@ class submission_manager {
         $rootsubmissionid = $this->get_root_submission_id($submission);
         $count = $this->count_submission_chain($rootsubmissionid);
 
-        // Allow reattempt if count is less than max attempts for this case study
+        // Allow reattempt if count is less than max attempts for this case study.
         return $count < $effective->maxattempts;
     }
 
@@ -757,7 +758,7 @@ class submission_manager {
     private function get_root_submission_id($submission) {
         global $DB;
 
-        // If this submission has no parent, it's the root
+        // If this submission has no parent, it's the root.
         if (empty($submission->parentid)) {
             return $submission->id;
         }
@@ -793,7 +794,7 @@ class submission_manager {
             'casestudyid' => $this->casestudyid,
         ]);
 
-        // Recursively count children and their descendants
+        // Recursively count children and their descendants.
         foreach ($children as $child) {
             $count += $this->count_submission_descendants($child->id);
         }
@@ -817,7 +818,7 @@ class submission_manager {
             'casestudyid' => $this->casestudyid,
         ]);
 
-        // Recursively count their descendants
+        // Recursively count their descendants.
         foreach ($children as $child) {
             $count += $this->count_submission_descendants($child->id);
         }
@@ -840,19 +841,19 @@ class submission_manager {
 
         $transaction = $DB->start_delegated_transaction();
 
-        // Find the root submission to delete the entire chain
+        // Find the root submission to delete the entire chain.
         $rootid = $this->get_root_submission_id($submission);
 
-        // Get all submission IDs in this chain (root + all descendants)
+        // Get all submission IDs in this chain (root + all descendants).
         $submissionids = $this->get_all_chain_submission_ids($rootid);
 
-        // Delete content and grades for all submissions in the chain
+        // Delete content and grades for all submissions in the chain.
         foreach ($submissionids as $submissionid) {
             $DB->delete_records('casestudy_content', ['submissionid' => $submissionid]);
             $DB->delete_records('casestudy_grades', ['submissionid' => $submissionid]);
         }
 
-        // Delete all submissions in the chain
+        // Delete all submissions in the chain.
         [$insql, $params] = $DB->get_in_or_equal($submissionids);
         $DB->delete_records_select('casestudy_submissions', "id $insql", $params);
 
@@ -891,7 +892,7 @@ class submission_manager {
 
         $ids = [$rootid];
 
-        // Get all children recursively
+        // Get all children recursively.
         $children = $DB->get_records('casestudy_submissions', ['parentid' => $rootid], '', 'id');
         foreach ($children as $child) {
             $ids = array_merge($ids, $this->get_all_chain_submission_ids($child->id));
@@ -915,10 +916,10 @@ class submission_manager {
 
         $transaction = $DB->start_delegated_transaction();
 
-        // Create new submission
+        // Create new submission.
         $newsubmission = $this->create_submission($submission->userid, $submission->groupid, $submission->id);
 
-        // Copy content from previous submission if resubmission is based on previous attempt
+        // Copy content from previous submission if resubmission is based on previous attempt.
         if ($this->casestudy->resubmissionbased) {
             $previouscontent = $this->get_submission_content($submission->id);
             if (!empty($previouscontent)) {
@@ -1025,12 +1026,14 @@ class submission_manager {
         $firstfield = $DB->get_records('casestudy_fields', ['casestudyid' => $this->casestudyid], 'sortorder ASC', 'id', 0, 1);
         $firstfield = reset($firstfield);
 
-        $sql = 'SELECT s.*, u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename, c.content
+        $sql = 'SELECT s.*, u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic,
+                       u.middlename, u.alternatename, c.content
                 FROM {casestudy_submissions} s
                 JOIN {user} u ON u.id = s.userid
                 JOIN {casestudy_content} c ON c.submissionid = s.id AND c.fieldid = :firstfieldid
                 WHERE s.casestudyid = :casestudyid1
-                AND s.id NOT IN (SELECT parentid FROM {casestudy_submissions} WHERE casestudyid = :casestudyid AND parentid IS NOT NULL)
+                AND s.id NOT IN (SELECT parentid FROM {casestudy_submissions}
+                                 WHERE casestudyid = :casestudyid AND parentid IS NOT NULL)
                 AND s.status <> :draft
                 ORDER BY s.timesubmitted ASC';
 
@@ -1061,14 +1064,14 @@ class submission_manager {
         $history = [];
         $currentsubmission = $DB->get_record('casestudy_submissions', ['id' => $submissionid], '*', MUST_EXIST);
 
-        // Build the history chain by following parentid backwards
+        // Build the history chain by following parentid backwards.
         $submissions = [];
         $current = $currentsubmission;
 
-        // Add current submission first
+        // Add current submission first.
         $submissions[] = $current;
 
-        // Follow the chain of parent submissions
+        // Follow the chain of parent submissions.
         while (!empty($current->parentid)) {
             $parent = $DB->get_record('casestudy_submissions', ['id' => $current->parentid]);
             if ($parent) {
@@ -1079,11 +1082,11 @@ class submission_manager {
             }
         }
 
-        // Reverse to get chronological order (oldest first) for numbering
+        // Reverse to get chronological order (oldest first) for numbering.
         $submissions = array_reverse($submissions);
         $totalsubmissions = count($submissions);
 
-        // Get feedback for each submission
+        // Get feedback for each submission.
         foreach ($submissions as $index => $submission) {
             $grade = $DB->get_record('casestudy_grades', ['submissionid' => $submission->id], '*', IGNORE_MISSING);
 
@@ -1097,7 +1100,7 @@ class submission_manager {
             ];
         }
 
-        // Reverse back so latest is first in display
+        // Reverse back so latest is first in display.
         return array_reverse($history);
     }
 }

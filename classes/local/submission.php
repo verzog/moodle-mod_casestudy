@@ -130,7 +130,7 @@ class submission implements \renderable, \templatable {
             'timesubmitted' => $submission->timesubmitted ? userdate($submission->timesubmitted) : null,
         ];
 
-        // Format fields with content using updated field type methods
+        // Format fields with content using updated field type methods.
         $formattedfields = [];
         $formattedfieldsbyshortname = [];
         $fieldmanager = field_manager::instance($submission->casestudyid);
@@ -157,10 +157,10 @@ class submission implements \renderable, \templatable {
                 'id' => $field->id,
             ];
 
-            // For mustache templates (indexed array)
+            // For mustache templates (indexed array).
             $formattedfields[] = $fielddata;
 
-            // For custom templates - (associative array by shortname)
+            // For custom templates - (associative array by shortname).
             $formattedfieldsbyshortname[$fielddata['shortname']] = $fielddata;
         }
 

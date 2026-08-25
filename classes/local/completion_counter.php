@@ -13,8 +13,6 @@
 
 namespace mod_casestudy\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Single source of truth for counting satisfactory cases toward completion.
  *

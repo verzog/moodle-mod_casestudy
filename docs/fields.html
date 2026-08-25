@@ -54,12 +54,14 @@
 
     <div class="callout note">
       <span class="callout-icon">🔑</span>
-      <div class="callout-body"><strong>Required capability:</strong> <code>mod/casestudy:managefields</code> — Editing Teacher or Manager role.</div>
+      <div class="callout-body"><strong>Required capability:</strong> <code>mod/casestudy:managefields</code> — Editing Teacher
+      or Manager role.</div>
     </div>
 
     <!-- Accessing -->
     <h2>Accessing field management</h2>
-    <p>Open the Case Study activity, then click <strong>Manage Fields</strong> in the activity navigation menu (or secondary navigation).</p>
+    <p>Open the Case Study activity, then click <strong>Manage Fields</strong> in the activity navigation menu (or secondary
+    navigation).</p>
 
     <figure class="screenshot">
       <img src="images/fields_nav_link.png" alt="Activity chooser showing Case Study" class="screenshot" />
@@ -94,12 +96,14 @@
     <p>Drag a row by its ✥ handle to change its position. The new order is saved immediately via AJAX.</p>
 
     <h3>Cloning a field</h3>
-    <p>Click <strong>Clone</strong> to duplicate a field with the same type and configuration. The clone gets a new unique short name automatically. Useful for repeating similar field patterns.</p>
+    <p>Click <strong>Clone</strong> to duplicate a field with the same type and configuration. The clone gets a new unique short
+    name automatically. Useful for repeating similar field patterns.</p>
 
     <h3>Deleting a field</h3>
     <div class="callout warning">
       <span class="callout-icon">⚠️</span>
-      <div class="callout-body"><strong>Warning:</strong> Deleting a field permanently removes it <em>and all student data stored in it</em>. This cannot be undone. Confirm carefully before proceeding.</div>
+      <div class="callout-body"><strong>Warning:</strong> Deleting a field permanently removes it <em>and all student data stored
+      in it</em>. This cannot be undone. Confirm carefully before proceeding.</div>
     </div>
 
     <!-- Adding -->
@@ -120,17 +124,22 @@
         <tbody>
           <tr><td><strong>Field Name</strong></td><td>Yes</td><td>The label students see next to the input</td></tr>
           <tr><td><strong>Short Name</strong></td><td>Yes</td><td>Unique identifier</td></tr>
-          <tr><td><strong>Field Description</strong></td><td>No</td><td>Help text shown beneath the field to clarify what students should enter</td></tr>
-          <tr><td><strong>Required</strong></td><td>—</td><td>If ticked, students cannot submit without filling this field</td></tr>
-          <tr><td><strong>Category Field</strong></td><td>—</td><td>If ticked, this field's values can be used as completion categories (see <a href="completion.html">Completion Rules</a>)</td></tr>
-          <tr><td><strong>Show in List View</strong></td><td>—</td><td>If ticked, this field value appears in the summaries / list table</td></tr>
+          <tr><td><strong>Field Description</strong></td><td>No</td><td>Help text shown beneath the field to clarify what students
+          should enter</td></tr>
+          <tr><td><strong>Required</strong></td><td>—</td><td>If ticked, students cannot submit without filling this field</td>
+          </tr>
+          <tr><td><strong>Category Field</strong></td><td>—</td><td>If ticked, this field's values can be used as completion
+          categories (see <a href="completion.html">Completion Rules</a>)</td></tr>
+          <tr><td><strong>Show in List View</strong></td><td>—</td><td>If ticked, this field value appears in the summaries /
+          list table</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="callout tip">
       <span class="callout-icon">💡</span>
-      <div class="callout-body">Not all common options are available for every field type — see the per-type details below.</div>
+      <div class="callout-body">Not all common options are available for every field type — see the per-type details
+      below.</div>
     </div>
 
     <!-- Field types -->
@@ -207,7 +216,9 @@
     <p><strong>Supports:</strong> Required · Category · Show in list view</p>
     <div class="callout tip">
       <span class="callout-icon">💡</span>
-      <div class="callout-body">Use <strong>Dropdown</strong> or <strong>Radio</strong> when you want the selected value to drive <a href="completion.html">completion rules</a> — e.g., "require 2 satisfactory submissions in the Business Analysis category".</div>
+      <div class="callout-body">Use <strong>Dropdown</strong> or <strong>Radio</strong> when you want the selected value to drive
+      <a href="completion.html">completion rules</a> — e.g., "require 2 satisfactory submissions in the Business Analysis
+      category".</div>
     </div>
 
     <hr>
@@ -264,7 +275,8 @@
           <tr><td>Minimum Files</td><td>Minimum required. <code>0</code> = none required (default)</td></tr>
           <tr><td>Maximum Files</td><td>Maximum allowed. <code>0</code> = unlimited</td></tr>
           <tr><td>Maximum File Size (bytes)</td><td>Per-file size limit. <code>0</code> = no limit</td></tr>
-          <tr><td>Accepted File Types</td><td>Comma-separated extensions or MIME types (e.g., <code>.pdf,.docx</code>). Leave blank to allow any type.</td></tr>
+          <tr><td>Accepted File Types</td><td>Comma-separated extensions or MIME types (e.g., <code>.pdf,.docx</code>). Leave
+          blank to allow any type.</td></tr>
         </tbody>
       </table>
     </div>
@@ -275,23 +287,27 @@
 
     <!-- SECTION HEADING -->
     <h3>📌 Section Heading — visual divider</h3>
-    <p>Displays a styled heading to divide the submission form into named sections. It collects <strong>no data</strong> from students.</p>
+    <p>Displays a styled heading to divide the submission form into named sections. It collects <strong>no data</strong> from
+    students.</p>
     <figure class="screenshot">
       <img src="images/fields_type_sectionheading.png" alt="Fieldtype section heading" class="screenshot" />
       <figcaption>Section Heading field — purely structural</figcaption>
     </figure>
     <div class="callout note">
       <span class="callout-icon">📌</span>
-      <div class="callout-body">Section headings do not appear in list view, cannot be required, and cannot be used as category fields. Use them purely to organise long forms.</div>
+      <div class="callout-body">Section headings do not appear in list view, cannot be required, and cannot be used as category
+      fields. Use them purely to organise long forms.</div>
     </div>
 
     <!-- Best practices -->
     <h2>Best practices</h2>
     <ul>
-      <li>Use <strong>consistent, descriptive short names</strong> (e.g., <code>case_type</code>, <code>analysis_body</code>, <code>references</code>) — they are used in templates.</li>
+      <li>Use <strong>consistent, descriptive short names</strong> (e.g., <code>case_type</code>, <code>analysis_body</code>,
+      <code>references</code>) — they are used in templates.</li>
       <li><strong>Mark Category</strong> only on Dropdown/Radio fields you intend to use in completion rules.</li>
       <li>Use <strong>Section Headings</strong> to group related fields (e.g., Background, Analysis, Conclusions).</li>
-      <li><strong>Show in List View</strong> for fields that help graders identify submissions at a glance (e.g., a case type or student name field).</li>
+      <li><strong>Show in List View</strong> for fields that help graders identify submissions at a glance (e.g., a case type or
+      student name field).</li>
       <li>Set <strong>Required</strong> on fields where a blank answer would make the submission meaningless.</li>
     </ul>
 

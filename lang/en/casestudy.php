@@ -28,9 +28,9 @@ $string['addcategoryrule'] = 'Add another category rule';
 $string['addfield'] = 'Add field';
 $string['addfields'] = 'Add Fields';
 $string['addoverride'] = 'Add override';
+$string['allmysubmissions'] = 'All my submissions';
 $string['allowsubmissionsfromdate'] = 'Allow submissions from';
 $string['allowsubmissionsfromdate_help'] = 'If enabled, students will not be able to submit before this date. If disabled, students can submit immediately.';
-$string['allmysubmissions'] = 'All my submissions';
 $string['allsubmissions'] = 'All submissions';
 $string['anyvalue'] = 'Any value';
 $string['atleastoneoption'] = 'Please enable at least one override option';
@@ -443,6 +443,8 @@ $string['submissionerror'] = 'Submission failed. Please try again.';
 $string['submissionhistory'] = 'Submission history';
 $string['submissionhistorydesc'] = 'A Submission history accessible for students and Markers is required for each Case Study submission. The history should also include the Marker feedback received for each attempt.';
 $string['submissionlevelreached'] = 'You have reached the maximum number of submissions allowed or the submission deadline has passed';
+$string['submissionnavcounter'] = 'Submission {$a->current} of {$a->total}';
+$string['submissionnavlabel'] = 'Cycle through your submissions';
 $string['submissionnotificationhtml'] = '<p>Hi,</p>
 <p><strong>{$a->student}</strong> has submitted a case study for <strong>"{$a->casestudy}"</strong> in {$a->course}.</p>
 <p><a href="{$a->url}">View and grade the submission</a></p>';
@@ -454,8 +456,6 @@ $string['submissionnotificationtext'] = 'Hi,
 
 You can view and grade the submission here:
 {$a->url}';
-$string['submissionnavcounter'] = 'Submission {$a->current} of {$a->total}';
-$string['submissionnavlabel'] = 'Cycle through your submissions';
 $string['submissionreattempted'] = 'Submission re-attempted successfully';
 $string['submissions'] = 'Submissions';
 $string['submissionsaved'] = 'Submission saved successfully';

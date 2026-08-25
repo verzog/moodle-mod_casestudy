@@ -58,20 +58,20 @@ class get_submissions_for_grading extends external_api {
     public static function execute($casestudyid, $cmid) {
         global $DB;
 
-        // Validate parameters
+        // Validate parameters.
         $params = self::validate_parameters(self::execute_parameters(), [
             'casestudyid' => $casestudyid,
             'cmid' => $cmid,
         ]);
 
-        // Get context and validate permissions
+        // Get context and validate permissions.
         $cm = get_coursemodule_from_id('casestudy', $params['cmid'], 0, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
 
         self::validate_context($context);
         require_capability('mod/casestudy:grade', $context);
 
-        // Check for group filtering
+        // Check for group filtering.
         $groupid = groups_get_activity_group($cm, true);
 
         // Only show submissions that have been submitted (exclude new and draft statuses).
@@ -96,7 +96,7 @@ class get_submissions_for_grading extends external_api {
 
         $sqlparams = array_merge(['casestudyid' => $params['casestudyid']], $statusparams);
 
-        // Add group filter if needed
+        // Add group filter if needed.
         if ($groupid) {
             $groupmembers = groups_get_members($groupid, 'u.id');
             if (!empty($groupmembers)) {

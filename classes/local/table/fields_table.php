@@ -78,7 +78,7 @@ class fields_table extends table_sql implements dynamic_table {
             'actions',
         ];
 
-        // Define column headers
+        // Define column headers.
         $headers = [
             get_string('order', 'mod_casestudy'),
             get_string('fieldname', 'mod_casestudy'),
@@ -92,12 +92,12 @@ class fields_table extends table_sql implements dynamic_table {
         $this->define_columns($columns);
         $this->define_headers($headers);
 
-        // Configure table properties
+        // Configure table properties.
         $this->sortable(true, 'sortorder', SORT_ASC);
         $this->collapsible(false);
         $this->set_attribute('class', 'casestudy-fields-table table table-striped table-hover');
 
-        // Set SQL query
+        // Set SQL query.
         $this->set_sql(
             'id, sortorder, name, type, required, category, showlistview',
             '{casestudy_fields}',
@@ -245,12 +245,14 @@ class fields_table extends table_sql implements dynamic_table {
 
         $actions = [];
 
-        // 'action' => 'moveup',
         $manageurl = new moodle_url('/mod/casestudy/fields/manage.php', [
             'id' => $this->cm->id, 'fieldid' => $row->id, 'sesskey' => $this->sesskey]);
 
-        // url.
-        $editurl = new moodle_url('/mod/casestudy/fields/edit.php', ['id' => $this->cm->id, 'fieldid' => $row->id, 'type' => $row->type]);
+        // Edit URL.
+        $editurl = new moodle_url(
+            '/mod/casestudy/fields/edit.php',
+            ['id' => $this->cm->id, 'fieldid' => $row->id, 'type' => $row->type]
+        );
 
         // Edit action.
         $actions[] = $OUTPUT->action_icon(
@@ -323,7 +325,7 @@ class fields_table extends table_sql implements dynamic_table {
      * @return bool
      */
     private function can_move_down($row) {
-        // Get maximum sort order
+        // Get maximum sort order.
         global $DB;
         $maxorder = $DB->get_field(
             'casestudy_fields',

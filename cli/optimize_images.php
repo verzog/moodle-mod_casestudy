@@ -26,7 +26,7 @@ require_once($CFG->libdir . '/clilib.php');
 
 use mod_casestudy\local\image_optimizer;
 
-list($options, $unrecognised) = cli_get_params(
+[$options, $unrecognised] = cli_get_params(
     [
         'help' => false,
         'dry-run' => false,
@@ -94,7 +94,7 @@ foreach ($fileids as $fileid) {
     }
 }
 
-$progress = function($stats, $file, $changed) {
+$progress = function ($stats, $file, $changed) {
     if ($changed && ($stats->optimized % 50 === 0)) {
         cli_writeln(sprintf('  ... %d optimised so far', $stats->optimized));
     }

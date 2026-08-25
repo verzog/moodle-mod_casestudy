@@ -19,8 +19,6 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Define the complete casestudy structure for restore, with file and id annotations.
  */
@@ -499,7 +497,12 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
             }
 
             $parentfiles = $fs->get_area_files(
-                $contextid, 'mod_casestudy', 'submission_richtext', $newparentid, 'id', false
+                $contextid,
+                'mod_casestudy',
+                'submission_richtext',
+                $newparentid,
+                'id',
+                false
             );
             foreach ($parentfiles as $file) {
                 // Copy each parent file that is absent from the child area by filepath+filename.
@@ -507,14 +510,16 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
                 // copy bug: save_area_files() adds newly-uploaded files to the child's area but
                 // leaves the inherited @@PLUGINFILE@@ references from the parent untouched, so
                 // some parent files are missing even though the child area is non-empty.
-                if (!$fs->file_exists(
-                    $contextid,
-                    'mod_casestudy',
-                    'submission_richtext',
-                    $newchildid,
-                    $file->get_filepath(),
-                    $file->get_filename()
-                )) {
+                if (
+                    !$fs->file_exists(
+                        $contextid,
+                        'mod_casestudy',
+                        'submission_richtext',
+                        $newchildid,
+                        $file->get_filepath(),
+                        $file->get_filename()
+                    )
+                ) {
                     $fs->create_file_from_storedfile([
                         'contextid' => $contextid,
                         'component' => 'mod_casestudy',
@@ -528,7 +533,7 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
 
     /**
      * Convert absolute submission_richtext pluginfile URLs in restored content to the
-     * @@PLUGINFILE@@ placeholder.
+     * `@@PLUGINFILE@@` placeholder.
      *
      * Rich-text submission content can embed absolute pluginfile URLs that carry the
      * original context and submission ids (for example images inserted as file links).
@@ -552,8 +557,10 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
 
         foreach ($this->restoredcontentids as $contentid) {
             $record = $DB->get_record('casestudy_content', ['id' => $contentid], 'id, content');
-            if (!$record || $record->content === null || $record->content === ''
-                    || strpos($record->content, 'submission_richtext') === false) {
+            if (
+                !$record || $record->content === null || $record->content === ''
+                    || strpos($record->content, 'submission_richtext') === false
+            ) {
                 continue;
             }
 

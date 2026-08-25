@@ -35,10 +35,10 @@ class mod_casestudy_mod_form extends moodleform_mod {
 
         $mform = $this->_form;
 
-        // Adding the "general" fieldset, where all the common settings are showed
+        // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // Adding the standard "name" field
+        // Adding the standard "name" field.
         $mform->addElement('text', 'name', get_string('casestudyname', 'mod_casestudy'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
@@ -49,13 +49,13 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
         $mform->addHelpButton('name', 'casestudyname', 'mod_casestudy');
 
-        // Adding the standard "intro" and "introformat" fields
+        // Adding the standard "intro" and "introformat" fields.
         $this->standard_intro_elements();
 
-        // Entries section
+        // Entries section.
         $mform->addElement('header', 'entriessection', get_string('entries', 'mod_casestudy'));
 
-        // Maximum number of submissions per student
+        // Maximum number of submissions per student.
         $options = [0 => get_string('unlimited', 'mod_casestudy')];
         for ($i = 1; $i <= 50; $i++) {
             $options[$i] = $i;
@@ -64,10 +64,10 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->setDefault('maxsubmissions', 0);
         $mform->addHelpButton('maxsubmissions', 'maxsubmissions', 'mod_casestudy');
 
-        // Availability section
+        // Availability section.
         $mform->addElement('header', 'availabilitysection', get_string('availability', 'mod_casestudy'));
 
-        // Allow submissions from (timeopen)
+        // Allow submissions from (timeopen).
         $mform->addElement(
             'date_time_selector',
             'timeopen',
@@ -77,7 +77,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->setDefault('timeopen', 0);
         $mform->addHelpButton('timeopen', 'allowsubmissionsfromdate', 'mod_casestudy');
 
-        // Due date (timeclose)
+        // Due date (timeclose).
         $mform->addElement(
             'date_time_selector',
             'timeclose',
@@ -87,38 +87,38 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->setDefault('timeclose', 0);
         $mform->addHelpButton('timeclose', 'duedate', 'mod_casestudy');
 
-        // Notifications section
+        // Notifications section.
         $mform->addElement('header', 'notificationssection', get_string('notifications', 'mod_casestudy'));
 
-        // Notify graders about submissions
+        // Notify graders about submissions.
         $mform->addElement('selectyesno', 'notifygraders', get_string('notifygraders', 'mod_casestudy'));
         $mform->setDefault('notifygraders', 1);
         $mform->addHelpButton('notifygraders', 'notifygraders', 'mod_casestudy');
 
-        // Email others
+        // Email others.
         $mform->addElement('text', 'notifyemail', get_string('notifyemail', 'mod_casestudy'), ['size' => '64']);
         $mform->setType('notifyemail', PARAM_TEXT);
         $mform->addHelpButton('notifyemail', 'notifyemail', 'mod_casestudy');
 
-        // Default for 'Notify student'
+        // Default value for the notify-student checkbox.
         $mform->addElement('selectyesno', 'notifystudentdefault', get_string('notifystudentdefault', 'mod_casestudy'));
         $mform->setDefault('notifystudentdefault', 1);
         $mform->addHelpButton('notifystudentdefault', 'notifystudentdefault', 'mod_casestudy');
 
-        // Submission settings section
+        // Submission settings section.
         $mform->addElement('header', 'submissionsettings', get_string('submissionsettings', 'mod_casestudy'));
 
-        // Require students to click submit button
+        // Require students to click submit button.
         $mform->addElement('selectyesno', 'requiresubmit', get_string('requiresubmit', 'mod_casestudy'));
         $mform->setDefault('requiresubmit', 1);
         $mform->addHelpButton('requiresubmit', 'requiresubmit', 'mod_casestudy');
 
-        // Require submission statement
+        // Require submission statement.
         $mform->addElement('selectyesno', 'requireacceptance', get_string('requireacceptance', 'mod_casestudy'));
         $mform->setDefault('requireacceptance', 0);
         $mform->addHelpButton('requireacceptance', 'requireacceptance', 'mod_casestudy');
 
-        // Maximum attempts
+        // Maximum attempts.
         $attemptsoptions = [0 => get_string('unlimited', 'mod_casestudy')];
         for ($i = 1; $i <= 10; $i++) {
             $attemptsoptions[$i] = $i;
@@ -127,20 +127,20 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->setDefault('maxattempts', 10);
         $mform->addHelpButton('maxattempts', 'maxattempts', 'mod_casestudy');
 
-        // Resubmissions based on previous attempt
+        // Resubmissions based on previous attempt.
         $mform->addElement('selectyesno', 'resubmissionbased', get_string('resubmissionbased', 'mod_casestudy'));
         $mform->setDefault('resubmissionbased', 1);
         $mform->addHelpButton('resubmissionbased', 'resubmissionbased', 'mod_casestudy');
 
-        // Grade scale - we'll use a custom scale
+        // Grade scale - we'll use a custom scale.
         $this->standard_grading_coursemodule_elements();
 
-        // Hide grader identity from students
+        // Hide grader identity from students.
         $mform->addElement('selectyesno', 'hidegrader', get_string('hidegrader', 'mod_casestudy'));
         $mform->setDefault('hidegrader', 0);
         $mform->addHelpButton('hidegrader', 'hidegrader', 'mod_casestudy');
 
-        // Grader information
+        // Grader information.
         $mform->addElement(
             'editor',
             'graderinfo_editor',
@@ -150,10 +150,10 @@ class mod_casestudy_mod_form extends moodleform_mod {
         );
         $mform->addHelpButton('graderinfo_editor', 'graderinfo', 'mod_casestudy');
 
-        // Add standard elements, common to all modules
+        // Add standard elements, common to all modules.
         $this->standard_coursemodule_elements();
 
-        // Add standard buttons, common to all modules
+        // Add standard buttons, common to all modules.
         $this->add_action_buttons();
 
         // Add JavaScript for dynamic category value dropdowns (only if editing existing instance).
@@ -192,7 +192,8 @@ class mod_casestudy_mod_form extends moodleform_mod {
                         });
 
                         // Only reset if we're not preserving selection AND current selection is now hidden.
-                        if (!preserveSelection && currentValue && valueSelect.find('option[value="' + currentValue + '"]:visible').length === 0) {
+                        if (!preserveSelection && currentValue
+                            && valueSelect.find('option[value="' + currentValue + '"]:visible').length === 0) {
                             valueSelect.val('0');
                         }
                     }
@@ -244,7 +245,12 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $group = [];
         $completionaggrsel = 'completionaggr' . $suffix;
 
-        $group[] =& $mform->createElement('static', 'completionsatisfactorydesc', '', get_string('completionsatisfactorydesc', 'mod_casestudy'));
+        $group[] =& $mform->createElement(
+            'static',
+            'completionsatisfactorydesc',
+            '',
+            get_string('completionsatisfactorydesc', 'mod_casestudy')
+        );
         $group[] =& $mform->createElement(
             'select',
             $completionaggrsel,
@@ -330,19 +336,38 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $repeatarray = [];
         $repeateloptions = [];
 
-        $repeatarray[] = $mform->createElement('advcheckbox', 'categoryrule_enabled', get_string('completioncategorysubmissions', 'mod_casestudy'));
+        $repeatarray[] = $mform->createElement(
+            'advcheckbox',
+            'categoryrule_enabled',
+            get_string('completioncategorysubmissions', 'mod_casestudy')
+        );
         $repeateloptions['categoryrule_enabled']['type'] = PARAM_INT;
         $repeateloptions['categoryrule_enabled']['hideif'] = ['completion', 'neq', COMPLETION_TRACKING_AUTOMATIC];
 
-        $repeatarray[] = $mform->createElement('select', 'categoryrule_fieldid', get_string('categoryfield', 'mod_casestudy'), $categoryfields);
+        $repeatarray[] = $mform->createElement(
+            'select',
+            'categoryrule_fieldid',
+            get_string('categoryfield', 'mod_casestudy'),
+            $categoryfields
+        );
         $repeateloptions['categoryrule_fieldid']['type'] = PARAM_INT;
         $repeateloptions['categoryrule_fieldid']['hideif'] = ['categoryrule_enabled', 'notchecked'];
 
-        $repeatarray[] = $mform->createElement('select', 'categoryrule_value', get_string('categoryvalue', 'mod_casestudy'), $allcategoryvalues);
+        $repeatarray[] = $mform->createElement(
+            'select',
+            'categoryrule_value',
+            get_string('categoryvalue', 'mod_casestudy'),
+            $allcategoryvalues
+        );
         $repeateloptions['categoryrule_value']['type'] = PARAM_INT;
         $repeateloptions['categoryrule_value']['hideif'] = ['categoryrule_enabled', 'notchecked'];
 
-        $repeatarray[] = $mform->createElement('select', 'categoryrule_count', get_string('requiredcount', 'mod_casestudy'), $countoptions);
+        $repeatarray[] = $mform->createElement(
+            'select',
+            'categoryrule_count',
+            get_string('requiredcount', 'mod_casestudy'),
+            $countoptions
+        );
         $repeateloptions['categoryrule_count']['type'] = PARAM_INT;
         $repeateloptions['categoryrule_count']['hideif'] = ['categoryrule_enabled', 'notchecked'];
 
@@ -649,7 +674,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Validate email addresses if provided
+        // Validate email addresses if provided.
         if (!empty($data['notifyemail'])) {
             $emails = explode(',', $data['notifyemail']);
             $invalidemail = '';
@@ -665,7 +690,7 @@ class mod_casestudy_mod_form extends moodleform_mod {
             }
         }
 
-        // Validate availability dates
+        // Validate availability dates.
         if (!empty($data['timeopen']) && !empty($data['timeclose'])) {
             if ($data['timeclose'] < $data['timeopen']) {
                 $errors['timeclose'] = get_string('closebeforeopen', 'mod_casestudy');
@@ -682,9 +707,11 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $completiontracking = (int) ($data['completion' . $suffix] ?? COMPLETION_TRACKING_NONE);
         $gradetype = $data['grade']['modgrade_type'] ?? '';
         $gradepass = isset($data['gradepass']) ? (float) unformat_float($data['gradepass']) : 0.0;
-        if ($gradetype === 'point' && $gradepass <= 0
+        if (
+            $gradetype === 'point' && $gradepass <= 0
                 && $completiontracking == COMPLETION_TRACKING_AUTOMATIC
-                && $this->completion_rule_enabled($data)) {
+                && $this->completion_rule_enabled($data)
+        ) {
             $errors['gradepass'] = get_string('markgradenopass', 'mod_casestudy');
         }
 

@@ -57,7 +57,7 @@ class checkbox_field extends base_field {
         $options = $this->get_options();
 
         if (empty($options)) {
-            // If no options, show a note
+            // If no options, show a note.
             $mform->addElement(
                 'static',
                 $elementname . '_note',
@@ -85,12 +85,12 @@ class checkbox_field extends base_field {
      */
     public function submission_definition_after_data($mform, $value, $fieldname) {
 
-        // Parse existing values (stored as JSON array)
+        // Parse existing values (stored as JSON array).
         $selectedvalues = [];
         if ($value) {
             $selectedvalues = is_array($value) ? $value : json_decode($value, true);
             if (!is_array($selectedvalues)) {
-                $selectedvalues = [$value]; // Handle single value
+                $selectedvalues = [$value]; // Handle single value.
             }
         }
 
@@ -135,7 +135,7 @@ class checkbox_field extends base_field {
                    get_string('no_options_configured', 'mod_casestudy') . '</div>';
         }
 
-        // Parse selected values
+        // Parse selected values.
         $selectedvalues = [];
         if ($value) {
             if (is_array($value)) {
@@ -209,7 +209,7 @@ class checkbox_field extends base_field {
     public function process_input($value, $data): field_data {
 
         if (is_array($value)) {
-            // Filter out unchecked boxes and get keys
+            // Filter out unchecked boxes and get keys.
             $selectedvalues = array_keys(array_filter($value));
             $value = json_encode($selectedvalues);
         }
@@ -229,7 +229,7 @@ class checkbox_field extends base_field {
     public function validate_input($value, $files = null, $data = null, $isdraft = false) {
         $errors = [];
 
-        // For checkboxes, check if at least one is selected for required fields
+        // For checkboxes, check if at least one is selected for required fields.
         if (!$isdraft && $this->fielddata->required) {
             $selectedvalues = [];
             if ($value) {
@@ -282,9 +282,9 @@ class checkbox_field extends base_field {
     public function set_field_params(&$field, $config) {
         parent::set_field_params($field, $config);
 
-        // Handle param1 for options
+        // Handle param1 for options.
         if (isset($config['param1']) && is_array($config['param1'])) {
-            // Convert array of options to JSON
+            // Convert array of options to JSON.
             $field->param1 = json_encode(array_values($config['param1']));
         }
     }
@@ -297,7 +297,7 @@ class checkbox_field extends base_field {
      * @return void
      */
     public function additional_form_elements(&$mform) {
-        // Options textarea
+        // Options textarea.
         $mform->addElement('textarea', 'param1', get_string('options', 'mod_casestudy'), ['rows' => 5, 'cols' => 50]);
         $mform->setType('param1', PARAM_TEXT);
         $mform->addHelpButton('param1', 'options', 'mod_casestudy');
@@ -349,7 +349,7 @@ class checkbox_field extends base_field {
     public function process_config_form($data) {
         $config = parent::process_config_form($data);
 
-        // Process options from textarea
+        // Process options from textarea.
         if (isset($data['param1'])) {
             $options = array_filter(array_map('trim', explode("\n", $data['param1'])));
             $config['param1'] = $options;
@@ -379,7 +379,7 @@ class checkbox_field extends base_field {
             return '-';
         }
 
-        // Parse stored values
+        // Parse stored values.
         $selectedvalues = [];
         if ($value) {
             $selectedvalues = is_array($value) ? $value : json_decode($value, true);
@@ -388,7 +388,7 @@ class checkbox_field extends base_field {
             }
         }
 
-        // Get options to display labels
+        // Get options to display labels.
         $options = $this->get_options();
         $displayvalues = [];
         foreach ($selectedvalues as $selectedvalue) {

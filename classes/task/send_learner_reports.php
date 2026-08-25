@@ -40,7 +40,7 @@ class send_learner_reports extends \core\task\scheduled_task {
     public function execute() {
         global $DB, $CFG;
 
-        // Load constants from lib.php
+        // Load constants from lib.php.
         require_once($CFG->dirroot . '/mod/casestudy/lib.php');
 
         mtrace('Starting weekly learner progress reports...');
@@ -79,7 +79,17 @@ class send_learner_reports extends \core\task\scheduled_task {
             $context = \context_module::instance($cm->id);
 
             // Get all enrolled students (users with submit capability).
-            $students = get_users_by_capability($context, 'mod/casestudy:submit', 'u.*', 'u.lastname, u.firstname', '', '', '', '', false);
+            $students = get_users_by_capability(
+                $context,
+                'mod/casestudy:submit',
+                'u.*',
+                'u.lastname, u.firstname',
+                '',
+                '',
+                '',
+                '',
+                false
+            );
 
             if (empty($students)) {
                 mtrace("  No students found.");
@@ -100,7 +110,8 @@ class send_learner_reports extends \core\task\scheduled_task {
                         $sent++;
                     } else {
                         $failed++;
-                        mtrace("    FAILED: Could not send report to {$student->firstname} {$student->lastname} ({$student->email})");
+                        mtrace("    FAILED: Could not send report to {$student->firstname} "
+                            . "{$student->lastname} ({$student->email})");
                     }
                 } catch (\Exception $e) {
                     $failed++;

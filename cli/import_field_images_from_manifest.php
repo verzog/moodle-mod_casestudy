@@ -30,7 +30,7 @@ require_once($CFG->libdir . '/clilib.php');
 
 use mod_casestudy\local\manifest_image_importer;
 
-list($options, $unrecognised) = cli_get_params(
+[$options, $unrecognised] = cli_get_params(
     [
         'help' => false,
         'manifest' => '',
@@ -80,7 +80,7 @@ $stats = manifest_image_importer::import(
     $options['manifest'],
     $options['filesdir'],
     ['commit' => $commit, 'courseid' => (int) $options['courseid']],
-    function($message) {
+    function ($message) {
         cli_writeln($message);
     }
 );

@@ -83,13 +83,13 @@ class template {
             return null; // Signal to use default rendering.
         }
 
-        // Get the formatted data from submission's export_for_template
+        // Get the formatted data from submission's export_for_template.
         $submissiondata = $submission->export_for_template($OUTPUT);
 
         $submissionrecord = $submission->get_submission();
         $user = $DB->get_record('user', ['id' => $submissionrecord->userid]);
 
-        // Build replacements using the export_for_template data
+        // Build replacements using the export_for_template data.
         $replacements = $this->get_replacements_from_export($submissiondata, $submissionrecord, $user, $grade);
         $output = $this->parse_template($templatecontent, $replacements);
 
@@ -162,7 +162,7 @@ class template {
         if (isset($submissiondata['fieldsbyshortname'])) {
             foreach ($submissiondata['fieldsbyshortname'] as $shortname => $fielddata) {
                 // Use the already rendered value from export_for_template.
-                $fieldcontent = $this->update_field_html($fielddata);// ['value'];
+                $fieldcontent = $this->update_field_html($fielddata);
 
                 // Support both field name and shortname.
                 $replacements['[[' . $fielddata['name'] . ']]'] = $fieldcontent;
@@ -334,7 +334,7 @@ class template {
     private function get_delete_button($submission) {
         global $USER;
 
-        // Use submission_manager to check if user can delete
+        // Use submission_manager to check if user can delete.
         $submissionmanager = \mod_casestudy\local\submission_manager::instance(
             $this->casestudy->id,
             $this->casestudy,
@@ -451,14 +451,16 @@ class template {
         ];
 
         foreach ($fields as $field) {
-            // Main field tag - replaced with the form input element
+            // Main field tag - replaced with the form input element.
             $tags['fields']['[[' . $field->name . ']]'] = get_string('tag_form_field', 'mod_casestudy', $field->name);
 
-            // Field attribute tags
+            // Field attribute tags.
             $tags['fieldattr']['[[' . $field->name . '#label]]'] = get_string('tag_form_label', 'mod_casestudy', $field->name);
-            $tags['fieldattr']['[[' . $field->name . '#description]]'] = get_string('tag_form_description', 'mod_casestudy', $field->name);
+            $tags['fieldattr']['[[' . $field->name . '#description]]'] =
+                get_string('tag_form_description', 'mod_casestudy', $field->name);
             $tags['fieldattr']['[[' . $field->name . '#input]]'] = get_string('tag_form_input', 'mod_casestudy', $field->name);
-            $tags['fieldattr']['[[' . $field->name . '#required]]'] = get_string('tag_form_required', 'mod_casestudy', $field->name);
+            $tags['fieldattr']['[[' . $field->name . '#required]]'] =
+                get_string('tag_form_required', 'mod_casestudy', $field->name);
             $tags['fieldattr']['[[' . $field->name . '#id]]'] = get_string('tag_form_id', 'mod_casestudy', $field->name);
             $tags['fieldattr']['[[' . $field->name . '#error]]'] = get_string('tag_form_error', 'mod_casestudy', $field->name);
         }
@@ -536,21 +538,21 @@ class template {
 
             $rawvalue = isset($values[$fieldid]) ? $values[$fieldid] : '';
 
-            // Handle object values (like field_data objects) by extracting the content property
+            // Handle object values (like field_data objects) by extracting the content property.
             if (is_object($rawvalue) && isset($rawvalue->content)) {
                 $value = $rawvalue->content;
             } else {
                 $value = $rawvalue;
             }
 
-            // Check for errors - errors may be keyed by field name (field_123) or field_123_group for checkbox/radio
+            // Check for errors - errors may be keyed by field name (field_123) or field_123_group for checkbox/radio.
             $fieldname = 'field_' . $fieldid;
             $errorkey = in_array($field->type, ['checkbox', 'radio']) ? $fieldname . '_group' : $fieldname;
             $fielderrors = [];
             if (isset($errors[$errorkey])) {
                 $fielderrors = (array)$errors[$errorkey];
             } else if (isset($errors[$fieldid])) {
-                // Also check by field ID for backward compatibility
+                // Also check by field ID for backward compatibility.
                 $fielderrors = (array)$errors[$fieldid];
             }
 
@@ -568,7 +570,7 @@ class template {
                 }
             }
 
-            // Main field tag - complete form element with label, input, description, errors
+            // Main field tag - complete form element with label, input, description, errors.
             $mformelement = $this->mform->get_form()->getElement($fieldname);
 
             // Get the configuration for the field to determine if it's required, etc.
@@ -580,13 +582,16 @@ class template {
 
             try {
                 // For the filemanager element, render will include the js for filemanager.
-                // When renderering for inputhtml and field html separetly, loads the js twice but only one element is included using template.
+                // When renderering for inputhtml and field html separetly, loads the js twice
+                // but only one element is included using template.
                 if ($mformelement instanceof \MoodleQuickForm_filemanager) {
                     // For section headings, we want to render them without the form-group wrapper that mform adds.
-                    [$fieldcontext, $fieldhtml] = $PAGE->get_renderer('mod_casestudy')->mform_element_filemanager($mformelement, $fieldconfig['required'], false, $error, false);
+                    [$fieldcontext, $fieldhtml] = $PAGE->get_renderer('mod_casestudy')
+                        ->mform_element_filemanager($mformelement, $fieldconfig['required'], false, $error, false);
                     $inputhtml = $fieldcontext['element']['html'];
                 } else {
-                    // Render the form element using mform's rendering to ensure consistency with Moodle's form styles and error handling.
+                    // Render the form element using mform's rendering to ensure consistency
+                    // with Moodle's form styles and error handling.
                     $fieldhtml = $OUTPUT->mform_element($mformelement, $fieldconfig['required'], false, $error, false);
                 }
 
@@ -622,7 +627,9 @@ class template {
             }
 
             try {
-                $mformelement->updateAttributes(['class' => str_replace('form-control', '', $mformelement->_attributes['class'] ?? '')]);
+                $mformelement->updateAttributes([
+                    'class' => str_replace('form-control', '', $mformelement->_attributes['class'] ?? ''),
+                ]);
 
                 if ($mformelement instanceof \templatable && !($mformelement instanceof \MoodleQuickForm_filemanager)) {
                     // Remove the formcontrol class, mform add the class to the template([[*:input]]) wrapper div
@@ -644,7 +651,7 @@ class template {
 
             $replacements['[[' . $field->name . ']]'] = $fieldhtml;
 
-            // Individual component tags for advanced template customization
+            // Individual component tags for advanced template customization.
             $required = !empty($field->required);
             $requiredmark = $required ? '<span class="text-danger">*</span>' : '';
 
@@ -669,18 +676,17 @@ class template {
             }
             $replacements['[[' . $field->name . '#error]]'] = $errorhtml;
 
-            // Input only tag (just the input element without wrapper)
+            // Input only tag (just the input element without wrapper).
             $haserrors = !empty($fielderrors);
-            // $fieldclass->get_input_html($fieldname, $value, $submissionid, $haserrors);
             $replacements['[[' . $field->name . '#input]]'] = $inputhtml;
 
-            // Required indicator tag
+            // Required indicator tag.
             $replacements['[[' . $field->name . '#required]]'] = $requiredmark;
 
-            // Field ID tag
+            // Field ID tag.
             $replacements['[[' . $field->name . '#id]]'] = $fieldname;
 
-            // Also support shortname-based tags
+            // Also support shortname-based tags.
             if (!empty($field->shortname) && $field->shortname !== $field->name) {
                 $replacements['[[' . $field->shortname . ']]'] = $fieldhtml;
                 $replacements['[[' . $field->shortname . '#label]]'] = format_string($field->name) . ' ' . $requiredmark;
@@ -692,10 +698,10 @@ class template {
             }
         }
 
-        // Parse the template with replacements
+        // Parse the template with replacements.
         $output = $this->parse_template($templatecontent, $replacements);
 
-        // Add CSS if defined
+        // Add CSS if defined.
         if (!empty($this->casestudy->csstemplate)) {
             $output = html_writer::tag('style', $this->casestudy->csstemplate) . $output;
         }

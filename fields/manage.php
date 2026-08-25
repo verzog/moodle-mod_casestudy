@@ -50,9 +50,19 @@ if ($action && confirm_sesskey()) {
         case 'delete':
             if ($fieldid) {
                 if ($fieldmanager->delete_field($fieldid)) {
-                    redirect($PAGE->url, get_string('fielddeleted', 'mod_casestudy'), null, \core\output\notification::NOTIFY_SUCCESS);
+                    redirect(
+                        $PAGE->url,
+                        get_string('fielddeleted', 'mod_casestudy'),
+                        null,
+                        \core\output\notification::NOTIFY_SUCCESS
+                    );
                 } else {
-                    redirect($PAGE->url, get_string('errordeleting', 'mod_casestudy'), null, \core\output\notification::NOTIFY_ERROR);
+                    redirect(
+                        $PAGE->url,
+                        get_string('errordeleting', 'mod_casestudy'),
+                        null,
+                        \core\output\notification::NOTIFY_ERROR
+                    );
                 }
             }
             break;
@@ -72,9 +82,19 @@ if ($action && confirm_sesskey()) {
             if ($fieldid) {
                 $newfieldid = $fieldmanager->clone_field($fieldid);
                 if ($newfieldid) {
-                    redirect($PAGE->url, get_string('fieldcloned', 'mod_casestudy'), null, \core\output\notification::NOTIFY_SUCCESS);
+                    redirect(
+                        $PAGE->url,
+                        get_string('fieldcloned', 'mod_casestudy'),
+                        null,
+                        \core\output\notification::NOTIFY_SUCCESS
+                    );
                 } else {
-                    redirect($PAGE->url, get_string('errorcloning', 'mod_casestudy'), null, \core\output\notification::NOTIFY_ERROR);
+                    redirect(
+                        $PAGE->url,
+                        get_string('errorcloning', 'mod_casestudy'),
+                        null,
+                        \core\output\notification::NOTIFY_ERROR
+                    );
                 }
             }
             break;
@@ -100,7 +120,8 @@ if (!empty($fields)) {
 echo $renderer->fields_management_page($cm, $context, $fields, $maxorder);
 
 $PAGE->requires->js_amd_inline("
-    require(['core/sortable_list', 'core/ajax', 'core/notification', 'core/toast', 'jquery'], function(SortableList, Ajax, Notification, Toast, $) {
+    require(['core/sortable_list', 'core/ajax', 'core/notification', 'core/toast', 'jquery'],
+            function(SortableList, Ajax, Notification, Toast, $) {
         let origIndex = 0;
 
         const sortable = new SortableList(

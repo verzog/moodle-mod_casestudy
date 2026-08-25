@@ -22,11 +22,11 @@
 require_once('../../../config.php');
 require_once($CFG->dirroot . '/mod/casestudy/lib.php');
 
-$id = required_param('id', PARAM_INT); // Course module ID
+$id = required_param('id', PARAM_INT); // Course module ID.
 $fieldid = optional_param('fieldid', 0, PARAM_INT);
 $fieldtype = optional_param('type', 'text', PARAM_ALPHA);
 
-// Get course module and related data
+// Get course module and related data.
 $cm = get_coursemodule_from_id('casestudy', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -44,10 +44,10 @@ $PAGE->set_context($context);
 // Initialize field manager.
 $fieldmanager = \mod_casestudy\local\field_manager::instance($casestudy->id);
 
-// Determine if we're editing or creating
+// Determine if we're editing or creating.
 $editing = !empty($fieldid);
 
-// Get the field type class
+// Get the field type class.
 $fieldclass = $fieldmanager->get_field_type_class($fieldtype);
 if (!$fieldclass) {
     throw new moodle_exception('invalidfieldtype', 'mod_casestudy');
@@ -56,11 +56,11 @@ if (!$fieldclass) {
 // Create form.
 $form = $fieldclass->get_edit_form($fieldmanager, $editing, $fieldid);
 
-// Handle form submission
+// Handle form submission.
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]));
 } else if ($data = $form->get_data()) {
-    // Get field data from form
+    // Get field data from form.
     $fielddata = $form->get_field_data($data);
 
     if ($editing) {
@@ -99,7 +99,7 @@ if ($form->is_cancelled()) {
     }
 } else {
     if ($editing) {
-        // Load existing field data into form
+        // Load existing field data into form.
         $field = $fieldmanager->get_field($fieldid);
         if (!$field) {
             throw new \moodle_exception('invalidfield', 'mod_casestudy');
@@ -119,17 +119,17 @@ if ($form->is_cancelled()) {
 
 echo $OUTPUT->header();
 
-// Page heading
+// Page heading.
 if ($editing) {
     echo $OUTPUT->heading(get_string('editfield', 'mod_casestudy') . ': ' . format_string($field->name));
 } else {
     echo $OUTPUT->heading(get_string('addfield', 'mod_casestudy') . ': ' . get_string('fieldtype_' . $fieldtype, 'mod_casestudy'));
 }
 
-// Display form
+// Display form.
 $form->display();
 
-// Back link
+// Back link.
 echo '<div class="mt-3">';
 echo '<a href="fields.php?id=' . $cm->id . '" class="btn btn-secondary">' . get_string('back') . '</a>';
 echo '</div>';

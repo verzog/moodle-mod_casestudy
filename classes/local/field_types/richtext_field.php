@@ -56,7 +56,7 @@ class richtext_field extends base_field {
     public function render_form_element($mform, $elementname, $value = null) {
         $editoroptions = $this->get_editor_options();
 
-        // Add the editor element
+        // Add the editor element.
         $mform->addElement(
             'editor',
             $elementname,
@@ -66,9 +66,9 @@ class richtext_field extends base_field {
         );
         $mform->setType($elementname, PARAM_RAW);
 
-        // Set default value if provided
+        // Set default value if provided.
         if ($value !== null) {
-            // Handle both array format (with text and format) and plain text
+            // Handle both array format (with text and format) and plain text.
             if (is_array($value)) {
                 $mform->setDefault($elementname, $value);
             } else {
@@ -102,7 +102,7 @@ class richtext_field extends base_field {
         $rows = $editoroptions['rows'] ?? 10;
         $errorclass = $haserrors ? ' is-invalid' : '';
 
-        // Return a rich text area with data attributes for JavaScript enhancement
+        // Return a rich text area with data attributes for JavaScript enhancement.
         return '<div class="casestudy-richtext-container" data-fieldname="' . $fieldname . '">' .
                '<textarea name="' . $fieldname . '[text]" id="' . $fieldname . '" ' .
                'class="form-control casestudy-richtext-editor' . $errorclass . '" rows="' . $rows . '">' .
@@ -117,7 +117,7 @@ class richtext_field extends base_field {
      * @return bool True if supports template forms
      */
     public function supports_template_form(): bool {
-        return false; // Richtext fields require Moodle's editor with JS
+        return false; // Richtext fields require Moodle's editor with JS.
     }
 
     /**
@@ -131,7 +131,7 @@ class richtext_field extends base_field {
             return \html_writer::span('-', 'text-muted');
         }
 
-        // Handle both array format and plain text
+        // Handle both array format and plain text.
         $text = '';
         $format = FORMAT_HTML;
 
@@ -241,7 +241,7 @@ class richtext_field extends base_field {
         if (is_array($value)) {
             $text = $value['text'] ?? '';
         } else {
-            // Try to decode JSON
+            // Try to decode JSON.
             $decoded = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE && isset($decoded['text'])) {
                 $text = $decoded['text'];
@@ -272,11 +272,11 @@ class richtext_field extends base_field {
      */
     public function get_form_value(&$submissiondata, $value, $fieldname) {
         if (!empty($value->content)) {
-            // Prepare editor with draft files
+            // Prepare editor with draft files.
             $editoroptions = $this->get_editor_options();
             $draftideditor = file_get_submitted_draft_itemid($fieldname);
 
-            // Prepare text with draft files
+            // Prepare text with draft files.
             $text = file_prepare_draft_area(
                 $draftideditor,
                 $this->fieldmanager->get_context()->id,
@@ -327,7 +327,7 @@ class richtext_field extends base_field {
     public function set_field_params(&$field, $config) {
         parent::set_field_params($field, $config);
 
-        // Handle param1 for editor options
+        // Handle param1 for editor options.
         if (isset($config['param1']) && is_array($config['param1'])) {
             $options = [
                 'rows' => (int) ($config['param1']['rows'] ?? 10),
@@ -347,19 +347,19 @@ class richtext_field extends base_field {
      * @return void
      */
     public function additional_form_elements(&$mform) {
-        // Editor rows
+        // Editor rows.
         $mform->addElement('text', 'param1[rows]', get_string('editorrows', 'mod_casestudy'), ['size' => 5]);
         $mform->setType('param1[rows]', PARAM_INT);
         $mform->setDefault('param1[rows]', 10);
         $mform->addHelpButton('param1[rows]', 'editorrows', 'mod_casestudy');
 
-        // Max bytes for file uploads in editor
+        // Max bytes for file uploads in editor.
         $mform->addElement('text', 'param1[maxbytes]', get_string('editormaxbytes', 'mod_casestudy'), ['size' => 10]);
         $mform->setType('param1[maxbytes]', PARAM_INT);
         $mform->setDefault('param1[maxbytes]', 0);
         $mform->addHelpButton('param1[maxbytes]', 'editormaxbytes', 'mod_casestudy');
 
-        // Max files for editor
+        // Max files for editor.
         $mform->addElement('text', 'param1[maxfiles]', get_string('editormaxfiles', 'mod_casestudy'), ['size' => 5]);
         $mform->setType('param1[maxfiles]', PARAM_INT);
         $mform->setDefault('param1[maxfiles]', -1);
@@ -427,7 +427,7 @@ class richtext_field extends base_field {
     public function process_config_form($data) {
         $config = parent::process_config_form($data);
 
-        // Process editor options
+        // Process editor options.
         if (isset($data['param1'])) {
             $config['param1'] = $data['param1'];
         }
@@ -475,18 +475,18 @@ class richtext_field extends base_field {
 
         $editoroptions = $this->get_editor_options();
 
-        // Save files from draft area to permanent storage
+        // Save files from draft area to permanent storage.
         $text = file_save_draft_area_files(
-            $value['itemid'], // Draft item ID from editor
-            $context->id, // Context ID
-            'mod_casestudy', // Component
-            'submission_richtext', // File area
-            $submissionid, // Final item ID (submission ID)
-            $editoroptions, // Editor options
-            $value['text']                        // Text content
+            $value['itemid'], // Draft item ID from editor.
+            $context->id, // Context ID.
+            'mod_casestudy', // Component.
+            'submission_richtext', // File area.
+            $submissionid, // Final item ID (submission ID).
+            $editoroptions, // Editor options.
+            $value['text']                        // Text content.
         );
 
-        // file_save_draft_area_files only tokenises draft URLs. Absolute pluginfile URLs that
+        // The file_save_draft_area_files() call only tokenises draft URLs. Absolute pluginfile URLs that
         // already point at this submission's own rich-text area (e.g. an image inserted as a
         // file link) stay absolute and would 404 after a course backup/restore. Replace them
         // with the @@PLUGINFILE@@ placeholder so the stored content is portable.
@@ -511,7 +511,7 @@ class richtext_field extends base_field {
             return '-';
         }
 
-        // Extract text content for list display
+        // Extract text content for list display.
         $text = '';
         if (is_array($value)) {
             $text = $value['text'] ?? '';
@@ -524,7 +524,7 @@ class richtext_field extends base_field {
             }
         }
 
-        // Strip HTML and truncate for list view
+        // Strip HTML and truncate for list view.
         $display = strip_tags($text);
         if (strlen($display) > 50) {
             $display = substr($display, 0, 47) . '...';

@@ -75,7 +75,12 @@ class submission_actionmenu implements renderable, templatable {
      * @param int $currentuser the current user id.
      * @param \moodle_url $baseurl the base url for the action menu.
      */
-    public function __construct(casestudy $casestudy, \moodle_url $baseurl, array $userinitials = [], array $additionalactions = []) {
+    public function __construct(
+        casestudy $casestudy,
+        \moodle_url $baseurl,
+        array $userinitials = [],
+        array $additionalactions = []
+    ) {
         $this->casestudy = $casestudy;
         $this->baseurl = $baseurl;
         $this->userinitials = $userinitials;
@@ -215,7 +220,8 @@ class submission_actionmenu implements renderable, templatable {
             return null;
         }
 
-        $currentvalue = $this->currentview === 'summaries' && isset($summariesurl) ? $summariesurl->out(false) : $submissionsurl->out(false);
+        $currentvalue = $this->currentview === 'summaries' && isset($summariesurl)
+            ? $summariesurl->out(false) : $submissionsurl->out(false);
 
         $viewselect = new \core\output\select_menu('view', $viewmenu, $currentvalue);
         $viewselect->set_label(get_string('gradeitem:submissions', 'mod_assign'), [], true);

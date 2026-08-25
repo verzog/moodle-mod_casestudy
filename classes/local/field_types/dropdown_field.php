@@ -56,7 +56,7 @@ class dropdown_field extends base_field {
     public function render_form_element($mform, $elementname, $value = null) {
         $options = $this->get_options();
 
-        // Add empty option for non-required fields
+        // Add empty option for non-required fields.
         if (!$this->fielddata->required) {
             $options = ['' => get_string('choose')] + $options;
         }
@@ -64,7 +64,7 @@ class dropdown_field extends base_field {
         $mform->addElement('select', $elementname, $this->fielddata->name, $options);
         $mform->setType($elementname, PARAM_TEXT);
 
-        // Set default value
+        // Set default value.
         if ($value !== null) {
             $mform->setDefault($elementname, $value);
         }
@@ -84,9 +84,10 @@ class dropdown_field extends base_field {
         $required = !empty($this->fielddata->required) ? 'required' : '';
         $errorclass = $haserrors ? ' is-invalid' : '';
 
-        $html = '<select name="' . $fieldname . '" id="' . $fieldname . '" class="form-control custom-select' . $errorclass . '" ' . $required . '>';
+        $html = '<select name="' . $fieldname . '" id="' . $fieldname
+            . '" class="form-control custom-select' . $errorclass . '" ' . $required . '>';
 
-        // Add empty option for non-required fields
+        // Add empty option for non-required fields.
         if (!$this->fielddata->required) {
             $html .= '<option value="">' . get_string('choose') . '</option>';
         }
@@ -114,7 +115,7 @@ class dropdown_field extends base_field {
             return \html_writer::span('-', 'text-muted');
         }
 
-        // Get options to display the label instead of value
+        // Get options to display the label instead of value.
         $options = $this->get_options();
         $displayvalue = isset($options[$value]) ? $options[$value] : $value;
 
@@ -153,7 +154,7 @@ class dropdown_field extends base_field {
     public function validate_input($value, $files = null, $data = null, $isdraft = false) {
         $errors = parent::validate_input($value, $files, $data, $isdraft);
 
-        // Check if value is in allowed options
+        // Check if value is in allowed options.
         if (!empty($value)) {
             $options = $this->get_options();
             if (!array_key_exists($value, $options)) {
@@ -174,9 +175,9 @@ class dropdown_field extends base_field {
     public function set_field_params(&$field, $config) {
         parent::set_field_params($field, $config);
 
-        // Handle param1 for options
+        // Handle param1 for options.
         if (isset($config['param1']) && is_array($config['param1'])) {
-            // Convert array of options to JSON
+            // Convert array of options to JSON.
             $field->param1 = json_encode(array_values($config['param1']));
         }
     }
@@ -189,7 +190,7 @@ class dropdown_field extends base_field {
      * @return void
      */
     public function additional_form_elements(&$mform) {
-        // Options textarea
+        // Options textarea.
         $mform->addElement('textarea', 'param1', get_string('options', 'mod_casestudy'), ['rows' => 5, 'cols' => 50]);
         $mform->setType('param1', PARAM_TEXT);
         $mform->addHelpButton('param1', 'options', 'mod_casestudy');
@@ -247,7 +248,7 @@ class dropdown_field extends base_field {
     public function process_config_form($data) {
         $config = parent::process_config_form($data);
 
-        // Process options from textarea
+        // Process options from textarea.
         if (isset($data['param1'])) {
             $options = array_filter(array_map('trim', explode("\n", $data['param1'])));
             $config['param1'] = $options;
@@ -262,7 +263,7 @@ class dropdown_field extends base_field {
      * @return bool True if supports categories
      */
     public function supports_categories() {
-        return true; // Dropdown options can be used as categories
+        return true; // Dropdown options can be used as categories.
     }
 
     /**
@@ -298,7 +299,7 @@ class dropdown_field extends base_field {
 
         $options = $this->get_param('param1', []);
 
-        // Convert array to key-value pairs (value => value)
+        // Convert array to key-value pairs (value => value).
         if (is_array($options)) {
             return array_combine($options, $options);
         }

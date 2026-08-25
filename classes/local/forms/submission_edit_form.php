@@ -78,7 +78,7 @@ class submission_edit_form extends \moodleform {
     protected function definition() {
         $mform = $this->_form;
 
-        // Hidden fields
+        // Hidden fields.
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
@@ -88,7 +88,7 @@ class submission_edit_form extends \moodleform {
         $mform->addElement('hidden', 'sesskey', sesskey());
         $mform->setType('sesskey', PARAM_ALPHANUM);
 
-        // Instructions for students
+        // Instructions for students.
         if (!$this->editing) {
             $mform->addElement(
                 'static',
@@ -98,14 +98,14 @@ class submission_edit_form extends \moodleform {
             );
         }
 
-        // Add dynamic fields based on configured fields
+        // Add dynamic fields based on configured fields.
         foreach ($this->fields as $field) {
             $fieldclass = $this->fieldmanager->get_field_type_class($field->type, $field, null);
 
             if ($fieldclass) {
-                // Render the actual form element
+                // Render the actual form element.
                 $fieldclass->render_form_element($mform, 'field_' . $field->id);
-                 // Add field description as static element if it exists
+                 // Add field description as static element if it exists.
                 if (!empty($field->description) && $field->type !== 'sectionheading') {
                     $mform->addElement(
                         'static',
@@ -135,7 +135,7 @@ class submission_edit_form extends \moodleform {
             $savedraftbtn = $mform->createElement('submit', 'savedraft', get_string('savedraft', 'mod_casestudy'));
             $buttonarray[] = $savedraftbtn;
 
-            // "Save and add another" only makes sense on a first attempt; on a
+            // The "Save and add another" button only makes sense on a first attempt; on a
             // resubmission the student is editing the existing attempt, so hide it.
             if (!$this->isresubmission) {
                 $saveaddanotherbtn = $mform->createElement('submit', 'saveaddanother', get_string('saveandadd', 'mod_casestudy'));
@@ -171,7 +171,7 @@ class submission_edit_form extends \moodleform {
         // Check if this is a draft save - required field validation is skipped for drafts.
         $isdraft = $this->is_draft_submission($data) || $this->is_save_and_add_another($data);
 
-        // Validate each field using its field type class
+        // Validate each field using its field type class.
         foreach ($this->fields as $field) {
             $fieldclass = $this->fieldmanager->get_field_type_class($field->type, $field);
             if ($fieldclass) {
@@ -207,7 +207,7 @@ class submission_edit_form extends \moodleform {
             $fieldname = 'field_' . $field->id;
             $value = isset($data->$fieldname) ? $data->$fieldname : '';
 
-            // Process the value through the field type
+            // Process the value through the field type.
             $fieldclass = $this->fieldmanager->get_field_type_class($field->type, $field);
             if ($fieldclass) {
                 $value = $fieldclass->process_input($value, $data);
@@ -237,13 +237,18 @@ class submission_edit_form extends \moodleform {
             if (isset($data->$fieldname)) {
                 $fieldclass = $this->fieldmanager->get_field_type_class($field->type, $field);
                 if ($fieldclass && method_exists($fieldclass, 'save_area_files')) {
-                    $cleanedtext = $fieldclass->save_area_files($data->$fieldname, $submissionid, $fieldname, $this->fieldmanager->get_context());
+                    $cleanedtext = $fieldclass->save_area_files(
+                        $data->$fieldname,
+                        $submissionid,
+                        $fieldname,
+                        $this->fieldmanager->get_context()
+                    );
 
                     // For richtext fields, update the content with cleaned text.
                     if ($field->type === 'richtext' && $cleanedtext !== null) {
                         $updatedcontent[$field->id] = $cleanedtext;
 
-                        // Update the content in the database
+                        // Update the content in the database.
                         $contentrecord = $DB->get_record('casestudy_content', [
                             'submissionid' => $submissionid,
                             'fieldid' => $field->id,
@@ -353,7 +358,7 @@ class submission_edit_form extends \moodleform {
             return;
         }
 
-        // Finalize the form definition if not yet done
+        // Finalize the form definition if not yet done.
         if (!$this->_definition_finalized) {
             $this->_definition_finalized = true;
             $this->definition_after_data();

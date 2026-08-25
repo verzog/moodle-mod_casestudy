@@ -80,7 +80,7 @@ if (!$hasfields) {
         );
 
         // Count only original/parent submissions (entries) - not resubmissions
-        // maxsubmissions controls how many unique case studies can be created
+        // maxsubmissions controls how many unique case studies can be created.
         $sql = "SELECT COUNT(*)
                   FROM {casestudy_submissions}
                  WHERE casestudyid = :casestudyid
@@ -109,7 +109,7 @@ if (!$hasfields) {
             $availabilitystatus = 'notopened';
         } else if ($effective->timeclose > 0 && $now > $effective->timeclose) {
             $cansubmitmore = false;
-            // Don't prevent access - allow students to view their previous submissions
+            // Don't prevent access - allow students to view their previous submissions.
             $preventaccess = false;
             $availabilitymessage = get_string('closed', 'mod_casestudy', userdate($effective->timeclose));
             $availabilitystatus = 'closed';

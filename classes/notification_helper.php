@@ -213,10 +213,18 @@ class notification_helper {
      * @param bool $notifystudent Whether to send notification (default true for backward compatibility)
      * @return bool Success
      */
-    public static function send_grade_notification($casestudy, $submission, $grade, $cm, $course, $oldstatus = null, $notifystudent = true) {
+    public static function send_grade_notification(
+        $casestudy,
+        $submission,
+        $grade,
+        $cm,
+        $course,
+        $oldstatus = null,
+        $notifystudent = true
+    ) {
         global $DB;
 
-        // Don't send if notification is disabled
+        // Don't send if notification is disabled.
         if (!$notifystudent) {
             return false;
         }
@@ -292,13 +300,13 @@ class notification_helper {
 
         foreach ($emaillist as $email) {
             if (validate_email($email)) {
-                // Use email_to_user() instead of message_send() for external emails
+                // Use email_to_user() instead of message_send() for external emails.
                 $tempuser = new \stdClass();
                 $tempuser->email = $email;
                 $tempuser->firstname = '';
                 $tempuser->lastname = '';
                 $tempuser->maildisplay = true;
-                $tempuser->mailformat = 1; // HTML email
+                $tempuser->mailformat = 1; // HTML email.
                 $tempuser->id = -99;
                 $tempuser->firstnamephonetic = '';
                 $tempuser->lastnamephonetic = '';
@@ -309,7 +317,7 @@ class notification_helper {
                 $messagetext = $message->fullmessage;
                 $messagehtml = $message->fullmessagehtml;
 
-                // Send directly via email, bypassing the message system
+                // Send directly via email, bypassing the message system.
                 email_to_user($tempuser, $message->userfrom, $subject, $messagetext, $messagehtml);
             }
         }
@@ -545,9 +553,12 @@ class notification_helper {
         $html .= '<h3>' . get_string('completionstatus', 'mod_casestudy') . '</h3>';
         $html .= '<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">';
         $html .= '<thead><tr style="background-color: #f5f5f5;">';
-        $html .= '<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">' . get_string('criterion', 'mod_casestudy') . '</th>';
-        $html .= '<th style="padding: 10px; text-align: center; border: 1px solid #ddd;">' . get_string('progress', 'mod_casestudy') . '</th>';
-        $html .= '<th style="padding: 10px; text-align: center; border: 1px solid #ddd;">' . get_string('status', 'mod_casestudy') . '</th>';
+        $html .= '<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">'
+            . get_string('criterion', 'mod_casestudy') . '</th>';
+        $html .= '<th style="padding: 10px; text-align: center; border: 1px solid #ddd;">'
+            . get_string('progress', 'mod_casestudy') . '</th>';
+        $html .= '<th style="padding: 10px; text-align: center; border: 1px solid #ddd;">'
+            . get_string('status', 'mod_casestudy') . '</th>';
         $html .= '</tr></thead><tbody>';
 
         foreach ($reportdata['criteria'] as $criterion) {
@@ -557,7 +568,8 @@ class notification_helper {
 
             $html .= '<tr>';
             $html .= '<td style="padding: 10px; border: 1px solid #ddd;">' . $criterion['label'] . '</td>';
-            $html .= '<td style="padding: 10px; text-align: center; border: 1px solid #ddd;"><strong>' . $criterion['current'] . '</strong> / ' . $criterion['required'] . '</td>';
+            $html .= '<td style="padding: 10px; text-align: center; border: 1px solid #ddd;"><strong>'
+                . $criterion['current'] . '</strong> / ' . $criterion['required'] . '</td>';
             $cellstyle = 'padding: 10px; text-align: center; border: 1px solid #ddd; background-color: ' . $statusbg . ';';
             $html .= '<td style="' . $cellstyle . '">'
                 . $statusicon . ($statusicon ? ' ' : '') . $statustext
@@ -568,11 +580,13 @@ class notification_helper {
         $html .= '</tbody></table>';
 
         if ($reportdata['overallcomplete']) {
-            $html .= '<div style="padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; margin: 20px 0;">';
+            $html .= '<div style="padding: 15px; background-color: #d4edda; '
+                . 'border: 1px solid #c3e6cb; border-radius: 5px; margin: 20px 0;">';
             $html .= '<strong style="color: #155724;">✓ ' . get_string('learnerreportcomplete', 'mod_casestudy') . '</strong>';
             $html .= '</div>';
         } else {
-            $html .= '<div style="padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; margin: 20px 0;">';
+            $html .= '<div style="padding: 15px; background-color: #fff3cd; '
+                . 'border: 1px solid #ffeaa7; border-radius: 5px; margin: 20px 0;">';
             $html .= '<strong style="color: #856404;">' . get_string('learnerreportincomplete', 'mod_casestudy') . '</strong>';
             $html .= '</div>';
         }

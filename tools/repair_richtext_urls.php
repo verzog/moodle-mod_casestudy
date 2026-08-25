@@ -54,10 +54,16 @@ echo html_writer::empty_tag('input', [
     'type' => 'number', 'name' => 'cmid', 'id' => 'cmid', 'value' => $cmid ?: '',
     'class' => 'form-control mr-2', 'min' => 0, 'placeholder' => get_string('repairrichtextcmidall', 'mod_casestudy'),
 ]);
-echo html_writer::tag('button', get_string('repairrichtextdiagnose', 'mod_casestudy'),
-    ['type' => 'submit', 'name' => 'action', 'value' => 'diagnose', 'class' => 'btn btn-secondary mr-2']);
-echo html_writer::tag('button', get_string('repairrichtextpreview', 'mod_casestudy'),
-    ['type' => 'submit', 'name' => 'action', 'value' => 'preview', 'class' => 'btn btn-secondary']);
+echo html_writer::tag(
+    'button',
+    get_string('repairrichtextdiagnose', 'mod_casestudy'),
+    ['type' => 'submit', 'name' => 'action', 'value' => 'diagnose', 'class' => 'btn btn-secondary mr-2']
+);
+echo html_writer::tag(
+    'button',
+    get_string('repairrichtextpreview', 'mod_casestudy'),
+    ['type' => 'submit', 'name' => 'action', 'value' => 'preview', 'class' => 'btn btn-secondary']
+);
 echo html_writer::end_tag('form');
 
 // Diagnose: list each referenced image and whether the file exists. Needs a specific activity.
@@ -82,8 +88,11 @@ if ($action === 'diagnose') {
             $table->data[] = [$item->submissionid, s($item->filename), $badge];
         }
         echo $OUTPUT->heading(get_string('repairrichtextresults', 'mod_casestudy'), 4);
-        echo html_writer::div(get_string('repairrichtextcounts', 'mod_casestudy',
-            (object) ['present' => $present, 'missing' => $missing]), 'mb-2');
+        echo html_writer::div(get_string(
+            'repairrichtextcounts',
+            'mod_casestudy',
+            (object) ['present' => $present, 'missing' => $missing]
+        ), 'mb-2');
         if ($report) {
             echo html_writer::table($table);
         } else {
@@ -99,8 +108,11 @@ if ($action === 'diagnose') {
 if ($action === 'preview') {
     $stats = richtext_repair::normalise($cmid, false);
     echo $OUTPUT->heading(get_string('repairrichtextpreviewheading', 'mod_casestudy'), 4);
-    echo html_writer::div(get_string('repairrichtextwouldrewrite', 'mod_casestudy',
-        (object) ['rows' => $stats->rows, 'urls' => $stats->urls, 'scanned' => $stats->scanned]), 'mb-2');
+    echo html_writer::div(get_string(
+        'repairrichtextwouldrewrite',
+        'mod_casestudy',
+        (object) ['rows' => $stats->rows, 'urls' => $stats->urls, 'scanned' => $stats->scanned]
+    ), 'mb-2');
 
     if ($stats->rows > 0) {
         echo html_writer::start_tag('form', ['method' => 'post', 'action' => $baseurl->out(false)]);
@@ -120,8 +132,11 @@ if ($action === 'preview') {
 if ($action === 'apply') {
     require_sesskey();
     $stats = richtext_repair::normalise($cmid, true);
-    echo $OUTPUT->notification(get_string('repairrichtextdone', 'mod_casestudy',
-        (object) ['rows' => $stats->rows, 'urls' => $stats->urls]), 'notifysuccess');
+    echo $OUTPUT->notification(get_string(
+        'repairrichtextdone',
+        'mod_casestudy',
+        (object) ['rows' => $stats->rows, 'urls' => $stats->urls]
+    ), 'notifysuccess');
 }
 
 echo $OUTPUT->footer();

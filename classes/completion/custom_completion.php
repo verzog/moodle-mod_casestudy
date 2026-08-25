@@ -144,7 +144,7 @@ class custom_completion extends activity_custom_completion {
             return $descriptions;
         }
 
-        // Get aggregation mode first
+        // Get aggregation mode first.
         $casestudy = $DB->get_record('casestudy', ['id' => $casestudyid]);
         $aggregation = isset($casestudy->completionaggr) ? $casestudy->completionaggr : CASESTUDY_COMPLETION_ALL;
 

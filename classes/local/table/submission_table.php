@@ -98,21 +98,21 @@ class submission_table extends table_sql {
             $this->groupid = optional_param('group', 0, PARAM_INT);
         }
 
-        // Get fields marked as "Show in List view"
+        // Get fields marked as "Show in List view".
         $listfields = $DB->get_records('casestudy_fields', [
             'casestudyid' => $this->cm->instance, 'showlistview' => 1], 'sortorder ASC');
 
         $columns = ['fullname', 'groupname'];
         $headers = [get_string('fullname', 'core'), get_string('group')];
 
-        // Add dynamic field columns
+        // Add dynamic field columns.
         foreach ($listfields as $field) {
             $columns[] = 'field_' . $field->id;
             $headers[] = format_string($field->name);
             $this->no_sorting('field_' . $field->id);
         }
 
-        // Add standard columns
+        // Add standard columns.
         $columns = array_merge($columns, ['submissioncount', 'status', 'timecreated', 'timemodified', 'actions']);
         $headers = array_merge($headers, [
             get_string('submissioncount', 'mod_casestudy'),
@@ -129,9 +129,9 @@ class submission_table extends table_sql {
         $this->no_sorting('groupname');
         $this->no_sorting('submissioncount');
         $this->no_sorting('status');
-        $this->no_sorting('actions'); // Disable sorting on actions column
+        $this->no_sorting('actions'); // Disable sorting on actions column.
 
-        // Configure table properties
+        // Configure table properties.
         $this->sortable(true, 'timesubmitted', SORT_DESC);
         $this->collapsible(false);
         $this->set_attribute('class', 'casestudy-submissions-table table table-striped table-hover');
@@ -175,10 +175,10 @@ class submission_table extends table_sql {
             } else {
                 if (!$canaccessall) {
                     if (empty($allowedgroups)) {
-                        // No allowed groups → return no users
+                        // No allowed groups → return no users.
                         $where .= ' AND 1 = 0';
                     } else {
-                        // Filter users by allowed groups
+                        // Filter users by allowed groups.
                         $usergroupids = array_keys($allowedgroups);
                         $from .= ' JOIN {groups_members} gm2 ON gm2.userid = u.id';
                         [$ingroupsql, $groupparams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
@@ -219,7 +219,8 @@ class submission_table extends table_sql {
         foreach ($columns as $column => $sortdirection) {
             if (stripos($column, 'field_') === 0) {
                 $fieldid = (int)str_replace('field_', '', $column);
-                $columns["(SELECT content FROM {casestudy_content} WHERE submissionid = s.id AND fieldid = $fieldid)"] = $sortdirection;
+                $subselect = "(SELECT content FROM {casestudy_content} WHERE submissionid = s.id AND fieldid = $fieldid)";
+                $columns[$subselect] = $sortdirection;
                 unset($columns[$column]);
             }
         }
@@ -241,7 +242,7 @@ class submission_table extends table_sql {
      * Print casestudy stats
      */
     protected function print_casestudy_stats() {
-        // TODO: Implement the stats of counts of casestudy submissions in different statuses.
+        // Not yet implemented: counts of casestudy submissions in the different statuses.
     }
 
     /**
@@ -414,18 +415,18 @@ class submission_table extends table_sql {
     public function col_submissioncount($row) {
         global $DB;
 
-        // Find the root submission (original parent) by going up the chain
+        // Find the root submission (original parent) by going up the chain.
         $rootid = $this->get_root_submission_id($row->id);
 
-        // Count all submissions in this chain starting from root
+        // Count all submissions in this chain starting from root.
         $count = $this->count_submission_chain($rootid);
 
-        // Get effective max attempts setting for this user (includes overrides)
+        // Get effective max attempts setting for this user (includes overrides).
         $casestudy = $DB->get_record('casestudy', ['id' => $this->cm->instance]);
         $effective = casestudy_get_effective_settings($casestudy, $row->userid);
         $maxattempts = !empty($effective->maxattempts) ? $effective->maxattempts : 0;
 
-        // Determine badge class based on whether limit is reached
+        // Determine badge class based on whether limit is reached.
         if ($maxattempts > 0 && $count >= $maxattempts) {
             $badgeclass = 'badge badge-danger';
             $title = get_string('resubmissionlimitreached', 'mod_casestudy', $count);
@@ -461,7 +462,7 @@ class submission_table extends table_sql {
             return $submissionid;
         }
 
-        // Follow parent chain up to root
+        // Follow parent chain up to root.
         while (!empty($current->parentid)) {
             $parent = $DB->get_record('casestudy_submissions', ['id' => $current->parentid], 'id, parentid');
             if (!$parent) {
@@ -499,7 +500,7 @@ class submission_table extends table_sql {
         $children = $DB->get_records('casestudy_submissions', ['parentid' => $parentid], '', 'id');
         $count = count($children);
 
-        // Recursively count grandchildren
+        // Recursively count grandchildren.
         foreach ($children as $child) {
             $count += $this->count_submission_children($child->id);
         }
@@ -553,9 +554,9 @@ class submission_table extends table_sql {
      * @return string HTML output
      */
     public function col_grade($row) {
-        // Check if due date has passed and no grade assigned
+        // Check if due date has passed and no grade assigned.
         if (empty($row->grade)) {
-            // If timeclose is set and has passed, show as unsatisfactory
+            // If timeclose is set and has passed, show as unsatisfactory.
             if (!empty($row->timeclose) && $row->timeclose > 0 && time() > $row->timeclose) {
                 $gradetext = get_string('grade_unsatisfactory', 'mod_casestudy');
                 $icon = \html_writer::tag('i', '', ['class' => 'fa fa-times']);
@@ -564,7 +565,7 @@ class submission_table extends table_sql {
                     'text-danger font-weight-bold'
                 );
             }
-            // Otherwise show not graded
+            // Otherwise show not graded.
             return \html_writer::span(get_string('notgraded', 'core_grades'), 'text-muted font-italic');
         }
 
@@ -650,8 +651,10 @@ class submission_table extends table_sql {
                 // images across when "Pre-fill resubmissions" is enabled).
                 $childid = $this->get_reattempt_child_id($row);
                 if ($childid) {
-                    $submissionurl = new moodle_url('/mod/casestudy/submission.php',
-                        ['id' => $this->cm->id, 'submissionid' => $childid]);
+                    $submissionurl = new moodle_url(
+                        '/mod/casestudy/submission.php',
+                        ['id' => $this->cm->id, 'submissionid' => $childid]
+                    );
                     $editicon = new pix_icon('i/customfield', get_string('edit'));
                     $title = get_string('edit');
                 } else {
@@ -666,8 +669,10 @@ class submission_table extends table_sql {
                 }
             } else {
                 // New or draft attempt: edit in place.
-                $submissionurl = new moodle_url('/mod/casestudy/submission.php',
-                    ['id' => $this->cm->id, 'submissionid' => $row->id]);
+                $submissionurl = new moodle_url(
+                    '/mod/casestudy/submission.php',
+                    ['id' => $this->cm->id, 'submissionid' => $row->id]
+                );
                 $editicon = new pix_icon('i/customfield', get_string('edit'));
                 $title = get_string('edit');
             }
@@ -716,7 +721,7 @@ class submission_table extends table_sql {
             );
         }
 
-        // Delete action - use submission_manager to check if user can delete
+        // Delete action - use submission_manager to check if user can delete.
         $submissionmanager = \mod_casestudy\local\submission_manager::instance(
             $this->cm->instance,
             null,
@@ -754,7 +759,7 @@ class submission_table extends table_sql {
     public function get_row_class($row) {
         $classes = [];
 
-        // Add status-specific classes
+        // Add status-specific classes.
         $classes[] = 'submission-status-' . str_replace('_', '-', $row->status);
 
         return implode(' ', $classes);
@@ -803,19 +808,19 @@ class submission_table extends table_sql {
     public function other_cols($column, $row) {
         global $DB;
 
-        // Handle dynamic field columns
+        // Handle dynamic field columns.
         if (strpos($column, 'field_') === 0) {
             $fieldid = (int)str_replace('field_', '', $column);
 
             $row->fieldid = $fieldid; // Pass fieldid to row for use in field type class.
 
-            // Get field information
+            // Get field information.
             $field = $DB->get_record('casestudy_fields', ['id' => $fieldid]);
             if (!$field) {
                 return \html_writer::span('-', 'text-muted');
             }
 
-            // Get field content for this submission
+            // Get field content for this submission.
             $content = $DB->get_record('casestudy_content', [
                 'submissionid' => $row->id,
                 'fieldid' => $fieldid,
@@ -825,20 +830,20 @@ class submission_table extends table_sql {
                 return \html_writer::span('-', 'text-muted');
             }
 
-            // Use field type class to format content for list view
+            // Use field type class to format content for list view.
             try {
                 $fieldmanager = \mod_casestudy\local\field_manager::instance($this->cm->instance);
                 $fieldtype = $fieldmanager->get_field_type_class($field->type, $field);
 
-                // Use the field type's list view formatting if available
+                // Use the field type's list view formatting if available.
                 if (method_exists($fieldtype, 'format_for_list_view')) {
                     return $fieldtype->format_for_list_view($content);
                 } else {
-                    // Fallback to display value method
+                    // Fallback to display value method.
                     return $fieldtype->get_list_display($content->content, $row);
                 }
             } catch (Exception $e) {
-                // Fallback if field type class not found
+                // Fallback if field type class not found.
                 return \html_writer::span(format_string($content->content));
             }
         }

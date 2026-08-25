@@ -22,7 +22,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    // Add instance
+    // Add instance.
     'mod/casestudy:addinstance' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
@@ -34,7 +34,7 @@ $capabilities = [
         'clonepermissionsfrom' => 'moodle/course:manageactivities',
     ],
 
-    // View activity
+    // View activity.
     'mod/casestudy:view' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -47,7 +47,7 @@ $capabilities = [
         ],
     ],
 
-    // Submit case studies
+    // Submit case studies.
     'mod/casestudy:submit' => [
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
@@ -57,7 +57,7 @@ $capabilities = [
         ],
     ],
 
-    // Grade/mark case studies
+    // Grade/mark case studies.
     'mod/casestudy:grade' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
@@ -69,7 +69,7 @@ $capabilities = [
         ],
     ],
 
-    // View all submissions (for teachers/managers)
+    // View all submissions (for teachers/managers).
     'mod/casestudy:viewallsubmissions' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -80,7 +80,7 @@ $capabilities = [
         ],
     ],
 
-    // View own submissions (for students)
+    // View own submissions (for students).
     'mod/casestudy:viewsubmissions' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -92,7 +92,7 @@ $capabilities = [
         ],
     ],
 
-    // Manage submissions (modify, delete, change status)
+    // Manage submissions (modify, delete, change status).
     'mod/casestudy:managesubmissions' => [
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
@@ -103,7 +103,7 @@ $capabilities = [
         ],
     ],
 
-    // Manage fields (add/edit/delete fields)
+    // Manage fields (add/edit/delete fields).
     'mod/casestudy:managefields' => [
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
@@ -114,7 +114,7 @@ $capabilities = [
         ],
     ],
 
-    // Manage overrides
+    // Manage overrides.
     'mod/casestudy:manageoverrides' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
@@ -125,7 +125,7 @@ $capabilities = [
         ],
     ],
 
-    // View reports
+    // View reports.
     'mod/casestudy:viewreports' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -136,7 +136,7 @@ $capabilities = [
         ],
     ],
 
-    // Export data
+    // Export data.
     'mod/casestudy:export' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
@@ -148,7 +148,7 @@ $capabilities = [
         ],
     ],
 
-    // Manage templates
+    // Manage templates.
     'mod/casestudy:managetemplates' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
@@ -159,7 +159,7 @@ $capabilities = [
         ],
     ],
 
-    // Regrade already graded submissions (satisfactory/unsatisfactory)
+    // Regrade already graded submissions (satisfactory/unsatisfactory).
     'mod/casestudy:regrade' => [
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',

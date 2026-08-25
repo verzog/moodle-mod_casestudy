@@ -63,7 +63,7 @@ class textarea_field extends base_field {
         $mform->addElement('textarea', $elementname, $this->fielddata->name, $attributes);
         $mform->setType($elementname, PARAM_TEXT);
 
-        // Set default value
+        // Set default value.
         if ($value !== null) {
             $mform->setDefault($elementname, $value);
         }

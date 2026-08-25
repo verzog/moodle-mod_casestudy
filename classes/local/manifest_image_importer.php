@@ -21,8 +21,6 @@
 
 namespace mod_casestudy\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Read-only side-channel image restore.
  *
@@ -42,7 +40,6 @@ defined('MOODLE_INTERNAL') || die();
  * Dry-run unless $opts['commit'] is true.
  */
 class manifest_image_importer {
-
     /** @var array Required manifest column headers. */
     const REQUIRED_COLUMNS = ['casestudy', 'field', 'old_submissionid', 'email', 'filename', 'contenthash'];
 
@@ -58,7 +55,7 @@ class manifest_image_importer {
     public static function import(string $manifestpath, string $filesdir, array $opts, ?callable $log = null): \stdClass {
         global $DB;
 
-        $log = $log ?? function($m) {
+        $log = $log ?? function ($m) {
         };
         $commit = !empty($opts['commit']);
         $courseid = isset($opts['courseid']) ? (int) $opts['courseid'] : 0;
@@ -87,7 +84,7 @@ class manifest_image_importer {
             // Resolve target user by email. Require a unique active account: on sites that allow
             // duplicate emails (allowaccountssameemail) a non-unique match cannot safely identify
             // the owner, and these are private images — flag the ambiguity instead of guessing.
-            $userid = self::cache($usercache, $email, function() use ($DB, $email) {
+            $userid = self::cache($usercache, $email, function () use ($DB, $email) {
                 $matches = $DB->get_records('user', ['email' => $email, 'deleted' => 0], 'id', 'id');
                 if (count($matches) === 1) {
                     return (int) reset($matches)->id;
@@ -105,7 +102,7 @@ class manifest_image_importer {
             }
 
             // Resolve target case study by name (optionally within one course).
-            $casestudyid = self::cache($activitycache, $activityname, function() use ($DB, $activityname, $courseid) {
+            $casestudyid = self::cache($activitycache, $activityname, function () use ($DB, $activityname, $courseid) {
                 $params = ['name' => $activityname];
                 if ($courseid) {
                     $params['course'] = $courseid;
@@ -135,17 +132,27 @@ class manifest_image_importer {
                 'id, attempt'
             );
             $oldtonew = self::pair_submissions(
-                $rows['submissions'], $targetsubs, $stats, $activityname, $email
+                $rows['submissions'],
+                $targetsubs,
+                $stats,
+                $activityname,
+                $email
             );
             if ($oldtonew === null) {
                 continue;
             }
 
             // Resolve this activity's file fields by shortname (cached).
-            $fields = self::cache($fieldcache, $casestudyid, function() use ($DB, $casestudyid) {
+            $fields = self::cache($fieldcache, $casestudyid, function () use ($DB, $casestudyid) {
                 $map = [];
-                foreach ($DB->get_records('casestudy_fields',
-                        ['casestudyid' => $casestudyid, 'type' => 'file'], '', 'id, shortname') as $f) {
+                foreach (
+                    $DB->get_records(
+                        'casestudy_fields',
+                        ['casestudyid' => $casestudyid, 'type' => 'file'],
+                        '',
+                        'id, shortname'
+                    ) as $f
+                ) {
                     $map[$f->shortname] = (int) $f->id;
                 }
                 return $map;
@@ -270,8 +277,13 @@ class manifest_image_importer {
      * @param string $email For mismatch messages.
      * @return array|null [old id => new id], or null if the group cannot be paired safely.
      */
-    protected static function pair_submissions(array $oldsubs, array $targetsubs, \stdClass $stats,
-            string $activityname, string $email): ?array {
+    protected static function pair_submissions(
+        array $oldsubs,
+        array $targetsubs,
+        \stdClass $stats,
+        string $activityname,
+        string $email
+    ): ?array {
         // Attempt-based matching, when the manifest carries an attempt for every source submission
         // and the target attempts are unique (they always are within one activity+user chain).
         $haveattempts = $oldsubs !== [] && !in_array(null, $oldsubs, true);
@@ -304,7 +316,10 @@ class manifest_image_importer {
         if (count($oldids) !== count($targetids)) {
             $stats->submissionmismatch[] = sprintf(
                 '%s / %s: source %d vs target %d submissions (no attempt data to disambiguate)',
-                $activityname, $email, count($oldids), count($targetids)
+                $activityname,
+                $email,
+                count($oldids),
+                count($targetids)
             );
             return null;
         }
@@ -336,8 +351,13 @@ class manifest_image_importer {
         foreach (self::REQUIRED_COLUMNS as $required) {
             if (!isset($col[$required])) {
                 fclose($handle);
-                throw new \moodle_exception('error', 'mod_casestudy', '', null,
-                    "Manifest is missing required column '{$required}'.");
+                throw new \moodle_exception(
+                    'error',
+                    'mod_casestudy',
+                    '',
+                    null,
+                    "Manifest is missing required column '{$required}'."
+                );
             }
         }
 
@@ -358,8 +378,10 @@ class manifest_image_importer {
             // submissions by attempt (robust) rather than positionally. Absent/blank => null,
             // which makes pair_submissions() fall back to positional matching for this group.
             $attempt = null;
-            if (isset($col['old_attempt'], $data[$col['old_attempt']])
-                    && trim($data[$col['old_attempt']]) !== '') {
+            if (
+                isset($col['old_attempt'], $data[$col['old_attempt']])
+                    && trim($data[$col['old_attempt']]) !== ''
+            ) {
                 $attempt = (int) $data[$col['old_attempt']];
             }
 

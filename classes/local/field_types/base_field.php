@@ -132,7 +132,7 @@ abstract class base_field implements fieldtype {
                              format_text($this->fielddata->description, FORMAT_HTML) . '</small>';
         }
 
-        // Get the input element HTML - to be overridden by subclasses
+        // Get the input element HTML - to be overridden by subclasses.
         $haserrors = !empty($errors);
         $inputhtml = $this->get_input_html($fieldname, $value, $submissionid, $haserrors);
 
@@ -160,7 +160,7 @@ abstract class base_field implements fieldtype {
      * @return string HTML for the input element
      */
     public function get_input_html(string $fieldname, $value = null, ?int $submissionid = null, bool $haserrors = false): string {
-        // Default implementation for text-like fields
+        // Default implementation for text-like fields.
         $escapedvalue = htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
         $required = !empty($this->fielddata->required) ? 'required' : '';
         $errorclass = $haserrors ? ' is-invalid' : '';
@@ -334,7 +334,7 @@ abstract class base_field implements fieldtype {
             return '-';
         }
 
-        // Default: truncate long text
+        // Default: truncate long text.
         $display = strip_tags($this->render_display($value));
         if (strlen($display) > 50) {
             $display = substr($display, 0, 47) . '...';
@@ -400,7 +400,7 @@ abstract class base_field implements fieldtype {
      * @return void
      */
     public function set_field_params(&$field, $config) {
-        // Clear all params first
+        // Clear all params first.
         $field->param1 = null;
         $field->param2 = null;
         $field->param3 = null;
@@ -459,7 +459,7 @@ abstract class base_field implements fieldtype {
      * @return void
      */
     public function add_param_form_elements(&$mform, $prefix = '') {
-        // Default implementation - subclasses should override
+        // Default implementation - subclasses should override.
     }
 
     /**
@@ -470,7 +470,7 @@ abstract class base_field implements fieldtype {
      * @return void
      */
     public function set_param_form_defaults(&$defaults, $prefix = '') {
-        // Default implementation - subclasses should override
+        // Default implementation - subclasses should override.
     }
 
     /**
@@ -480,7 +480,7 @@ abstract class base_field implements fieldtype {
      * @return array Array of field name => error message
      */
     public function validate_config_data($data) {
-        // Default implementation - subclasses should override for specific validation
+        // Default implementation - subclasses should override for specific validation.
         return [];
     }
 

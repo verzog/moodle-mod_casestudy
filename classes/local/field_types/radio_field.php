@@ -57,7 +57,7 @@ class radio_field extends base_field {
         $options = $this->get_options();
 
         if (empty($options)) {
-            // If no options, show a note
+            // If no options, show a note.
             $mform->addElement(
                 'static',
                 $elementname . '_note',
@@ -74,7 +74,7 @@ class radio_field extends base_field {
 
         $mform->addGroup($radioarray, $elementname . '_group', $this->fielddata->name, '', false);
 
-        // Set default value
+        // Set default value.
         if ($value !== null) {
             $mform->setDefault($elementname, $value);
         }
@@ -128,11 +128,16 @@ class radio_field extends base_field {
             return \html_writer::span('-', 'text-muted');
         }
 
-        // Get options to display the label instead of value
+        // Get options to display the label instead of value.
         $options = $this->get_options();
         $displayvalue = isset($options[$value]) ? $options[$value] : $value;
 
-        $label = \html_writer::label(format_string($this->fielddata->name), 'field-' . $this->fielddata->id, '', ['class' => 'casestudy-field-label font-weight-bold field-label']);
+        $label = \html_writer::label(
+            format_string($this->fielddata->name),
+            'field-' . $this->fielddata->id,
+            '',
+            ['class' => 'casestudy-field-label font-weight-bold field-label']
+        );
         $valuespan = \html_writer::span(format_string($displayvalue), 'casestudy-field-radio field-' . $this->fielddata->id);
 
         return $valuespan;
@@ -161,7 +166,7 @@ class radio_field extends base_field {
     public function validate_input($value, $files = null, $data = null, $isdraft = false) {
         $errors = parent::validate_input($value, $files, $data, $isdraft);
 
-        // Check if value is in allowed options
+        // Check if value is in allowed options.
         if (!empty($value)) {
             $options = $this->get_options();
             if (!array_key_exists($value, $options)) {
@@ -182,9 +187,9 @@ class radio_field extends base_field {
     public function set_field_params(&$field, $config) {
         parent::set_field_params($field, $config);
 
-        // Handle param1 for options
+        // Handle param1 for options.
         if (isset($config['param1']) && is_array($config['param1'])) {
-            // Convert array of options to JSON
+            // Convert array of options to JSON.
             $field->param1 = json_encode(array_values($config['param1']));
         }
     }
@@ -197,7 +202,7 @@ class radio_field extends base_field {
      * @return void
      */
     public function additional_form_elements(&$mform) {
-        // Options textarea
+        // Options textarea.
         $mform->addElement('textarea', 'param1', get_string('options', 'mod_casestudy'), ['rows' => 5, 'cols' => 50]);
         $mform->setType('param1', PARAM_TEXT);
         $mform->addHelpButton('param1', 'options', 'mod_casestudy');
@@ -258,7 +263,7 @@ class radio_field extends base_field {
     public function process_config_form($data) {
         $config = parent::process_config_form($data);
 
-        // Process options from textarea
+        // Process options from textarea.
         if (isset($data['param1'])) {
             $options = array_filter(array_map('trim', explode("\n", $data['param1'])));
             $config['param1'] = $options;
@@ -273,7 +278,7 @@ class radio_field extends base_field {
      * @return bool True if supports categories
      */
     public function supports_categories() {
-        return true; // Radio options can be used as categories
+        return true; // Radio options can be used as categories.
     }
 
     /**
