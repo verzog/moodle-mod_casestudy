@@ -167,10 +167,12 @@ class submission_actionmenu implements renderable, templatable {
             $gs = new group_selector($PAGE->context);
             $templatecontext['groupselector'] = $gs->export_for_template($output);
 
+            // Reload the current view (submissions/summaries/reports) when the group
+            // changes, rather than always returning to the submissions view.
             $PAGE->requires->js_call_amd(
                 'core_course/actionbar/group',
                 'init',
-                [$resetlink->out(false), $this->casestudy->get_cm()->id]
+                [$this->baseurl->out(false), $this->casestudy->get_cm()->id]
             );
         }
 

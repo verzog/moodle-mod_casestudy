@@ -44,6 +44,12 @@ class report_table extends \table_sql {
     /** @var int Group ID for filtering. */
     protected $groupid;
 
+    /** @var array<int,string[]> Map of user id => list of group names, preloaded per page. */
+    protected $groupmap = [];
+
+    /** @var int[]|null Group ids the viewer may see, or null when all groups are visible. */
+    protected $allowedgroupids = null;
+
     /**
      * Constructor.
      *
@@ -59,7 +65,22 @@ class report_table extends \table_sql {
         $this->context = $context;
         $this->groupid = $groupid;
 
-        $this->baseurl = new moodle_url('/mod/casestudy/reports.php', ['id' => $cm->id]);
+        // Keep the active group in the base URL so it survives sorting and paging.
+        $baseparams = ['id' => $cm->id];
+        if (!empty($groupid)) {
+            $baseparams['group'] = $groupid;
+        }
+        $this->baseurl = new moodle_url('/mod/casestudy/reports.php', $baseparams);
+
+        // In separate-groups mode a viewer without accessallgroups may only see their
+        // own groups; null means every group is visible.
+        if (
+            !has_capability('moodle/site:accessallgroups', $context)
+                && groups_get_activity_groupmode($cm) == SEPARATEGROUPS
+        ) {
+            $allowed = groups_get_activity_allowed_groups($cm);
+            $this->allowedgroupids = $allowed ? array_keys($allowed) : [];
+        }
 
         $columns = [
             'fullname',
@@ -114,17 +135,18 @@ class report_table extends \table_sql {
             if ($groupmode == SEPARATEGROUPS && $allowedgroups !== false && !isset($allowedgroups[$this->groupid])) {
                 $where .= ' AND 1 = 0';
             }
-            $from .= ' JOIN {groups_members} gm ON gm.userid = u.id';
-            $where .= ' AND gm.groupid = :selgroup';
+            // EXISTS rather than a JOIN so a user is never duplicated across memberships.
+            $where .= ' AND EXISTS (SELECT 1 FROM {groups_members} gm
+                                     WHERE gm.userid = u.id AND gm.groupid = :selgroup)';
             $params['selgroup'] = $this->groupid;
         } else if (!$canaccessall && $groupmode != NOGROUPS) {
             if (empty($allowedgroups)) {
                 $where .= ' AND 1 = 0';
             } else {
                 $usergroupids = array_keys($allowedgroups);
-                $from .= ' JOIN {groups_members} gm2 ON gm2.userid = u.id';
                 [$ingroupsql, $groupparams] = $DB->get_in_or_equal($usergroupids, SQL_PARAMS_NAMED);
-                $where .= " AND gm2.groupid $ingroupsql";
+                $where .= " AND EXISTS (SELECT 1 FROM {groups_members} gm2
+                                         WHERE gm2.userid = u.id AND gm2.groupid $ingroupsql)";
                 $params = array_merge($params, $groupparams);
             }
         }
@@ -141,8 +163,51 @@ class report_table extends \table_sql {
      */
     public function query_db($pagesize, $useinitialsbar = true) {
         parent::query_db($pagesize, $useinitialsbar);
+        $userids = [];
         foreach ($this->rawdata as $row) {
             $row->stats = report_stats::for_user((int) $this->cm->instance, (int) $row->id);
+            $userids[] = (int) $row->id;
+        }
+        $this->load_group_map($userids);
+    }
+
+    /**
+     * Preload the group memberships for this page's users in a single query.
+     *
+     * Only groups the viewer is permitted to see are included (see $allowedgroupids).
+     *
+     * @param int[] $userids User ids on the current page.
+     */
+    protected function load_group_map(array $userids) {
+        global $DB;
+
+        $this->groupmap = [];
+        if (empty($userids)) {
+            return;
+        }
+        // A viewer restricted to specific groups with none allowed sees no group names.
+        if (is_array($this->allowedgroupids) && empty($this->allowedgroupids)) {
+            return;
+        }
+
+        [$inusers, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'u');
+        $params['courseid'] = $this->cm->course;
+
+        $groupwhere = '';
+        if (is_array($this->allowedgroupids)) {
+            [$ingroups, $gparams] = $DB->get_in_or_equal($this->allowedgroupids, SQL_PARAMS_NAMED, 'g');
+            $groupwhere = " AND g.id $ingroups";
+            $params = array_merge($params, $gparams);
+        }
+
+        $sql = "SELECT gm.id AS membershipid, gm.userid, g.name
+                  FROM {groups} g
+                  JOIN {groups_members} gm ON gm.groupid = g.id
+                 WHERE g.courseid = :courseid AND gm.userid $inusers $groupwhere
+              ORDER BY g.name ASC";
+        $memberships = $DB->get_records_sql($sql, $params);
+        foreach ($memberships as $m) {
+            $this->groupmap[(int) $m->userid][] = format_string($m->name);
         }
     }
 
@@ -174,14 +239,10 @@ class report_table extends \table_sql {
      * @return string Group names, or a dash when the user is in no groups
      */
     public function col_groups($row) {
-        $groups = groups_get_all_groups($this->cm->course, $row->id, 0, 'g.id, g.name');
-        if (empty($groups)) {
+        if (empty($this->groupmap[$row->id])) {
             return '-';
         }
-        $names = array_map(function ($g) {
-            return format_string($g->name);
-        }, $groups);
-        return implode(', ', $names);
+        return implode(', ', $this->groupmap[$row->id]);
     }
 
     /**

@@ -163,7 +163,19 @@ class renderer extends plugin_renderer_base {
         // completion progress summary (the same one students see for themselves).
         $context = \context_module::instance($cm->id);
         $selecteduserid = optional_param('userid', 0, PARAM_INT);
-        if ($selecteduserid > 0 && is_enrolled($context, $selecteduserid, 'mod/casestudy:submit')) {
+        $canviewuser = $selecteduserid > 0
+            && is_enrolled($context, $selecteduserid, 'mod/casestudy:submit');
+        // In separate-groups mode, a grader without accessallgroups may only see users
+        // who share one of the grader's allowed groups (mirrors the submissions table).
+        if (
+            $canviewuser && !has_capability('moodle/site:accessallgroups', $context)
+                && groups_get_activity_groupmode($cm) == SEPARATEGROUPS
+        ) {
+            $allowedgroups = groups_get_activity_allowed_groups($cm);
+            $usergroups = groups_get_all_groups($cm->course, $selecteduserid);
+            $canviewuser = !empty($allowedgroups) && !empty(array_intersect_key($allowedgroups, $usergroups));
+        }
+        if ($canviewuser) {
             $casestudyrecord = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
             $output .= $this->render_completion_summary($casestudyrecord, $selecteduserid);
         }
