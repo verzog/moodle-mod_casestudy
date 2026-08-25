@@ -90,7 +90,7 @@ class grading_form extends \core_form\dynamic_form {
             'editor',
             'feedback_editor',
             get_string('markercomments', 'mod_casestudy'),
-            ['rows' => 6],
+            ['rows' => 10],
             $this->get_editor_options()
         );
         $mform->setType('feedback_editor', PARAM_RAW);
