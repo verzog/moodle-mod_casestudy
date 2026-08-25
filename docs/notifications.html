@@ -63,10 +63,13 @@
         <thead><tr><th>Detail</th><th>Value</th></tr></thead>
         <tbody>
           <tr><td><strong>When</strong></td><td>A student clicks <strong>Finish and Submit</strong></td></tr>
-          <tr><td><strong>Condition</strong></td><td>Activity setting <strong>Notify Graders About Submissions</strong> = Yes</td></tr>
-          <tr><td><strong>Recipients</strong></td><td>All users with <code>mod/casestudy:grade</code> capability + addresses in the <strong>Email Others</strong> field</td></tr>
+          <tr><td><strong>Condition</strong></td><td>Activity setting <strong>Notify Graders About Submissions</strong> = Yes</td>
+          </tr>
+          <tr><td><strong>Recipients</strong></td><td>All users with <code>mod/casestudy:grade</code> capability + addresses in
+          the <strong>Email Others</strong> field</td></tr>
           <tr><td><strong>Subject</strong></td><td><em>[Student Name] has submitted: [Case Study Name]</em></td></tr>
-          <tr><td><strong>Body</strong></td><td>Student's name, case study title, course name, and a direct link to grade the submission</td></tr>
+          <tr><td><strong>Body</strong></td><td>Student's name, case study title, course name, and a direct link to grade the
+          submission</td></tr>
         </tbody>
       </table>
     </div>
@@ -83,7 +86,8 @@
           <tr><td><strong>When</strong></td><td>A student clicks <strong>Finish and Submit</strong></td></tr>
           <tr><td><strong>Recipients</strong></td><td>The student who submitted</td></tr>
           <tr><td><strong>Subject</strong></td><td><em>Submission confirmed: [Case Study Name]</em></td></tr>
-          <tr><td><strong>Body</strong></td><td>Confirmation message with submission timestamp and a link to view the submission</td></tr>
+          <tr><td><strong>Body</strong></td><td>Confirmation message with submission timestamp and a link to view the
+          submission</td></tr>
         </tbody>
       </table>
     </div>
@@ -96,22 +100,28 @@
       <table>
         <thead><tr><th>Detail</th><th>Value</th></tr></thead>
         <tbody>
-          <tr><td><strong>When</strong></td><td>A grader clicks <strong>Mark Satisfactory</strong>, <strong>Mark Unsatisfactory</strong>, or <strong>Save Feedback</strong></td></tr>
-          <tr><td><strong>Condition</strong></td><td>The <strong>Notify Student</strong> checkbox is ticked on the grading form</td></tr>
+          <tr><td><strong>When</strong></td><td>A grader clicks <strong>Mark Satisfactory</strong>, <strong>Mark
+          Unsatisfactory</strong>, or <strong>Save Feedback</strong></td></tr>
+          <tr><td><strong>Condition</strong></td><td>The <strong>Notify Student</strong> checkbox is ticked on the grading
+          form</td></tr>
           <tr><td><strong>Recipients</strong></td><td>The student whose submission was graded</td></tr>
-          <tr><td><strong>Subject</strong></td><td><em>Your case study has been graded: [Case Study Name] – [Status]</em></td></tr>
-          <tr><td><strong>Body</strong></td><td>Outcome status, grader name (unless hidden), feedback text, and a link to view the marked submission</td></tr>
+          <tr><td><strong>Subject</strong></td><td><em>Your case study has been graded: [Case Study Name] – [Status]</em></td>
+          </tr>
+          <tr><td><strong>Body</strong></td><td>Outcome status, grader name (unless hidden), feedback text, and a link to view the
+          marked submission</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="callout note">
       <span class="callout-icon">📌</span>
-      <div class="callout-body">If <strong>Hide Grader Identity</strong> is enabled in the activity settings, the grader's name is omitted from the notification.</div>
+      <div class="callout-body">If <strong>Hide Grader Identity</strong> is enabled in the activity settings, the grader's name is
+      omitted from the notification.</div>
     </div>
 
     <figure class="screenshot">
-      <img src="images/casestudy-submission-notification-student.png" alt="Example grade notification email with feedback and a link to view the graded submission">
+      <img src="images/casestudy-submission-notification-student.png" alt="Example grade notification email with feedback and a
+      link to view the graded submission">
       <figcaption>Example — grade notification email received by the student</figcaption>
     </figure>
 
@@ -119,7 +129,8 @@
 
     <!-- Weekly reports -->
     <h2>Weekly scheduled reports</h2>
-    <p>Two automated tasks run every Monday morning. Site administrators can adjust the schedule via <strong>Site Administration → Server → Scheduled tasks</strong>.</p>
+    <p>Two automated tasks run every Monday morning. Site administrators can adjust the schedule via <strong>Site Administration
+    → Server → Scheduled tasks</strong>.</p>
 
     <!-- Learner report -->
     <h3>Weekly Learner Progress Report</h3>
@@ -130,15 +141,18 @@
         <tbody>
           <tr><td><strong>Schedule</strong></td><td>Every Monday at 09:00 (configurable)</td></tr>
           <tr><td><strong>Task class</strong></td><td><code>mod_casestudy\task\send_learner_reports</code></td></tr>
-          <tr><td><strong>Recipients</strong></td><td>All enrolled students with submit capability, in courses where a Case Study has <a href="completion.html">completion rules</a> enabled</td></tr>
+          <tr><td><strong>Recipients</strong></td><td>All enrolled students with submit capability, in courses where a Case Study
+          has <a href="completion.html">completion rules</a> enabled</td></tr>
           <tr><td><strong>Subject</strong></td><td><em>Progress report: [Case Study Name] ([Course Name])</em></td></tr>
-          <tr><td><strong>Body</strong></td><td>Completion status (complete/incomplete), progress toward each completion criterion, motivational message if incomplete, link to the activity</td></tr>
+          <tr><td><strong>Body</strong></td><td>Completion status (complete/incomplete), progress toward each completion
+          criterion, motivational message if incomplete, link to the activity</td></tr>
         </tbody>
       </table>
     </div>
 
     <figure class="screenshot">
-      <img src="images/Progress-report.png" alt="Example learner progress report email showing progress toward completion criteria">
+      <img src="images/Progress-report.png" alt="Example learner progress report email showing progress toward completion
+      criteria">
       <figcaption>Example — weekly learner progress report received by a student</figcaption>
     </figure>
 
@@ -150,9 +164,11 @@
       <table>
         <thead><tr><th>Setting</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td><strong>Notify Graders About Submissions</strong></td><td>Turns the grader new-submission notification on or off for the whole activity</td></tr>
+          <tr><td><strong>Notify Graders About Submissions</strong></td><td>Turns the grader new-submission notification on or off
+          for the whole activity</td></tr>
           <tr><td><strong>Email Others</strong></td><td>Adds extra recipients to the grader notification</td></tr>
-          <tr><td><strong>Default for "Notify Student"</strong></td><td>Pre-fills the Notify Student checkbox on the grading form (graders can override per submission)</td></tr>
+          <tr><td><strong>Default for "Notify Student"</strong></td><td>Pre-fills the Notify Student checkbox on the grading form
+          (graders can override per submission)</td></tr>
         </tbody>
       </table>
     </div>
@@ -162,7 +178,8 @@
       <table>
         <thead><tr><th>Setting</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td><strong>Notify Student</strong> checkbox</td><td>Determines whether this specific grading action triggers a notification to the student</td></tr>
+          <tr><td><strong>Notify Student</strong> checkbox</td><td>Determines whether this specific grading action triggers a
+          notification to the student</td></tr>
         </tbody>
       </table>
     </div>

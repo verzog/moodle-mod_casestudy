@@ -63,7 +63,7 @@ class field_edit_form extends \moodleform {
     protected function definition() {
         $mform = $this->_form;
 
-        // Hidden fields
+        // Hidden fields.
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
@@ -73,7 +73,7 @@ class field_edit_form extends \moodleform {
         $mform->addElement('hidden', 'type');
         $mform->setType('type', PARAM_ALPHA);
 
-        // Field type display (read-only)
+        // Field type display (read-only).
         $mform->addElement(
             'static',
             'fieldtype_display',
@@ -81,13 +81,13 @@ class field_edit_form extends \moodleform {
             get_string('fieldtype_' . $this->fieldtype, 'mod_casestudy')
         );
 
-        // Basic field properties
+        // Basic field properties.
         $mform->addElement('text', 'name', get_string('fieldname', 'mod_casestudy'), ['size' => 50]);
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
         $mform->addHelpButton('name', 'fieldname', 'mod_casestudy');
 
-        // Shortname field description
+        // Shortname field description.
         $mform->addElement('text', 'shortname', get_string('fieldshortname', 'mod_casestudy'), ['size' => 50]);
         $mform->setType('shortname', PARAM_ALPHANUMEXT);
         $mform->addRule('shortname', get_string('required'), 'required', null, 'client');
@@ -102,7 +102,7 @@ class field_edit_form extends \moodleform {
         $mform->setType('description', PARAM_TEXT);
         $mform->addHelpButton('description', 'fielddescription', 'mod_casestudy');
 
-        // Required checkbox
+        // Required checkbox.
         if ($this->field->supports_required()) {
             $mform->addElement('advcheckbox', 'required', get_string('required'));
             $mform->addHelpButton('required', 'fieldrequired', 'mod_casestudy');
@@ -113,18 +113,18 @@ class field_edit_form extends \moodleform {
             $mform->addHelpButton('category', 'category', 'mod_casestudy');
         }
 
-        // Show in list view checkbox
+        // Show in list view checkbox.
         if ($this->field->supports_listview()) {
             $mform->addElement('advcheckbox', 'showlistview', get_string('showlistview', 'mod_casestudy'));
             $mform->addHelpButton('showlistview', 'showlistview', 'mod_casestudy');
         }
 
-        // Add field-specific configuration elements
+        // Add field-specific configuration elements.
         if ($this->field) {
             $this->field->additional_form_elements($mform);
         }
 
-        // Action buttons
+        // Action buttons.
         $this->add_action_buttons(
             true,
             $this->editing ? get_string('updatefield', 'mod_casestudy') : get_string('addfield', 'mod_casestudy')
@@ -141,7 +141,7 @@ class field_edit_form extends \moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Validate field name uniqueness
+        // Validate field name uniqueness.
         if (!empty($data['shortname'])) {
             $existing = $this->fieldmanager->get_field_by_shortname(
                 $data['shortname'],
@@ -152,7 +152,7 @@ class field_edit_form extends \moodleform {
             }
         }
 
-        // Let the field type class validate its parameters
+        // Let the field type class validate its parameters.
         if ($this->field) {
             $fielderrors = $this->field->validate_config_data($data);
             $errors = array_merge($errors, $fielderrors);
@@ -169,7 +169,7 @@ class field_edit_form extends \moodleform {
      */
     public function get_field_data($data) {
 
-        // Prepare basic field data
+        // Prepare basic field data.
         $fielddata = new \stdClass();
         $fielddata->name = $data->name;
         $fielddata->shortname = $data->shortname;
@@ -179,7 +179,7 @@ class field_edit_form extends \moodleform {
         $fielddata->category = !empty($data->category) ? 1 : 0;
         $fielddata->showlistview = !empty($data->showlistview) ? 1 : 0;
 
-        // Let the field type class process its configuration
+        // Let the field type class process its configuration.
         if ($this->field) {
             $config = $this->field->process_config_form((array)$data);
             $this->field->set_field_params($fielddata, $config);
@@ -196,7 +196,7 @@ class field_edit_form extends \moodleform {
     public function set_field_defaults($field) {
         $defaults = (array) $field;
 
-        // Let the field type class set its parameter defaults
+        // Let the field type class set its parameter defaults.
         if ($this->field && $field) {
             $this->field->set_param_form_defaults($defaults);
         }

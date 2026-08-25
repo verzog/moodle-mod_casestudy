@@ -44,7 +44,7 @@ define('CLI_SCRIPT', true);
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
 
-list($options, $unrecognised) = cli_get_params(
+[$options, $unrecognised] = cli_get_params(
     [
         'help' => false,
         'backup' => '',
@@ -126,7 +126,7 @@ if ($multi) {
 
 // Inspect every target. Track the best outcome so a directory scan can exit with a
 // code that reflects whether ANY backup is recoverable.
-$worstoutcome = 'none';   // none < files < images, where 'images' is the best result.
+$worstoutcome = 'none';   // None < files < images, where 'images' is the best result.
 $summaries = [];
 
 foreach ($targets as [$label, $kind, $path]) {
@@ -363,7 +363,8 @@ function casestudy_report_areas(array $areas): array {
     $recoverablefiles = $richtext + $fieldfiles + $legacyfiles;
     $recoverableimages = $richtextimages + $fieldimages + $legacyimages;
 
-    cli_writeln(sprintf('  -> rich-text images: %d   file-field uploads: %d (%d image)%s',
+    cli_writeln(sprintf(
+        '  -> rich-text images: %d   file-field uploads: %d (%d image)%s',
         $richtext,
         $fieldfiles,
         $fieldimages,

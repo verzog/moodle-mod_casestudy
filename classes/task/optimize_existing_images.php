@@ -31,7 +31,6 @@ use mod_casestudy\local\image_optimizer;
  * within a single cron run.
  */
 class optimize_existing_images extends \core\task\adhoc_task {
-
     /** @var int How many files to process per run before re-queuing. */
     const BATCH_SIZE = 200;
 

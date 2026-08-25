@@ -19,9 +19,7 @@
  * @license    Proprietary — Skin Cancer College Australasia, all rights reserved
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-// Case Study submission statuses
+// Case Study submission statuses.
 define('CASESTUDY_STATUS_NEW', 'new');
 define('CASESTUDY_STATUS_DRAFT', 'draft');
 define('CASESTUDY_STATUS_SUBMITTED', 'submitted');
@@ -32,7 +30,7 @@ define('CASESTUDY_STATUS_RESUBMITTED_INREVIEW', 'resubmitted_inreview');
 define('CASESTUDY_STATUS_SATISFACTORY', 'satisfactory');
 define('CASESTUDY_STATUS_UNSATISFACTORY', 'unsatisfactory');
 
-// Field types
+// Field types.
 define('CASESTUDY_FIELD_TEXT', 'text');
 define('CASESTUDY_FIELD_TEXTAREA', 'textarea');
 define('CASESTUDY_FIELD_DROPDOWN', 'dropdown');
@@ -40,7 +38,7 @@ define('CASESTUDY_FIELD_RADIO', 'radio');
 define('CASESTUDY_FIELD_CHECKBOX', 'checkbox');
 define('CASESTUDY_FIELD_FILE', 'file');
 
-// Completion criteria types
+// Completion criteria types.
 define('CASESTUDY_COMPLETION_TOTAL', 'total_satisfactory');
 define('CASESTUDY_COMPLETION_CATEGORY', 'category_satisfactory');
 
@@ -115,8 +113,10 @@ function casestudy_add_instance(stdClass $casestudy, mod_casestudy_mod_form $mfo
 function casestudy_save_graderinfo_editor(stdClass $casestudy) {
     global $DB;
 
-    if (empty($casestudy->graderinfo_editor) || !is_array($casestudy->graderinfo_editor)
-            || empty($casestudy->coursemodule)) {
+    if (
+        empty($casestudy->graderinfo_editor) || !is_array($casestudy->graderinfo_editor)
+            || empty($casestudy->coursemodule)
+    ) {
         return;
     }
 
@@ -196,11 +196,11 @@ function casestudy_delete_instance($id) {
         return false;
     }
 
-    // Delete all dependent records
+    // Delete all dependent records.
     $DB->delete_records('casestudy_overrides', ['casestudyid' => $id]);
     $DB->delete_records('casestudy_completion_rules', ['casestudyid' => $id]);
 
-    // Delete submissions and their content/feedback
+    // Delete submissions and their content/feedback.
     $submissions = $DB->get_records('casestudy_submissions', ['casestudyid' => $id]);
     foreach ($submissions as $submission) {
         $DB->delete_records('casestudy_content', ['submissionid' => $submission->id]);
@@ -208,10 +208,10 @@ function casestudy_delete_instance($id) {
     }
     $DB->delete_records('casestudy_submissions', ['casestudyid' => $id]);
 
-    // Delete fields
+    // Delete fields.
     $DB->delete_records('casestudy_fields', ['casestudyid' => $id]);
 
-    // Delete the instance itself
+    // Delete the instance itself.
     $DB->delete_records('casestudy', ['id' => $casestudy->id]);
 
     casestudy_grade_item_delete($casestudy);
@@ -277,7 +277,8 @@ function casestudy_user_complete($course, $user, $mod, $casestudy) {
         foreach ($submissions as $submission) {
             echo '<div class="submission">';
             echo '<strong>' . get_string('status') . ':</strong> ' . $submission->status . '<br>';
-            echo '<strong>' . get_string('timemodified', 'mod_casestudy') . ':</strong> ' . userdate($submission->timemodified) . '<br>';
+            echo '<strong>' . get_string('timemodified', 'mod_casestudy') . ':</strong> '
+                . userdate($submission->timemodified) . '<br>';
             echo '</div>';
         }
         echo '</div>';
@@ -408,7 +409,7 @@ function casestudy_grade_item_update($casestudy, $grades = null) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    // cmidnumber is only present on the object during the module-edit flow (add/update instance).
+    // The cmidnumber is only present on the object during the module-edit flow (add/update instance).
     // Grade-recompute callers (after grading, or after deleting a submission) pass a raw {casestudy}
     // record that has no cmidnumber, so coalesce to '' to avoid an undefined-property warning and to
     // avoid passing null as the idnumber. grade_update() never overwrites an existing non-empty
@@ -494,9 +495,9 @@ function casestudy_get_user_grades($casestudy, $userid = 0) {
         }
     }
 
-    // Check if due date has passed - add unsatisfactory grades for ungraded students with submissions
+    // Check if due date has passed - add unsatisfactory grades for ungraded students with submissions.
     if (!empty($casestudy->timeclose) && $casestudy->timeclose > 0 && time() > $casestudy->timeclose) {
-        // Get all users with submissions but no grades
+        // Get all users with submissions but no grades.
         $ungradedparams = ['casestudyid' => $casestudy->id];
         if ($userid) {
             $ungradedparams['userid'] = $userid;
@@ -649,7 +650,7 @@ function casestudy_update_completion_criteria($casestudy) {
 function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
     global $PAGE, $DB;
 
-    // Get the course module and context
+    // Get the course module and context.
     $cm = $PAGE->cm;
     if (!$cm) {
         return;
@@ -665,7 +666,7 @@ function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
     $fieldmanager = \mod_casestudy\local\field_manager::instance($casestudy->id);
     $hasfields = !empty($fieldmanager->get_fields());
 
-    // Manage Fields - always available
+    // Manage Fields - always available.
     $casestudynode->add(
         get_string('managefields', 'mod_casestudy'),
         new moodle_url('/mod/casestudy/fields/manage.php', ['id' => $cm->id]),
@@ -675,7 +676,7 @@ function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
         new pix_icon('i/customfield', get_string('managefields', 'mod_casestudy')),
     );
 
-    // Manage Templates - available if user has capability
+    // Manage Templates - available if user has capability.
     if (has_capability('mod/casestudy:managetemplates', $context)) {
         $casestudynode->add(
             get_string('managetemplates', 'mod_casestudy'),
@@ -687,9 +688,9 @@ function casestudy_extend_settings_navigation($settingsnav, $casestudynode) {
         );
     }
 
-    // Only add submission-related navigation if fields exist
+    // Only add submission-related navigation if fields exist.
     if ($hasfields) {
-        // Overrides
+        // Overrides.
         if (has_capability('mod/casestudy:manageoverrides', $context)) {
             $casestudynode->add(
                 get_string('overrides', 'mod_casestudy'),

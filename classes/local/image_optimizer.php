@@ -21,8 +21,6 @@
 
 namespace mod_casestudy\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Downscale and re-encode large uploaded images so storage and backups stay small.
  *
@@ -32,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  * once an image is within bounds and its orientation is normalised, every later run is a no-op.
  */
 class image_optimizer {
-
     /** @var int Default longest-edge cap in pixels when no admin setting is present. */
     const DEFAULT_MAX_EDGE = 2560;
 
@@ -90,8 +87,13 @@ class image_optimizer {
      * @param int|null $quality Override quality, or null to read config
      * @return \stdClass Stats object: ->processed, ->optimized, ->bytesbefore, ->bytesafter
      */
-    public static function optimize_area(int $contextid, string $filearea, int $itemid,
-            ?int $maxedge = null, ?int $quality = null): \stdClass {
+    public static function optimize_area(
+        int $contextid,
+        string $filearea,
+        int $itemid,
+        ?int $maxedge = null,
+        ?int $quality = null
+    ): \stdClass {
         $fs = get_file_storage();
         $files = $fs->get_area_files($contextid, 'mod_casestudy', $filearea, $itemid, 'id', false);
         return self::optimize_files($fs, $files, $maxedge, $quality);
@@ -108,8 +110,14 @@ class image_optimizer {
      * @param callable|null $progress Optional callback(\stdClass $stats, \stored_file $file, bool $changed)
      * @return \stdClass Stats object: ->processed, ->optimized, ->bytesbefore, ->bytesafter
      */
-    public static function optimize_files(\file_storage $fs, array $files, ?int $maxedge = null,
-            ?int $quality = null, bool $apply = true, ?callable $progress = null): \stdClass {
+    public static function optimize_files(
+        \file_storage $fs,
+        array $files,
+        ?int $maxedge = null,
+        ?int $quality = null,
+        bool $apply = true,
+        ?callable $progress = null
+    ): \stdClass {
         $maxedge = $maxedge ?? self::get_max_edge();
         $quality = $quality ?? self::get_quality();
 
@@ -170,8 +178,12 @@ class image_optimizer {
      * @param int $quality JPEG quality (0-100)
      * @return \stored_file|null The replacement file, or null if the file was left unchanged
      */
-    public static function optimize_stored_file(\file_storage $fs, \stored_file $file, int $maxedge,
-            int $quality): ?\stored_file {
+    public static function optimize_stored_file(
+        \file_storage $fs,
+        \stored_file $file,
+        int $maxedge,
+        int $quality
+    ): ?\stored_file {
         $result = self::reencode($file->get_content(), $maxedge, $quality);
         if ($result === null) {
             return null;
@@ -316,7 +328,7 @@ class image_optimizer {
             return 1;
         }
 
-        // exif_read_data needs a seekable source, so stage the bytes in the per-request temp dir.
+        // The exif_read_data() call needs a seekable source, so stage the bytes in the per-request temp dir.
         $tmpfile = make_request_directory() . '/casestudy_exif_probe';
         if (file_put_contents($tmpfile, $data) === false) {
             return 1;

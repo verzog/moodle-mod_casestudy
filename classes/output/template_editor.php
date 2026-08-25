@@ -87,7 +87,7 @@ class template_editor implements renderable, templatable {
      * @return array Toolbar context.
      */
     private function get_toolbar_data(renderer_base $output) {
-        // Get tags based on template type
+        // Get tags based on template type.
         $tags = $this->manager->get_available_tags($this->templatename);
 
         $toolbar = [
@@ -99,7 +99,7 @@ class template_editor implements renderable, templatable {
             ]),
         ];
 
-        // CSS template doesn't have tags
+        // CSS template doesn't have tags.
         if ($this->templatename === 'csstemplate') {
             return $toolbar;
         }

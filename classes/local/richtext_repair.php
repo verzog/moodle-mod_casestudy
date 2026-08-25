@@ -21,18 +21,15 @@
 
 namespace mod_casestudy\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Diagnose and repair absolute rich-text pluginfile URLs in stored submissions.
  *
  * Rich-text content can embed absolute pluginfile URLs (e.g. images inserted as
  * file links, or content carried through a course restore) that 404 because they
  * keep the original context/submission id. These helpers rewrite such URLs to the
- * @@PLUGINFILE@@ placeholder and report whether the referenced files exist.
+ * `@@PLUGINFILE@@` placeholder and report whether the referenced files exist.
  */
 class richtext_repair {
-
     /**
      * Matches an absolute submission_richtext pluginfile URL prefix, capturing the context id.
      *
@@ -181,8 +178,14 @@ class richtext_repair {
                 $report[] = (object) [
                     'submissionid' => (int) $row->submissionid,
                     'filename' => $filename,
-                    'present' => $fs->file_exists($contextid, 'mod_casestudy', 'submission_richtext',
-                        (int) $row->submissionid, '/', $filename),
+                    'present' => $fs->file_exists(
+                        $contextid,
+                        'mod_casestudy',
+                        'submission_richtext',
+                        (int) $row->submissionid,
+                        '/',
+                        $filename
+                    ),
                 ];
             }
         }

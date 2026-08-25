@@ -23,11 +23,11 @@ require_once('../../config.php');
 
 require_once(dirname(__FILE__) . '/lib.php');
 
-$id = required_param('id', PARAM_INT); // Course module ID
-$submissionid = optional_param('submissionid', 0, PARAM_INT); // Submission ID for editing
+$id = required_param('id', PARAM_INT); // Course module ID.
+$submissionid = optional_param('submissionid', 0, PARAM_INT); // Submission ID for editing.
 $action = optional_param('action', '', PARAM_ALPHA); // Action to perform.
 
-// Get course module and related data
+// Get course module and related data.
 $cm = get_coursemodule_from_id('casestudy', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -49,11 +49,11 @@ $PAGE->set_course($course);
 $PAGE->set_cm($cm);
 
 
-// Initialize managers
+// Initialize managers.
 $fieldmanager = \mod_casestudy\local\field_manager::instance($casestudy->id);
 $submissionmanager = \mod_casestudy\local\submission_manager::instance($casestudy->id, $casestudy, $cm);
 
-// Get or create submission
+// Get or create submission.
 if ($action) {
     switch ($action) {
         case 'delete':
@@ -115,7 +115,7 @@ if (!$submission) {
 
 $editing = !empty($submissionid) && $submission && $submission->id == $submissionid;
 
-// Get fields
+// Get fields.
 $fields = $fieldmanager->get_fields();
 
 if (empty($fields)) {
@@ -127,25 +127,25 @@ if (empty($fields)) {
     );
 }
 
-// Check if user can edit this submission
+// Check if user can edit this submission.
 if ($editing && !$submissionmanager->can_edit_submission($submission, $USER->id, true)) {
     throw new moodle_exception('cannotedisubmission', 'mod_casestudy');
 }
 
-// Get existing submission data for form
+// Get existing submission data for form.
 $submissiondata = [];
 if ($submission && $submission->id) {
     $submissiondata = $submissionmanager->get_submission_form_data($submission->id);
 }
 
 // Create form
-// Prepare form data
+// Prepare form data.
 $formdata = [
     'id' => $cm->id,
     'submissionid' => $submission->id,
 ];
 
-// Add existing submission data
+// Add existing submission data.
 
 $cmdata = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
@@ -166,7 +166,7 @@ $form->set_data($formdata);
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]));
 } else if ($data = $form->get_data()) {
-    // Standard moodleform submission
+    // Standard moodleform submission.
     $isdraft = $form->is_draft_submission($data) || $form->is_save_and_add_another($data);
     $issubmit = !$isdraft && $form->is_finish_submission($data);
     $currentsubmissionid = $editing ? $submission->id : 0;
@@ -196,19 +196,19 @@ if ($form->is_cancelled()) {
     }
 }
 
-// Check if form template exists
+// Check if form template exists.
 $casestudyobj = new \mod_casestudy\local\casestudy($casestudy->id, $cm, $context);
 $template = new \mod_casestudy\template($casestudyobj, $cm, $context);
 $useformtemplate = $template->has_form_template();
 
-// pop up.
+// Submission confirmation pop-up.
 $totalunanswered = 0;
 $requiresubmit = !empty($casestudy->requiresubmit) ? 1 : 0;
 $PAGE->requires->js_call_amd('mod_casestudy/submission_confirmation', 'init', [$totalunanswered, $requiresubmit]);
 
 echo $OUTPUT->header();
 
-// Page heading
+// Page heading.
 if ($editing) {
     echo $OUTPUT->heading(get_string('editcasestudy', 'mod_casestudy'));
 } else {
@@ -239,7 +239,7 @@ if ($useformtemplate) {
     $form->parse_from_template($template, $fields, $templatedata, $errors, $submission->id ?? null);
     $form->display();
 } else {
-    // Use standard moodleform rendering
+    // Use standard moodleform rendering.
     $form->display();
 }
 

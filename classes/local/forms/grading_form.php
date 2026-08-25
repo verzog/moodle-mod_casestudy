@@ -41,7 +41,7 @@ class grading_form extends \core_form\dynamic_form {
     protected function definition() {
         $mform = $this->_form;
 
-        // Hidden fields
+        // Hidden fields.
         $mform->addElement('hidden', 'submissionid');
         $mform->setType('submissionid', PARAM_INT);
 
@@ -51,13 +51,13 @@ class grading_form extends \core_form\dynamic_form {
         $mform->addElement('hidden', 'action');
         $mform->setType('action', PARAM_ALPHA);
 
-        $mform->addElement('hidden', 'id'); // Course module ID
+        $mform->addElement('hidden', 'id'); // Course module ID.
         $mform->setType('id', PARAM_INT);
 
         $mform->addElement('hidden', 'userid'); // User ID.
         $mform->setType('userid', PARAM_INT);
 
-        // Student name (read-only display)
+        // Student name (read-only display).
         $submission = $this->get_submission();
         if ($submission) {
             $mform->addElement(
@@ -69,7 +69,8 @@ class grading_form extends \core_form\dynamic_form {
         }
 
         // Check if submission is already graded and user has regrade capability.
-        $isfinished = $submission && in_array($submission->status, [CASESTUDY_STATUS_SATISFACTORY, CASESTUDY_STATUS_UNSATISFACTORY]);
+        $isfinished = $submission
+            && in_array($submission->status, [CASESTUDY_STATUS_SATISFACTORY, CASESTUDY_STATUS_UNSATISFACTORY]);
         $cmid = $this->optional_param('id', 0, PARAM_INT);
         $context = $cmid ? \context_module::instance($cmid) : null;
         $canregrade = $context && has_capability('mod/casestudy:regrade', $context);
@@ -84,7 +85,7 @@ class grading_form extends \core_form\dynamic_form {
             );
         }
 
-        // Marker comments
+        // Marker comments.
         $mform->addElement(
             'editor',
             'feedback_editor',
@@ -94,7 +95,7 @@ class grading_form extends \core_form\dynamic_form {
         );
         $mform->setType('feedback_editor', PARAM_RAW);
 
-        // Notify student checkbox
+        // Notify student checkbox.
         $casestudyid = $this->optional_param('casestudyid', 0, PARAM_INT);
         if ($casestudyid) {
             global $DB;
@@ -213,20 +214,20 @@ class grading_form extends \core_form\dynamic_form {
         $context = \context_module::instance($cm->id);
         $casestudy = $DB->get_record('casestudy', ['id' => $cm->instance], '*', MUST_EXIST);
 
-        // Get current submission details
+        // Get current submission details.
         $currentsubmission = $DB->get_record('casestudy_submissions', ['id' => $currentsubmissionid]);
         if (!$currentsubmission) {
             return;
         }
 
-        // Get all submissions for this case study
+        // Get all submissions for this case study.
         $submissions = $this->get_all_submissions_for_selector($casestudy->id, $cm, $context);
 
         if (empty($submissions)) {
             return;
         }
 
-        // Calculate current index
+        // Calculate current index.
         $currentindex = 0;
         $totalcount = count($submissions);
         $submissionids = array_keys($submissions);
@@ -238,7 +239,7 @@ class grading_form extends \core_form\dynamic_form {
             }
         }
 
-        // Create the HTML for the user navigation component
+        // Create the HTML for the user navigation component.
         $larrow = $OUTPUT->larrow();
         $rarrow = $OUTPUT->rarrow();
 
@@ -288,7 +289,7 @@ class grading_form extends \core_form\dynamic_form {
     protected function get_all_submissions_for_selector($casestudyid, $cm, $context) {
         global $DB;
 
-        // Check for group filtering
+        // Check for group filtering.
         $groupid = groups_get_activity_group($cm, true);
 
         // Only show submissions that have been submitted (exclude new and draft statuses).
@@ -313,7 +314,7 @@ class grading_form extends \core_form\dynamic_form {
 
         $params = array_merge(['casestudyid' => $casestudyid], $statusparams);
 
-        // Add group filter if needed
+        // Add group filter if needed.
         if ($groupid) {
             $groupmembers = groups_get_members($groupid, 'u.id');
             if (!empty($groupmembers)) {
@@ -321,7 +322,7 @@ class grading_form extends \core_form\dynamic_form {
                 $sql .= " AND s.userid $insql";
                 $params = array_merge($params, $inparams);
             } else {
-                // No members in group, return empty
+                // No members in group, return empty.
                 return [];
             }
         }
@@ -337,7 +338,7 @@ class grading_form extends \core_form\dynamic_form {
     protected function add_grading_elements() {
         $mform = $this->_form;
 
-        // Get the casestudy instance and context
+        // Get the casestudy instance and context.
         $cmid = $this->optional_param('id', 0, PARAM_INT);
         $submissionid = $this->optional_param('submissionid', 0, PARAM_INT);
 
@@ -410,7 +411,7 @@ class grading_form extends \core_form\dynamic_form {
             throw new \moodle_exception('invalidparameters');
         }
 
-        // Get course module
+        // Get course module.
         $cm = get_coursemodule_from_instance('casestudy', $casestudyid);
         if (!$cm) {
             throw new \moodle_exception('invalidcoursemodule');
@@ -495,7 +496,7 @@ class grading_form extends \core_form\dynamic_form {
             $data['grade'] = $feedback->grade;
             $data['requestresubmission'] = $feedback->requestresubmission;
         } else {
-            // Initialize empty editor data to prevent validation errors
+            // Initialize empty editor data to prevent validation errors.
             $data['feedback_editor'] = [
                 'text' => '',
                 'format' => FORMAT_HTML,
@@ -503,7 +504,7 @@ class grading_form extends \core_form\dynamic_form {
             ];
         }
 
-        // Always set data, even if there's no feedback yet
+        // Always set data, even if there's no feedback yet.
         $this->set_data($data);
     }
 }

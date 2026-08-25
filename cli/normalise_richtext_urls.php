@@ -33,7 +33,7 @@ define('CLI_SCRIPT', true);
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
 
-list($options, $unrecognised) = cli_get_params(
+[$options, $unrecognised] = cli_get_params(
     [
         'help' => false,
         'dry-run' => false,
@@ -82,8 +82,12 @@ $stats = \mod_casestudy\local\richtext_repair::normalise($cmid, $apply);
 
 cli_writeln('');
 cli_writeln(sprintf('Scanned content rows:   %d', $stats->scanned));
-cli_writeln(sprintf('%s %d row(s), %d URL(s)',
-    $apply ? 'Rewrote:               ' : 'Would rewrite:         ', $stats->rows, $stats->urls));
+cli_writeln(sprintf(
+    '%s %d row(s), %d URL(s)',
+    $apply ? 'Rewrote:               ' : 'Would rewrite:         ',
+    $stats->rows,
+    $stats->urls
+));
 
 if (!$apply) {
     cli_writeln('');

@@ -40,7 +40,7 @@ class send_weekly_report extends \core\task\scheduled_task {
     public function execute() {
         global $DB, $CFG;
 
-        // Load constants from locallib.php
+        // Load constants from locallib.php.
         require_once($CFG->dirroot . '/mod/casestudy/lib.php');
 
         mtrace('Starting weekly case study submission report...');

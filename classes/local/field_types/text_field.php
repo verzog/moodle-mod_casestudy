@@ -63,7 +63,7 @@ class text_field extends base_field {
         $mform->addElement('text', $elementname, $this->fielddata->name, $attributes);
         $mform->setType($elementname, PARAM_TEXT);
 
-        // Set default value
+        // Set default value.
         if ($value !== null) {
             $mform->setDefault($elementname, $value);
         }
@@ -98,7 +98,12 @@ class text_field extends base_field {
             return \html_writer::span('-', 'text-muted');
         }
 
-        $label = \html_writer::label(format_string($this->fielddata->name), 'field-' . $this->fielddata->id, '', ['class' => 'casestudy-field-label font-weight-bold field-label']);
+        $label = \html_writer::label(
+            format_string($this->fielddata->name),
+            'field-' . $this->fielddata->id,
+            '',
+            ['class' => 'casestudy-field-label font-weight-bold field-label']
+        );
         $value = \html_writer::span(format_text($value, FORMAT_PLAIN), 'casestudy-field-text field-' . $this->fielddata->id);
 
         return $value;
@@ -129,7 +134,7 @@ class text_field extends base_field {
     public function validate_input($value, $files = null, $data = null, $isdraft = false) {
         $errors = parent::validate_input($value, $files, $data, $isdraft);
 
-        // Additional validation for text fields
+        // Additional validation for text fields.
         if (!empty($value) && strlen($value) > 255) {
             $errors[] = get_string('error_text_too_long', 'mod_casestudy', 255);
         }
@@ -145,16 +150,6 @@ class text_field extends base_field {
     public function get_config() {
         $config = parent::get_config();
         return $config;
-    }
-
-    /**
-     * Process configuration form data
-     *
-     * @param array $data Form data
-     * @return array Processed configuration
-     */
-    public function process_config_form($data) {
-        return parent::process_config_form($data);
     }
 
     /**
@@ -187,24 +182,13 @@ class text_field extends base_field {
             return '-';
         }
 
-        // For text fields, truncate if too long
+        // For text fields, truncate if too long.
         $display = strip_tags($value);
         if (strlen($display) > 30) {
             $display = substr($display, 0, 27) . '...';
         }
 
         return $display;
-    }
-
-    /**
-     * Set field parameters from configuration
-     *
-     * @param object $field Field object (passed by reference)
-     * @param array $config Configuration array
-     * @return void
-     */
-    public function set_field_params(&$field, $config) {
-        parent::set_field_params($field, $config);
     }
 
     /**

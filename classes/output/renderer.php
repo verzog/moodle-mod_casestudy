@@ -82,13 +82,13 @@ class renderer extends plugin_renderer_base {
     ) {
         global $USER, $DB;
 
-        // Use casestudy object if no separate instance provided
+        // Use casestudy object if no separate instance provided.
         $casestudyinstance = $casestudyinstance ?: $casestudy;
 
-        // Format completion summary
+        // Format completion summary.
         $completionsummary = $this->format_completion_summary($casestudyinstance, $USER->id);
 
-        // Generate submissions table only if access is allowed
+        // Generate submissions table only if access is allowed.
         $tableoutput = '';
         if (!$preventaccess) {
             $table = new \mod_casestudy\local\table\submission_table(
@@ -103,7 +103,7 @@ class renderer extends plugin_renderer_base {
             $tableoutput = ob_get_clean();
         }
 
-        // Get case study information
+        // Get case study information.
         $casestudyinfo = $this->get_casestudy_info($casestudy, $USER->id);
 
         $templatecontext = [
@@ -131,7 +131,7 @@ class renderer extends plugin_renderer_base {
     public function grader_interface($cm) {
         $output = '';
 
-        // Use dynamic submissions table for all submissions (graders can see all)
+        // Use dynamic submissions table for all submissions (graders can see all).
         $table = new \mod_casestudy\local\table\submission_table(
             'grader-submissions-' . $cm->id,
             $cm,
@@ -258,7 +258,7 @@ class renderer extends plugin_renderer_base {
             return $type;
         }, $fieldtypes);
 
-        // Generate fields table
+        // Generate fields table.
         $table = new \mod_casestudy\local\table\fields_table('casestudy-fields-table', $cm, $context);
         $table->define_baseurl(new \moodle_url('/mod/casestudy/fields.php', ['id' => $cm->id]));
 
@@ -354,7 +354,7 @@ class renderer extends plugin_renderer_base {
     private function format_completion_summary($casestudy, $userid) {
         global $DB;
 
-        // Get completion rules from the new casestudy_completion_rules table
+        // Get completion rules from the new casestudy_completion_rules table.
         $completionrules = $DB->get_records(
             'casestudy_completion_rules',
             ['casestudyid' => $casestudy->id, 'enabled' => 1],
@@ -368,11 +368,11 @@ class renderer extends plugin_renderer_base {
         $criteria = [];
         $categorycount = 0;
 
-        // Get aggregation mode for category rules
+        // Get aggregation mode for category rules.
         $aggregation = isset($casestudy->completionaggr) ? $casestudy->completionaggr : CASESTUDY_COMPLETION_ALL;
 
         foreach ($completionrules as $rule) {
-            // Handle total satisfactory completion rule
+            // Handle total satisfactory completion rule.
             if ($rule->ruletype == CASESTUDY_COMPLETION_TOTAL) {
                 $current = \mod_casestudy\local\completion_counter::count_total($casestudy->id, $userid);
 
@@ -385,7 +385,7 @@ class renderer extends plugin_renderer_base {
                 ];
             }
 
-            // Handle category-based completion rules
+            // Handle category-based completion rules.
             if ($rule->ruletype == CASESTUDY_COMPLETION_CATEGORY && !empty($rule->fieldid)) {
                 $categorycount++;
 
@@ -424,7 +424,7 @@ class renderer extends plugin_renderer_base {
             }
         }
 
-        // Add aggregation mode information if there are multiple category rules
+        // Add aggregation mode information if there are multiple category rules.
         $aggregationmode = '';
         if ($categorycount > 1) {
             $aggregationmode = ($aggregation == CASESTUDY_COMPLETION_ALL)
@@ -450,7 +450,7 @@ class renderer extends plugin_renderer_base {
     private function get_casestudy_info($casestudy, $userid) {
         global $DB;
 
-        // Get effective settings including any user overrides
+        // Get effective settings including any user overrides.
         $effective = casestudy_get_effective_settings($casestudy, $userid);
 
         // Count original/parent submissions only (not resubmissions).
@@ -466,7 +466,7 @@ class renderer extends plugin_renderer_base {
 
         $info = [];
 
-        // Add entries count (number of unique case studies, not including resubmissions)
+        // Add entries count (number of unique case studies, not including resubmissions).
         $entriesvalue = ($casestudy->maxsubmissions == 0) ? $totalentries : $totalentries;
         $info[] = [
             'icon' => 'list',
@@ -474,19 +474,19 @@ class renderer extends plugin_renderer_base {
             'value' => $entriesvalue,
         ];
 
-        // Add max submissions information if limited (use effective settings for overrides)
+        // Add max submissions information if limited (use effective settings for overrides).
         if (!empty($effective->maxsubmissions) && $effective->maxsubmissions > 0) {
             $remaining = max(0, $effective->maxsubmissions - $totalentries);
 
             if ($remaining == 0) {
-                // Maximum reached - show completed message
+                // Maximum reached - show completed message.
                 $info[] = [
                     'icon' => 'check-circle',
                     'label' => get_string('submissionsremaining', 'mod_casestudy'),
                     'value' => get_string('limitreached', 'mod_casestudy'),
                 ];
             } else {
-                // Show remaining count
+                // Show remaining count.
                 $info[] = [
                     'icon' => 'file-text',
                     'label' => get_string('submissionsremaining', 'mod_casestudy'),
@@ -495,7 +495,7 @@ class renderer extends plugin_renderer_base {
             }
         }
 
-        // Add max attempts (re-attempts) information if set (use effective settings for overrides)
+        // Add max attempts (re-attempts) information if set (use effective settings for overrides).
         if (!empty($effective->maxattempts)) {
             $info[] = [
                 'icon' => 'repeat',
@@ -504,7 +504,7 @@ class renderer extends plugin_renderer_base {
             ];
         }
 
-        // Add start date if set
+        // Add start date if set.
         if (!empty($casestudy->timeopen)) {
             $info[] = [
                 'icon' => 'calendar-check',
@@ -513,7 +513,7 @@ class renderer extends plugin_renderer_base {
             ];
         }
 
-        // Add due date if set
+        // Add due date if set.
         if (!empty($casestudy->timeclose)) {
             $info[] = [
                 'icon' => 'calendar-times',
@@ -645,16 +645,22 @@ class renderer extends plugin_renderer_base {
 
         // Fields list and contents.
         $fields = field_manager::instance($casestudyrecord->id)->get_fields($casestudyrecord->id);
-        $contents = $DB->get_records('casestudy_content', ['submissionid' => $submission->get_submission()->id], '', 'fieldid, id, content, contentformat');
+        $contents = $DB->get_records(
+            'casestudy_content',
+            ['submissionid' => $submission->get_submission()->id],
+            '',
+            'fieldid, id, content, contentformat'
+        );
         $grade = $DB->get_record('casestudy_grades', ['submissionid' => $submission->get_submission()->id], '*', IGNORE_MISSING);
 
-        // Check if custom template is configured
+        // Check if custom template is configured.
         $template = new \mod_casestudy\template($casestudy, $cm, $context);
         $customtemplatehtml = $template->render_submission($submission, $fields, $contents, $grade);
 
-        // Prepare grading form if user has permission and submission is not a draft
+        // Prepare grading form if user has permission and submission is not a draft.
         $gradeform = null;
-        if ($cangrade && has_capability('mod/casestudy:grade', $context) && $submission->get_submission()->status != CASESTUDY_STATUS_DRAFT) {
+        $notdraft = $submission->get_submission()->status != CASESTUDY_STATUS_DRAFT;
+        if ($cangrade && has_capability('mod/casestudy:grade', $context) && $notdraft) {
             try {
                 $form = new \mod_casestudy\local\forms\grading_form(null, null, 'post', '', [
                         'data-form' => 'casestudy-grading-form', 'class' => 'casestudy-grading-form mt-3']);
@@ -666,7 +672,7 @@ class renderer extends plugin_renderer_base {
             }
         }
 
-        // Prepare action menu
+        // Prepare action menu.
         $baseurl = new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]);
         $additionalactions = [];
 
@@ -675,7 +681,7 @@ class renderer extends plugin_renderer_base {
         $actionmenu->disable_filters(['group', 'status', 'user', 'initials']);
         $actionmenuhtml = $this->render($actionmenu);
 
-        // Add user navigation for users who can view all submissions
+        // Add user navigation for users who can view all submissions.
         $usernavigationhtml = '';
         $studentnavigationhtml = '';
         $context = \context_module::instance($cm->id);
@@ -689,11 +695,11 @@ class renderer extends plugin_renderer_base {
 
         $submissiondata['customtemplate'] = $customtemplatehtml;
 
-        // Get submission history
+        // Get submission history.
         $manager = new \mod_casestudy\local\submission_manager($casestudyrecord->id, $casestudyrecord, $cm);
         $history = $manager->get_submission_history($submission->get_submission()->id);
         $submissiondata['history'] = $this->format_submission_history($history, $context);
-        $submissiondata['hashistory'] = count($history) > 1; // Only show if there are multiple attempts
+        $submissiondata['hashistory'] = count($history) > 1; // Only show if there are multiple attempts.
 
         $submissiondata['showgraderinfo'] = !$casestudy->get_casestudy_record()->hidegrader;
         // Otherwise, use the mustache template with submission data.
@@ -766,10 +772,10 @@ class renderer extends plugin_renderer_base {
     protected function render_user_navigation($cm, $casestudy, $currentsubmission) {
         global $DB;
 
-        // Get all submissions for this case study
+        // Get all submissions for this case study.
         $context = \context_module::instance($cm->id);
 
-        // Only show navigation if user has permission to view all submissions
+        // Only show navigation if user has permission to view all submissions.
         if (!has_capability('mod/casestudy:viewallsubmissions', $context)) {
             return '';
         }
@@ -783,7 +789,7 @@ class renderer extends plugin_renderer_base {
 
         $params = ['casestudyid' => $casestudy->casestudyid];
 
-        // Add group filter if needed
+        // Add group filter if needed.
         if ($groupid) {
             $groupmembers = groups_get_members($groupid, 'u.id');
             if (!empty($groupmembers)) {
@@ -902,7 +908,8 @@ class renderer extends plugin_renderer_base {
                 'islatest' => $item->islatest,
                 'status' => $status,
                 'statusclass' => $statusinfo['class'],
-                'timesubmitted' => $submission->timesubmitted ? userdate($submission->timesubmitted, get_string('strftimedatetime', 'langconfig')) : '-',
+                'timesubmitted' => $submission->timesubmitted
+                    ? userdate($submission->timesubmitted, get_string('strftimedatetime', 'langconfig')) : '-',
                 'hasfeedback' => !empty($grade),
             ];
 

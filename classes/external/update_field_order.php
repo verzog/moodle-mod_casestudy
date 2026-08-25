@@ -59,7 +59,7 @@ class update_field_order extends external_api {
     public static function execute($cmid, $fieldid, $newposition) {
         global $DB;
 
-        // Validate parameters
+        // Validate parameters.
         $params = self::validate_parameters(self::execute_parameters(), [
             'cmid' => $cmid,
             'fieldid' => $fieldid,
@@ -83,7 +83,7 @@ class update_field_order extends external_api {
             throw new \moodle_exception('invalidfieldid', 'mod_casestudy');
         }
 
-        // Validate new position
+        // Validate new position.
         $maxorder = $DB->get_field(
             'casestudy_fields',
             'MAX(sortorder)',
@@ -94,15 +94,17 @@ class update_field_order extends external_api {
             throw new \moodle_exception('invalidposition', 'mod_casestudy');
         }
 
-        // Get field manager instance
+        // Get field manager instance.
         $fieldmanager = field_manager::instance($cm->instance);
 
-        // Update field order
+        // Update field order.
         $success = self::reorder_field($fieldmanager, $field, $params['newposition']);
 
         return [
             'success' => $success,
-            'message' => $success ? get_string('fieldorderupdated', 'mod_casestudy') : get_string('fieldorderupdatefailed', 'mod_casestudy'),
+            'message' => $success
+                ? get_string('fieldorderupdated', 'mod_casestudy')
+                : get_string('fieldorderupdatefailed', 'mod_casestudy'),
         ];
     }
 

@@ -290,7 +290,7 @@ class summary_table extends table_sql {
 
         $userpicture = $OUTPUT->user_picture($user, ['size' => 35, 'courseid' => $this->cm->course]);
 
-        // Link to user profile page
+        // Link to user profile page.
         $url = new moodle_url('/user/view.php', [
             'id' => $row->id,
             'course' => $this->cm->course,

@@ -67,7 +67,7 @@ class file_field extends base_field {
 
         $mform->addElement('filemanager', $elementname, $this->fielddata->name, null, $options);
 
-        // Set default value
+        // Set default value.
         if ($value !== null) {
             $mform->setDefault($elementname, $value);
         }
@@ -108,7 +108,7 @@ class file_field extends base_field {
      * @return bool True if supports template forms
      */
     public function supports_template_form(): bool {
-        return false; // File fields require Moodle's filemanager with JS
+        return false; // File fields require Moodle's filemanager with JS.
     }
 
     /**
@@ -132,7 +132,13 @@ class file_field extends base_field {
         $valuespan = \html_writer::start_div('casestudy-files-wrapper d-flex flex-direction-row');
 
         $includeinstruction = false;
-        $areafiles = $this->get_areafiles('field_' . $this->fieldid, $submissionid, 'mod_casestudy', $this->fieldmanager->get_context(), true);
+        $areafiles = $this->get_areafiles(
+            'field_' . $this->fieldid,
+            $submissionid,
+            'mod_casestudy',
+            $this->fieldmanager->get_context(),
+            true
+        );
         foreach ($areafiles as $file) {
             if ($file['image']) {
                 $image = \html_writer::img($file['url'], basename($file['url']), ['class' => 'responsive-img']);
@@ -174,7 +180,7 @@ class file_field extends base_field {
      */
     public function process_input($value, $data): field_data {
         // File processing would typically involve handling the filemanager data
-        // and storing files in the appropriate file area
+        // and storing files in the appropriate file area.
         return field_data::create((object) ['content' => $value]);
     }
 
@@ -263,7 +269,7 @@ class file_field extends base_field {
     public function set_field_params(&$field, $config) {
         parent::set_field_params($field, $config);
 
-        // Handle param1 for file count
+        // Handle param1 for file count.
         if (isset($config['param1']) && is_array($config['param1'])) {
             $field->param1 = json_encode([
                 'min' => (int)($config['param1']['min'] ?? 0),
@@ -271,7 +277,7 @@ class file_field extends base_field {
             ]);
         }
 
-        // Handle param2 for max file size
+        // Handle param2 for max file size.
         if (isset($config['param2'])) {
             $field->param2 = (int)$config['param2'];
         }
@@ -292,14 +298,14 @@ class file_field extends base_field {
      * @return void
      */
     public function additional_form_elements(&$mform) {
-        // File count configuration
+        // File count configuration.
         $countgroup = [];
         $mform->addElement('text', 'param1[min]', get_string('minfiles', 'mod_casestudy'), ['size' => 3]);
         $mform->addElement('text', 'param1[max]', get_string('maxfiles', 'mod_casestudy'), ['size' => 3]);
         $mform->setType('param1[min]', PARAM_INT);
         $mform->setType('param1[max]', PARAM_INT);
 
-        // Max file size
+        // Max file size.
         $sizeoptions = [
             1048576 => '1 MB',
             5242880 => '5 MB',
@@ -388,12 +394,12 @@ class file_field extends base_field {
     public function process_config_form($data) {
         $config = parent::process_config_form($data);
 
-        // Process file count
+        // Process file count.
         if (isset($data['param1'])) {
             $config['param1'] = $data['param1'];
         }
 
-        // Process max file size
+        // Process max file size.
         if (isset($data['param2'])) {
             $config['param2'] = $data['param2'];
         }
@@ -415,7 +421,7 @@ class file_field extends base_field {
      * @return bool True if supports categories
      */
     public function supports_categories() {
-        return false; // Files don't work well as categories
+        return false; // Files don't work well as categories.
     }
 
     /**
@@ -431,7 +437,13 @@ class file_field extends base_field {
         }
 
         // For list view, show the attachment icon.
-        $files = $this->get_areafiles('field_' . $row->fieldid, $row->id, 'mod_casestudy', $this->fieldmanager->get_context(), true);
+        $files = $this->get_areafiles(
+            'field_' . $row->fieldid,
+            $row->id,
+            'mod_casestudy',
+            $this->fieldmanager->get_context(),
+            true
+        );
         if (empty($files)) {
             return '-';
         }
@@ -440,7 +452,11 @@ class file_field extends base_field {
         $links = [];
         foreach ($files as $file) {
             if ($file['image']) {
-                $images[] = \html_writer::img($file['url'], basename($file['url']), ['class' => 'responsive-img', 'style' => 'height:30px;']);
+                $images[] = \html_writer::img(
+                    $file['url'],
+                    basename($file['url']),
+                    ['class' => 'responsive-img', 'style' => 'height:30px;']
+                );
             } else {
                 $links[] = \html_writer::link($file['url'], urldecode(basename($file['url'])), ['target' => '_blank']);
             }
@@ -550,7 +566,7 @@ class file_field extends base_field {
             'accepted_types' => $fileconfig['acceptedtypes'],
         ];
 
-        // Save the files from draft area to the filearea
+        // Save the files from draft area to the filearea.
         file_save_draft_area_files(
             $draftitemid,
             $context->id,

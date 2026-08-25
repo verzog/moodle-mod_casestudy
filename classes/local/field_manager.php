@@ -84,7 +84,7 @@ class field_manager {
             throw new moodle_exception('error_unsupported_field_type', 'mod_casestudy', '', $type);
         }
 
-        // Get the next sort order
+        // Get the next sort order.
         $sortorder = $this->get_next_sortorder();
 
         $field = (object) $config;
@@ -127,16 +127,16 @@ class field_manager {
     public function delete_field($fieldid) {
         global $DB;
 
-        // Check if field exists and belongs to this case study
+        // Check if field exists and belongs to this case study.
         $field = $this->get_field($fieldid);
         if (!$field) {
             return false;
         }
 
-        // Delete field content from submissions
+        // Delete field content from submissions.
         $DB->delete_records('casestudy_content', ['fieldid' => $fieldid]);
 
-        // Delete the field itself
+        // Delete the field itself.
         return $DB->delete_records('casestudy_fields', ['id' => $fieldid]);
     }
 
@@ -380,24 +380,24 @@ class field_manager {
     public function clone_field($fieldid) {
         global $DB;
 
-        // Get the original field
+        // Get the original field.
         $originalfield = $this->get_field($fieldid);
         if (!$originalfield) {
             return false;
         }
 
-        // Create a clone of the field
+        // Create a clone of the field.
         $clonefield = clone $originalfield;
 
-        // Remove the ID and update timestamps
+        // Remove the ID and update timestamps.
         unset($clonefield->id);
         $clonefield->name = $clonefield->name . ' (Copy)';
-        // Generate a unique shortname by appending a number if needed
+        // Generate a unique shortname by appending a number if needed.
         $baseshortname = $clonefield->shortname . '_copy';
         $shortname = $baseshortname;
         $counter = 1;
 
-        // Check if shortname exists and increment until we find a unique one
+        // Check if shortname exists and increment until we find a unique one.
         while (
             $DB->record_exists('casestudy_fields', [
             'casestudyid' => $clonefield->casestudyid,
@@ -413,7 +413,7 @@ class field_manager {
         $clonefield->timecreated = time();
         $clonefield->timemodified = time();
 
-        // Insert the cloned field
+        // Insert the cloned field.
         return $DB->insert_record('casestudy_fields', $clonefield);
     }
 

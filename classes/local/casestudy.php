@@ -157,7 +157,6 @@ class casestudy {
         global $DB;
 
         $params = [
-            // 'casestudyid' => $this->casestudyid,
             'userid' => $userid,
             'submissionid' => $submissionid,
         ];
@@ -166,7 +165,6 @@ class casestudy {
 
         if (!$grade && $create) {
             $grade = new \stdClass();
-            // $grade->casestudyid = $this->casestudyid;
             $grade->userid = $userid;
             $grade->submissionid = $submissionid;
             $grade->timecreated = time();
@@ -200,7 +198,7 @@ class casestudy {
 
         $userid = helper::get_submission($submissionid)->userid;
 
-        // Add the grading elements to the form
+        // Add the grading elements to the form.
         if (!$userid) {
             return ['mode' => 'none', 'scaleitems' => []];
         }
@@ -330,7 +328,7 @@ class casestudy {
             return $result;
         }
 
-        // Process grading actions
+        // Process grading actions.
         $feedback = $this->process_feedback_data($data);
         $grade = $this->process_advanced_grading($data, $casestudyid, $submissionid);
 
@@ -367,7 +365,7 @@ class casestudy {
             default => $inreview,
         };
 
-        // Get notifystudent value from form data (default true for backward compatibility)
+        // Get notifystudent value from form data (default true for backward compatibility).
         $notifystudent = isset($data->notifystudent) ? (bool)$data->notifystudent : true;
 
         $this->update_submission_status($submission, $status, $notifystudent);
@@ -388,7 +386,7 @@ class casestudy {
     protected function process_advanced_grading($data, $casestudyid, $submissionid) {
         global $USER;
 
-        // Check for advanced grading data
+        // Check for advanced grading data.
         if (!isset($data->advancedgrading) || empty($data->advancedgrading)) {
             // Fall back to traditional grading. Preserve decimals (e.g. 7.5): point grades can be
             // fractional and are compared against grade-to-pass, so truncating to int here could
@@ -412,12 +410,12 @@ class casestudy {
         $gradingmanager = get_grading_manager($context, 'mod_casestudy', 'submissions');
 
         if ($controller = $gradingmanager->get_active_controller()) {
-            // Get or create grading instance
+            // Get or create grading instance.
             $gradinginstance = $controller->get_or_create_instance($submissionid, $USER->id, $grade->id ?? 0);
 
-            // Process the advanced grading form
+            // Process the advanced grading form.
             if ($gradinginstance) {
-                // Update the grading instance with form data
+                // Update the grading instance with form data.
                 $gradinginstance->submit_and_get_grade($data->advancedgrading, $grade->id ?? 0);
 
                 // Return the rubric-calculated grade. Whether it counts as satisfactory is
@@ -456,14 +454,14 @@ class casestudy {
     protected function save_feedback(stdClass $submission, $feedback, $grade = null, $requestresubmission = false, $form = null) {
         global $DB, $USER;
 
-        // Check if feedback already exists
+        // Check if feedback already exists.
         $existingfeedback = $DB->get_record('casestudy_grades', [
             'submissionid' => $submission->id,
         ], '*', IGNORE_MULTIPLE);
 
         $graderecord = null;
         if (!empty($existingfeedback)) {
-            // Update existing feedback
+            // Update existing feedback.
             $existingfeedback->feedback = $feedback['text'];
             $existingfeedback->feedbackformat = $feedback['format'];
             if ($grade !== null) {
@@ -481,10 +479,10 @@ class casestudy {
             $feedbackid = $existingfeedback->id;
             $graderecord = $existingfeedback;
         } else {
-            // Create new feedback record
+            // Create new feedback record.
             $feedbackrecord = new \stdClass();
             $feedbackrecord->submissionid = $submission->id;
-            // casestudy_grades.userid is NOT NULL with no default: it must be the graded student.
+            // The casestudy_grades.userid column is NOT NULL with no default: it must be the graded student.
             // Omitting it makes the insert fail on databases that enforce NOT NULL (PostgreSQL,
             // strict-mode MySQL) whenever a grade row was not already pre-created for the submission.
             $feedbackrecord->userid = $submission->userid;
@@ -524,7 +522,7 @@ class casestudy {
             }
         }
 
-        // Trigger submission graded event
+        // Trigger submission graded event.
         if ($graderecord && $this->cm) {
             $event = \mod_casestudy\event\submission_graded::create_from_grade(
                 $this->casestudy,
@@ -552,7 +550,7 @@ class casestudy {
 
         $DB->update_record('casestudy_submissions', $submission);
 
-        // Trigger grade event if applicable
+        // Trigger grade event if applicable.
         if (in_array($newstatus, [CASESTUDY_STATUS_SATISFACTORY, CASESTUDY_STATUS_UNSATISFACTORY])) {
             $this->trigger_grade_event($submission);
         }
@@ -579,9 +577,9 @@ class casestudy {
         if ($this->cm && $this->course) {
             $completion = new \completion_info($this->course);
             if ($completion->is_enabled($this->cm)) {
-                // Only update completion for automatic tracking with custom rules
+                // Only update completion for automatic tracking with custom rules.
                 if ($this->cm->completion == COMPLETION_TRACKING_AUTOMATIC) {
-                    // Trigger recalculation based on custom completion rules
+                    // Trigger recalculation based on custom completion rules.
                     $completion->update_state($this->cm, COMPLETION_COMPLETE, $submission->userid);
                 }
             }
@@ -594,7 +592,7 @@ class casestudy {
      * @param object $submission Submission record
      */
     protected function trigger_grade_event($submission) {
-        // Get casestudy record
+        // Get casestudy record.
         global $DB;
 
         $casestudy = $DB->get_record('casestudy', ['id' => $submission->casestudyid]);

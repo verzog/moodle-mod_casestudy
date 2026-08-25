@@ -56,12 +56,12 @@ class sectionheading_field extends base_field {
      * @return void
      */
     public function render_form_element($mform, $elementname, $value = null) {
-        // Section headings display as headers in forms, not input elements
+        // Section headings display as headers in forms, not input elements.
         $headingtext = format_string($this->fielddata->name);
 
         $mform->addElement('header', $elementname . '_heading', $headingtext);
 
-        // Add description if provided
+        // Add description if provided.
         if (!empty($this->fielddata->description)) {
             $mform->addElement(
                 'html',
@@ -86,7 +86,7 @@ class sectionheading_field extends base_field {
      * @return string HTML for the heading
      */
     public function get_input_html(string $fieldname, $value = null, ?int $submissionid = null, bool $haserrors = false): string {
-        // Section headings just display as headings, no input element
+        // Section headings just display as headings, no input element.
         return '';
     }
 
@@ -128,7 +128,7 @@ class sectionheading_field extends base_field {
             'class' => 'casestudy-section-heading field-section-heading mt-4 mb-3',
         ]);
 
-        // Add description if provided
+        // Add description if provided.
         if (!empty($this->fielddata->description)) {
             $html .= \html_writer::div(
                 format_text($this->fielddata->description, FORMAT_HTML),
@@ -162,7 +162,7 @@ class sectionheading_field extends base_field {
      * @return bool Always true for section headings
      */
     protected function is_empty_value($value) {
-        return true; // Section headings don't have values
+        return true; // Section headings don't have values.
     }
 
     /**
@@ -173,7 +173,7 @@ class sectionheading_field extends base_field {
     public function get_config() {
         $config = parent::get_config();
 
-        // Section headings can't be required or used in list views
+        // Section headings can't be required or used in list views.
         $config['required'] = false;
         $config['showlistview'] = false;
 
@@ -189,9 +189,9 @@ class sectionheading_field extends base_field {
     public function process_config_form($data) {
         $config = parent::process_config_form($data);
 
-        // Override settings that don't apply to section headings
-        $config['required'] = false; // Section headings can't be required
-        $config['showlistview'] = false; // Don't show in list views
+        // Override settings that don't apply to section headings.
+        $config['required'] = false; // Section headings can't be required.
+        $config['showlistview'] = false; // Don't show in list views.
 
         return $config;
     }
@@ -212,7 +212,7 @@ class sectionheading_field extends base_field {
      * @return string The field name for search purposes
      */
     public function get_search_content($value) {
-        return $this->fielddata->name; // Make the heading searchable
+        return $this->fielddata->name; // Make the heading searchable.
     }
 
     /**
@@ -222,18 +222,7 @@ class sectionheading_field extends base_field {
      * @return string Display text for lists
      */
     public function get_list_display($value, $row) {
-        return '-'; // Section headings don't display in lists
-    }
-
-    /**
-     * Set field parameters from configuration
-     *
-     * @param object $field Field object (passed by reference)
-     * @param array $config Configuration array
-     * @return void
-     */
-    public function set_field_params(&$field, $config) {
-        parent::set_field_params($field, $config);
+        return '-'; // Section headings don't display in lists.
     }
 
     /**
@@ -253,7 +242,7 @@ class sectionheading_field extends base_field {
      * @return void
      */
     public function additional_form_elements(&$mform) {
-        // Add note about section headings
+        // Add note about section headings.
         $mform->addElement(
             'static',
             'sectionheading_note',
