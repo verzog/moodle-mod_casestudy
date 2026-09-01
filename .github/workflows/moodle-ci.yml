@@ -9,6 +9,12 @@ jobs:
   test:
     runs-on: ubuntu-22.04
 
+    # Moodle 5.3 has not been branched yet (MOODLE_503_STABLE does not exist
+    # upstream until 5.3 is released, ~late 2026), so those matrix cells fail at
+    # the Moodle checkout. Allow only the 5.3 jobs to fail without failing the
+    # run; they turn green automatically once the branch is cut - no edit needed.
+    continue-on-error: ${{ matrix.moodle-branch == 'MOODLE_503_STABLE' }}
+
     services:
       postgres:
         image: postgres:14
