@@ -9,6 +9,12 @@ jobs:
   test:
     runs-on: ubuntu-22.04
 
+    # Moodle 5.3 has not been branched yet (MOODLE_503_STABLE does not exist
+    # upstream until 5.3 is released, ~late 2026), so those matrix cells fail at
+    # the Moodle checkout. Allow only the 5.3 jobs to fail without failing the
+    # run; they turn green automatically once the branch is cut - no edit needed.
+    continue-on-error: ${{ matrix.moodle-branch == 'MOODLE_503_STABLE' }}
+
     services:
       postgres:
         image: postgres:14
@@ -34,12 +40,15 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        moodle-branch: ['MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE']
+        moodle-branch: ['MOODLE_500_STABLE', 'MOODLE_501_STABLE', 'MOODLE_502_STABLE', 'MOODLE_503_STABLE']
         database: ['pgsql', 'mariadb']
         exclude:
           # Moodle 5.0 was released before PHP 8.4 support landed.
           - php: '8.4'
             moodle-branch: 'MOODLE_500_STABLE'
+          # Moodle 5.3 requires PHP 8.3 as a minimum (8.4 supported); PHP 8.2 is dropped.
+          - php: '8.2'
+            moodle-branch: 'MOODLE_503_STABLE'
 
     steps:
       - name: Check out plugin
