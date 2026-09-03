@@ -143,7 +143,10 @@ class submission implements \renderable, \templatable {
                 continue;
             }
             $value = isset($content[$field->id]) ? $content[$field->id]->content : '';
-            $hasvalue = !empty(trim($value));
+            // Ask the field type whether it has anything to show. Most types judge this from the
+            // content string, but file fields judge it from their file area, so uploads are not
+            // hidden as "No value" when the content pointer is empty.
+            $hasvalue = $fieldclass->has_display_content($value, $submission->id);
 
             $value = $fieldclass->render_display($value, $submission->id);
 
