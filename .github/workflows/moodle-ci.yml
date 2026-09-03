@@ -107,11 +107,11 @@ jobs:
 
       - name: Validating
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci validate
+        run: moodle-plugin-ci validate ./plugin
 
       - name: Check upgrade savepoints
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci savepoints
+        run: moodle-plugin-ci savepoints ./plugin
 
       - name: Mustache Lint
         if: ${{ !cancelled() }}
@@ -127,4 +127,4 @@ jobs:
 
       - name: Behat features
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci behat --profile chrome
+        run: moodle-plugin-ci behat --profile chrome ./plugin
