@@ -28,6 +28,33 @@ use mod_casestudy\local\field_data;
  * File field implementation - File parameters stored in param1, param2, param3
  */
 class file_field extends base_field {
+    /** @var array Per-request cache of area-file lookups, keyed by submission id. */
+    private $fieldfilescache = [];
+
+    /**
+     * Fetch (and memoise) this field's uploaded files for a submission.
+     *
+     * The submission view asks for presence (has_display_content()) and then renders
+     * (render_display()) on the same field instance for the same submission, so the lookup is cached
+     * to keep it to a single file-storage query per field.
+     *
+     * @param int|null $submissionid Submission id keying the field_<id> file area
+     * @return array List of ['image' => bool, 'url' => string] entries (empty when there are none)
+     */
+    private function get_field_files($submissionid) {
+        $key = (int) $submissionid;
+        if (!array_key_exists($key, $this->fieldfilescache)) {
+            $this->fieldfilescache[$key] = $this->get_areafiles(
+                'field_' . $this->fieldid,
+                $submissionid,
+                'mod_casestudy',
+                $this->fieldmanager->get_context(),
+                true
+            );
+        }
+        return $this->fieldfilescache[$key];
+    }
+
     /**
      * Get field type name
      *
@@ -127,13 +154,7 @@ class file_field extends base_field {
         // is empty (legacy/vendor submissions, or files brought in by a restore that carried no
         // content pointer). The previous is_empty_value($value) check hid uploaded images whenever
         // that pointer was blank, even though the files were present in storage.
-        $areafiles = $this->get_areafiles(
-            'field_' . $this->fieldid,
-            $submissionid,
-            'mod_casestudy',
-            $this->fieldmanager->get_context(),
-            true
-        );
+        $areafiles = $this->get_field_files($submissionid);
         if (empty($areafiles)) {
             return \html_writer::span('-', 'text-muted');
         }
@@ -190,14 +211,7 @@ class file_field extends base_field {
      * @return bool True when at least one file is present
      */
     public function has_display_content($value, $submissionid = null) {
-        $areafiles = $this->get_areafiles(
-            'field_' . $this->fieldid,
-            $submissionid,
-            'mod_casestudy',
-            $this->fieldmanager->get_context(),
-            true
-        );
-        return !empty($areafiles);
+        return !empty($this->get_field_files($submissionid));
     }
 
     /**
