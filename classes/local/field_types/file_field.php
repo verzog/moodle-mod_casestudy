@@ -122,7 +122,19 @@ class file_field extends base_field {
 
         static $jsincluded = false;
 
-        if ($this->is_empty_value($value)) {
+        // File uploads live in the field_<id> file area keyed by submission id, not in the content
+        // string. Decide presence from the actual files so images still render when the content row
+        // is empty (legacy/vendor submissions, or files brought in by a restore that carried no
+        // content pointer). The previous is_empty_value($value) check hid uploaded images whenever
+        // that pointer was blank, even though the files were present in storage.
+        $areafiles = $this->get_areafiles(
+            'field_' . $this->fieldid,
+            $submissionid,
+            'mod_casestudy',
+            $this->fieldmanager->get_context(),
+            true
+        );
+        if (empty($areafiles)) {
             return \html_writer::span('-', 'text-muted');
         }
 
@@ -132,13 +144,6 @@ class file_field extends base_field {
         $valuespan = \html_writer::start_div('casestudy-files-wrapper d-flex flex-direction-row');
 
         $includeinstruction = false;
-        $areafiles = $this->get_areafiles(
-            'field_' . $this->fieldid,
-            $submissionid,
-            'mod_casestudy',
-            $this->fieldmanager->get_context(),
-            true
-        );
         foreach ($areafiles as $file) {
             if ($file['image']) {
                 $image = \html_writer::img($file['url'], basename($file['url']), ['class' => 'responsive-img']);
@@ -170,6 +175,29 @@ class file_field extends base_field {
         }
 
         return $valuespan;
+    }
+
+    /**
+     * Whether this file field has uploads to display for a submission.
+     *
+     * File uploads are stored in the field_<id> file area keyed by submission id, not in the content
+     * string, so presence is decided by the files themselves. This keeps the "No value" placeholder
+     * in the submission view in step with render_display(), so images are not hidden when the content
+     * pointer happens to be empty.
+     *
+     * @param mixed $value Stored content value (ignored for file fields)
+     * @param int|null $submissionid Submission id keying the file area
+     * @return bool True when at least one file is present
+     */
+    public function has_display_content($value, $submissionid = null) {
+        $areafiles = $this->get_areafiles(
+            'field_' . $this->fieldid,
+            $submissionid,
+            'mod_casestudy',
+            $this->fieldmanager->get_context(),
+            true
+        );
+        return !empty($areafiles);
     }
 
     /**
@@ -432,10 +460,8 @@ class file_field extends base_field {
      */
     public function get_list_display($value, $row) {
 
-        if ($this->is_empty_value($value)) {
-            return '-';
-        }
-
+        // Presence is decided by the files below, not the content string, so uploads still show in
+        // list views when the content pointer is empty (see has_display_content()/render_display()).
         // For list view, show the attachment icon.
         $files = $this->get_areafiles(
             'field_' . $row->fieldid,

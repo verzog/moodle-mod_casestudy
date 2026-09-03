@@ -222,6 +222,21 @@ abstract class base_field implements fieldtype {
     }
 
     /**
+     * Whether this field has something to display for a submission.
+     *
+     * Drives the "No value" placeholder in the submission view. For most field types the stored
+     * content string is the source of truth, so this mirrors is_empty_value(). File fields override
+     * it because their uploads live in a file area, not the content string.
+     *
+     * @param mixed $value Stored content value for the field
+     * @param int|null $submissionid Submission id (needed by field types that store data elsewhere)
+     * @return bool True when there is content to display
+     */
+    public function has_display_content($value, $submissionid = null) {
+        return !$this->is_empty_value($value);
+    }
+
+    /**
      * Parse field parameters from database
      *
      * @return array Parsed parameters
