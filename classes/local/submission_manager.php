@@ -151,6 +151,7 @@ class submission_manager {
      * Update submission
      *
      * @param object $submission Submission data
+     * @param bool $triggerupdate Whether to trigger the updated event and notifications
      * @return bool Success
      */
     public function update_submission($submission, $triggerupdate = true) {

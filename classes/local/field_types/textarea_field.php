@@ -96,6 +96,7 @@ class textarea_field extends base_field {
      * Render field for display (read-only)
      *
      * @param mixed $value Field value
+     * @param int|null $submissionid Submission ID
      * @return string HTML for display
      */
     public function render_display($value, $submissionid = null) {
@@ -134,7 +135,6 @@ class textarea_field extends base_field {
      * Add parameter-specific form elements
      *
      * @param \MoodleQuickForm $mform Form object
-     * @param string $prefix Element name prefix
      * @return void
      */
     public function additional_form_elements(&$mform) {

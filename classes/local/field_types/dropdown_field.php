@@ -108,6 +108,7 @@ class dropdown_field extends base_field {
      * Render field for display (read-only)
      *
      * @param mixed $value Field value
+     * @param int|null $submissionid Submission ID
      * @return string HTML for display
      */
     public function render_display($value, $submissionid = null) {
@@ -135,6 +136,7 @@ class dropdown_field extends base_field {
      * Process and clean input value
      *
      * @param mixed $value Raw input value
+     * @param object $data Full submitted form data
      * @return field_data Cleaned value
      */
     public function process_input($value, $data): field_data {
@@ -186,7 +188,6 @@ class dropdown_field extends base_field {
      * Add parameter-specific form elements
      *
      * @param \MoodleQuickForm $mform Form object
-     * @param string $prefix Element name prefix
      * @return void
      */
     public function additional_form_elements(&$mform) {
@@ -279,6 +280,7 @@ class dropdown_field extends base_field {
      * Get field display value for list views
      *
      * @param mixed $value Field value
+     * @param object $row Row data
      * @return string Display text for lists
      */
     public function get_list_display($value, $row) {

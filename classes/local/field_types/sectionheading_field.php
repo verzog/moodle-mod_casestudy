@@ -219,6 +219,7 @@ class sectionheading_field extends base_field {
      * Get field display value for list views
      *
      * @param mixed $value Field value
+     * @param object $row Row data
      * @return string Display text for lists
      */
     public function get_list_display($value, $row) {

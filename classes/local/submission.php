@@ -61,7 +61,11 @@ class submission implements \renderable, \templatable {
     }
 
     /**
+     * Build the submission wrapper for the given submission id.
      *
+     * @param int $submissionid Submission id.
+     * @param \cm_info|\stdClass|null $cm Optional pre-loaded course module record.
+     * @param \context_module|null $context Optional pre-loaded module context.
      */
     public function __construct(int $submissionid, $cm = null, $context = null) {
         global $DB;
@@ -94,9 +98,10 @@ class submission implements \renderable, \templatable {
     }
 
     /**
-     * Get the course module of the case study instance.
+     * Export the submission for rendering in a mustache template.
      *
-     * @return cm_info The course module instance
+     * @param \renderer_base $output The renderer.
+     * @return array Template context.
      */
     public function export_for_template(\renderer_base $output): array {
         global $DB;
