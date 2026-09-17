@@ -322,7 +322,7 @@ function casestudy_tally_areas(string $filesxmlsource): ?array {
  * Print one backup's inventory and verdict, and return its outcome.
  *
  * @param array $areas Per-filearea tallies from casestudy_tally_areas().
- * @return array{0:string,1:int,2:int} [outcome, recoverablefiles, recoverableimages]
+ * @return array [outcome, recoverablefiles, recoverableimages]
  *         where outcome is 'none', 'files' or 'images'.
  */
 function casestudy_report_areas(array $areas): array {
