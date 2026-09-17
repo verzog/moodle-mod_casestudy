@@ -714,7 +714,6 @@ class renderer extends plugin_renderer_base {
      *
      * @param object $submission Submission object
      * @param object $user User object
-     * @param array $fields Array of field objects
      * @param array $content Array of submission content
      * @param object $cm Course module
      * @param bool $canedit Whether user can edit

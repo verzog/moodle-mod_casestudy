@@ -70,10 +70,9 @@ class submission_actionmenu implements renderable, templatable {
      * Constructor.
      *
      * @param \mod_casestudy\local\casestudy $casestudy the casestudy instance.
-     * @param \context_module $context the context of the casestudy instance.
-     * @param int $currentgroup the current group id.
-     * @param int $currentuser the current user id.
      * @param \moodle_url $baseurl the base url for the action menu.
+     * @param array $userinitials user initials keyed by user id.
+     * @param array $additionalactions additional actions to add to the menu.
      */
     public function __construct(
         casestudy $casestudy,
@@ -198,7 +197,8 @@ class submission_actionmenu implements renderable, templatable {
     /**
      * Get the view selector menu (Submissions vs Summaries).
      *
-     * @return array|null The view selector data or null.
+     * @param \renderer_base $output Renderer used to build the menu.
+     * @return \stdClass|null The view selector data or null.
      */
     private function get_view_menu($output): ?\stdClass {
         $cm = $this->casestudy->get_cm();
