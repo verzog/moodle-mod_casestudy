@@ -716,18 +716,20 @@ class submission_manager {
 
             // Commit transaction.
             $transaction->allow_commit();
-
-            // Notifications must go out after the commit: message_send() cannot run
-            // inside a DB transaction, so sending any earlier rolls the submit back.
-            if ($issubmit) {
-                $this->send_submission_notifications($submission);
-            }
-
-            return $submission;
         } catch (\Exception $e) {
             $transaction->rollback($e);
             throw $e;
         }
+
+        // Notifications run only after the transaction has committed and outside its
+        // try/catch. message_send() cannot run inside a transaction, and a messaging
+        // failure here must not call rollback() on the already-committed submission,
+        // which would resurface the misleading "Submission failed".
+        if ($issubmit) {
+            $this->send_submission_notifications($submission);
+        }
+
+        return $submission;
     }
 
     /**
