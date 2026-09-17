@@ -201,23 +201,33 @@ class submission_manager {
             return;
         }
 
-        $course = get_course($this->cm->course);
+        // Notification delivery is a best-effort side effect that runs after the
+        // submission has already been committed. A failing message processor must
+        // not surface as a submission error, so swallow and log any delivery
+        // failure rather than letting it bubble up to the "Submission failed"
+        // handler in submission.php. On a production site (debug display off)
+        // debugging() only writes to the server log, so nothing reaches output.
+        try {
+            $course = get_course($this->cm->course);
 
-        // Send web notification to markers.
-        \mod_casestudy\notification_helper::send_submission_notification(
-            $this->casestudy,
-            $submission,
-            $this->cm,
-            $course
-        );
+            // Send web notification to markers.
+            \mod_casestudy\notification_helper::send_submission_notification(
+                $this->casestudy,
+                $submission,
+                $this->cm,
+                $course
+            );
 
-        // Send email confirmation to learner.
-        \mod_casestudy\notification_helper::send_submission_confirmation(
-            $this->casestudy,
-            $submission,
-            $this->cm,
-            $course
-        );
+            // Send email confirmation to learner.
+            \mod_casestudy\notification_helper::send_submission_confirmation(
+                $this->casestudy,
+                $submission,
+                $this->cm,
+                $course
+            );
+        } catch (\Throwable $e) {
+            debugging('Case study submission notification failed: ' . $e->getMessage(), DEBUG_NORMAL);
+        }
     }
 
     /**
