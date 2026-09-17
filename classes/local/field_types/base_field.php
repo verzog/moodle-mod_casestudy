@@ -47,8 +47,9 @@ abstract class base_field implements fieldtype {
     /**
      * Constructor
      *
-     * @param int|object $field Field definition
-     * @param object $submission Current submission (optional)
+     * @param int|null $casestudyid Activity instance id
+     * @param int|object|null $field Field definition or field id
+     * @param object|null $submission Current submission (optional)
      */
     public function __construct($casestudyid = null, $field = null, $submission = null) {
 
@@ -98,6 +99,7 @@ abstract class base_field implements fieldtype {
      * Render field for display.
      *
      * @param mixed $value Field value
+     * @param int|null $submissionid Submission ID
      * @return string HTML for display
      */
     abstract public function render_display($value, $submissionid = null);
@@ -202,7 +204,8 @@ abstract class base_field implements fieldtype {
      * Process and clean input value
      *
      * @param mixed $value Raw input value
-     * @return mixed Cleaned value
+     * @param object $data Full submitted form data
+     * @return field_data Cleaned value
      */
     public function process_input($value, $data): field_data {
         return field_data::create((object) ['content' => $value]);
@@ -246,6 +249,10 @@ abstract class base_field implements fieldtype {
 
     /**
      * Update for submission data for form set_data
+     *
+     * @param array $formdata Form data being prepared (passed by reference)
+     * @param object $contentdata Stored content record for this field
+     * @param string $fieldname Form element name
      */
     public function update_submission_formdata_beforeset(&$formdata, $contentdata, $fieldname) {
         // Default implementation does nothing.
@@ -254,8 +261,9 @@ abstract class base_field implements fieldtype {
     /**
      * Get field parameter value
      *
-     * @param string $param Parameter name (param1, param2, etc.)
+     * @param string $paramname Parameter name (param1, param2, etc.)
      * @param mixed $default Default value
+     * @param array $defaults Array of default values
      * @return mixed Parameter value
      */
     protected function get_param($paramname, $default = null, array $defaults = []) {
@@ -269,6 +277,11 @@ abstract class base_field implements fieldtype {
 
     /**
      * Get param value with defaults.
+     *
+     * @param string $paramname Parameter name
+     * @param mixed $default Default value if not set
+     * @param array $defaults Array of default values
+     * @return mixed Parameter value
      */
     public function get_param_decode($paramname, $default = null, array $defaults = []) {
 
@@ -341,6 +354,7 @@ abstract class base_field implements fieldtype {
      * Get field display value for list views
      *
      * @param mixed $value Field value
+     * @param object $row Row data
      * @return string Display text for lists
      */
     public function get_list_display($value, $row) {

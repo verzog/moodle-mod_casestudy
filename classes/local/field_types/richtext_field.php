@@ -124,6 +124,7 @@ class richtext_field extends base_field {
      * Render field for display (read-only)
      *
      * @param mixed $value Field value
+     * @param int|null $submissionid Submission ID
      * @return string HTML for display
      */
     public function render_display($value, $submissionid = null) {

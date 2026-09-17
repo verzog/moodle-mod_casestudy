@@ -72,8 +72,6 @@ class field_manager {
      * Create a new field
      *
      * @param string $type Field type
-     * @param string $name Field name
-     * @param string $description Field description
      * @param array $config Field configuration
      * @return int|false Field ID on success, false on failure
      */
@@ -344,6 +342,7 @@ class field_manager {
      * Get field type class without instantiation
      *
      * @param string $type Field type
+     * @param int|null $fieldid Field ID (optional)
      * @return object|false Field class instance or false if not found
      */
     public function get_field_type_class($type, $fieldid = null) {

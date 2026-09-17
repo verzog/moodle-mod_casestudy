@@ -450,6 +450,7 @@ class casestudy {
      * @param array $feedback Feedback data
      * @param int|null $grade Grade (0=unsatisfactory, 1=satisfactory, null=no grade)
      * @param bool $requestresubmission Request resubmission
+     * @param grading_form|null $form The grading form instance
      */
     protected function save_feedback(stdClass $submission, $feedback, $grade = null, $requestresubmission = false, $form = null) {
         global $DB, $USER;

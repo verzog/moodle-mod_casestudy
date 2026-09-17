@@ -142,6 +142,7 @@ class file_field extends base_field {
      * Render field for display
      *
      * @param mixed $value Field value
+     * @param int|null $submissionid Submission ID
      * @return string HTML for display
      */
     public function render_display($value, $submissionid = null) {
@@ -218,7 +219,8 @@ class file_field extends base_field {
      * Process and clean input value
      *
      * @param mixed $value Raw input value
-     * @return mixed Cleaned value
+     * @param object $data Full submitted form data
+     * @return field_data Cleaned value
      */
     public function process_input($value, $data): field_data {
         // File processing would typically involve handling the filemanager data
@@ -336,7 +338,6 @@ class file_field extends base_field {
      * Add parameter-specific form elements
      *
      * @param \MoodleQuickForm $mform Form object
-     * @param string $prefix Element name prefix
      * @return void
      */
     public function additional_form_elements(&$mform) {
@@ -470,6 +471,7 @@ class file_field extends base_field {
      * Get field display value for list views
      *
      * @param mixed $value Field value
+     * @param object $row Row data
      * @return string Display text for lists
      */
     public function get_list_display($value, $row) {
@@ -516,6 +518,7 @@ class file_field extends base_field {
     /**
      * Get file configuration from parameters
      *
+     * @param array $defaults Default values to consult
      * @return array File configuration
      */
     private function get_file_config($defaults = []) {
@@ -537,7 +540,8 @@ class file_field extends base_field {
     /**
      * Get the type sets configured for this assignment.
      *
-     * @return array('groupname', 'mime/type', ...)
+     * @param string $filetypes Space-separated list of accepted file types
+     * @return array Normalised array of type group names / mime types
      */
     private function update_file_typesets($filetypes) {
 

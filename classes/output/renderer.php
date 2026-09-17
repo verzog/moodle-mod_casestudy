@@ -712,7 +712,7 @@ class renderer extends plugin_renderer_base {
     /**
      * Render individual submission view
      *
-     * @param object $submission Submission object
+     * @param submission $submission Submission object
      * @param object $user User object
      * @param array $content Array of submission content
      * @param object $cm Course module

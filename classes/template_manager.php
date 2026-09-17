@@ -58,7 +58,7 @@ class template_manager {
     /**
      * Constructor
      *
-     * @param stdClass $casestudy The case study instance
+     * @param casestudy $casestudy The case study instance
      * @param cm_info $cm The course module instance
      * @param context $context The context instance
      *
@@ -117,9 +117,11 @@ class template_manager {
     }
 
     /**
-     * Get the default CSS template.
+     * Update the content of a template.
      *
-     * @return string The default CSS template content
+     * @param string $type The type of template to update ('singletemplate', 'formtemplate' or 'csstemplate')
+     * @param string $content The new template content
+     * @return bool True on success
      */
     public function update_template($type, $content) {
         global $DB;
@@ -135,9 +137,10 @@ class template_manager {
     }
 
     /**
-     * Get the default CSS template.
+     * Reset a template to its default value.
      *
-     * @return string The default CSS template content
+     * @param string $type The type of template to reset ('singletemplate', 'formtemplate' or 'csstemplate')
+     * @return bool True on success
      */
     public function reset_template($type = 'singletemplate') {
         global $DB;
