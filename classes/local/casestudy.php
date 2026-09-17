@@ -446,7 +446,7 @@ class casestudy {
     /**
      * Save feedback for submission
      *
-     * @param object $submission Submission record
+     * @param stdClass $submission Submission record
      * @param array $feedback Feedback data
      * @param int|null $grade Grade (0=unsatisfactory, 1=satisfactory, null=no grade)
      * @param bool $requestresubmission Request resubmission
