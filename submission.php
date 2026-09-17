@@ -190,7 +190,11 @@ if ($form->is_cancelled()) {
 
         redirect($redirecturl, $message, null, \core\output\notification::NOTIFY_SUCCESS);
     } catch (Exception $e) {
-        debugging('Error processing submission: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        // Defer the developer debug line until after the page header is sent.
+        // Calling debugging() here, before $OUTPUT->header(), prints output ahead
+        // of the doctype when debug display is on, which drops the page into
+        // Quirks Mode and stops the TinyMCE editor from initialising.
+        $submissionerror = 'Error processing submission: ' . $e->getMessage();
         $form->set_data($data);
         \core\notification::add(get_string('submissionerror', 'mod_casestudy'), \core\output\notification::NOTIFY_ERROR);
     }
@@ -207,6 +211,11 @@ $requiresubmit = !empty($casestudy->requiresubmit) ? 1 : 0;
 $PAGE->requires->js_call_amd('mod_casestudy/submission_confirmation', 'init', [$totalunanswered, $requiresubmit]);
 
 echo $OUTPUT->header();
+
+// Surface any deferred processing error to developers now that output has started.
+if (!empty($submissionerror)) {
+    debugging($submissionerror, DEBUG_DEVELOPER);
+}
 
 // Page heading.
 if ($editing) {
