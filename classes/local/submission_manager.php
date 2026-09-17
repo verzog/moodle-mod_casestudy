@@ -169,29 +169,65 @@ class submission_manager {
             );
             $event->trigger();
 
-            // Send notifications when submission is submitted (not just updated).
-            if ($submission->status == CASESTUDY_STATUS_SUBMITTED || $submission->status == CASESTUDY_STATUS_RESUBMITTED) {
-                $course = get_course($this->cm->course);
-
-                // Send web notification to markers.
-                \mod_casestudy\notification_helper::send_submission_notification(
-                    $this->casestudy,
-                    $submission,
-                    $this->cm,
-                    $course
-                );
-
-                // Send email confirmation to learner.
-                \mod_casestudy\notification_helper::send_submission_confirmation(
-                    $this->casestudy,
-                    $submission,
-                    $this->cm,
-                    $course
-                );
+            // Notifications call message_send(), which throws when a DB transaction is
+            // open. Send them only when no transaction is active; the transactional
+            // submit path (see process_form_submission) sends them after the commit.
+            if (!$DB->is_transaction_started()) {
+                $this->send_submission_notifications($submission);
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Send the submit/resubmit notifications for a submission.
+     *
+     * Kept separate from {@see self::update_submission()} so it can run after a
+     * delegated transaction commits. message_send() refuses to run inside an open
+     * DB transaction, so notifying mid-transaction rolls the whole submission back.
+     *
+     * @param \stdClass $submission Submission row with its status already set.
+     * @return void
+     */
+    private function send_submission_notifications($submission) {
+        if (!$this->cm) {
+            return;
+        }
+
+        // Only a submitted or resubmitted case notifies; drafts stay silent.
+        if ($submission->status != CASESTUDY_STATUS_SUBMITTED
+                && $submission->status != CASESTUDY_STATUS_RESUBMITTED) {
+            return;
+        }
+
+        // Notification delivery is a best-effort side effect that runs after the
+        // submission has already been committed. A failing message processor must
+        // not surface as a submission error, so swallow and log any delivery
+        // failure rather than letting it bubble up to the "Submission failed"
+        // handler in submission.php. On a production site (debug display off)
+        // debugging() only writes to the server log, so nothing reaches output.
+        try {
+            $course = get_course($this->cm->course);
+
+            // Send web notification to markers.
+            \mod_casestudy\notification_helper::send_submission_notification(
+                $this->casestudy,
+                $submission,
+                $this->cm,
+                $course
+            );
+
+            // Send email confirmation to learner.
+            \mod_casestudy\notification_helper::send_submission_confirmation(
+                $this->casestudy,
+                $submission,
+                $this->cm,
+                $course
+            );
+        } catch (\Throwable $e) {
+            debugging('Case study submission notification failed: ' . $e->getMessage(), DEBUG_NORMAL);
+        }
     }
 
     /**
@@ -690,12 +726,20 @@ class submission_manager {
 
             // Commit transaction.
             $transaction->allow_commit();
-
-            return $submission;
         } catch (\Exception $e) {
             $transaction->rollback($e);
             throw $e;
         }
+
+        // Notifications run only after the transaction has committed and outside its
+        // try/catch. message_send() cannot run inside a transaction, and a messaging
+        // failure here must not call rollback() on the already-committed submission,
+        // which would resurface the misleading "Submission failed".
+        if ($issubmit) {
+            $this->send_submission_notifications($submission);
+        }
+
+        return $submission;
     }
 
     /**
