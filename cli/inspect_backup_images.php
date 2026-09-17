@@ -267,8 +267,8 @@ function casestudy_unreadable(string $path, bool $lenient, string $reason, bool 
  * Streaming keeps memory flat even on large backups with thousands of file records.
  *
  * @param string $filesxmlsource Path or stream readable by XMLReader.
- * @return array<string,array{count:int,images:int,bytes:int,contexts:array}>|null
- *         Per-filearea tallies, or null if files.xml could not be opened.
+ * @return array|null Per-filearea tallies (keyed by filearea, each with count, images,
+ *         bytes and contexts), or null if files.xml could not be opened.
  */
 function casestudy_tally_areas(string $filesxmlsource): ?array {
     $reader = new XMLReader();
@@ -322,7 +322,7 @@ function casestudy_tally_areas(string $filesxmlsource): ?array {
  * Print one backup's inventory and verdict, and return its outcome.
  *
  * @param array $areas Per-filearea tallies from casestudy_tally_areas().
- * @return array{0:string,1:int,2:int} [outcome, recoverablefiles, recoverableimages]
+ * @return array [outcome, recoverablefiles, recoverableimages]
  *         where outcome is 'none', 'files' or 'images'.
  */
 function casestudy_report_areas(array $areas): array {

@@ -129,7 +129,7 @@ class report_stats {
     /**
      * Resolve a submission id to the root of its resubmission chain.
      *
-     * @param array<int,int> $parentmap Submission id => immediate parent id (0 for a root).
+     * @param int[] $parentmap Submission id => immediate parent id (0 for a root).
      * @param int $id Submission id to resolve.
      * @return int Root submission (case) id.
      */

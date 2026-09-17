@@ -217,7 +217,8 @@ class richtext_field extends base_field {
      * Process and clean input value
      *
      * @param mixed $value Raw input value
-     * @return mixed Cleaned value
+     * @param object $data Full submitted form data
+     * @return field_data Cleaned value
      */
     public function process_input($value, $data): field_data {
 
@@ -255,6 +256,10 @@ class richtext_field extends base_field {
 
     /**
      * Update for submission data for form set_data
+     *
+     * @param array $formdata Form data being prepared (passed by reference).
+     * @param object $contentdata Stored content record for this field.
+     * @param string $fieldname Form element name.
      */
     public function update_submission_formdata_beforeset(&$formdata, $contentdata, $fieldname) {
         if (!empty($contentdata->content)) {
@@ -343,7 +348,6 @@ class richtext_field extends base_field {
      * Add parameter-specific form elements
      *
      * @param \MoodleQuickForm $mform Form object
-     * @param string $prefix Element name prefix
      * @return void
      */
     public function additional_form_elements(&$mform) {

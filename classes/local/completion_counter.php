@@ -39,7 +39,7 @@ class completion_counter {
      *
      * @param int $casestudyid Case study instance id.
      * @param int $userid User id.
-     * @return array<int,int> Submission id => immediate parent id (0 for a root).
+     * @return int[] Submission id => immediate parent id (0 for a root).
      */
     private static function parent_map(int $casestudyid, int $userid): array {
         global $DB;
@@ -61,7 +61,7 @@ class completion_counter {
     /**
      * Resolve a submission id to the root of its resubmission chain.
      *
-     * @param array<int,int> $parentmap Submission id => immediate parent id.
+     * @param int[] $parentmap Submission id => immediate parent id.
      * @param int $id Submission id to resolve.
      * @return int Root submission (case) id.
      */
@@ -79,7 +79,7 @@ class completion_counter {
     /**
      * Count the distinct root cases the given submission ids belong to.
      *
-     * @param array<int,int> $parentmap Submission id => immediate parent id.
+     * @param int[] $parentmap Submission id => immediate parent id.
      * @param int[] $ids Submission ids to collapse to their root cases.
      * @return int Number of distinct root cases.
      */

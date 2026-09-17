@@ -65,7 +65,7 @@ class restore_casestudy_activity_structure_step extends restore_activity_structu
      * actual files to the new submission's area.  after_execute uses these pairs to
      * propagate parent files into child areas so those images display after restore.
      *
-     * @var array<int,int>  [oldchildid => oldparentid]
+     * @var int[]  [oldchildid => oldparentid]
      */
     protected $submissionparentoldids = [];
 

@@ -196,8 +196,10 @@ class submission_manager {
         }
 
         // Only a submitted or resubmitted case notifies; drafts stay silent.
-        if ($submission->status != CASESTUDY_STATUS_SUBMITTED
-                && $submission->status != CASESTUDY_STATUS_RESUBMITTED) {
+        if (
+            $submission->status != CASESTUDY_STATUS_SUBMITTED
+            && $submission->status != CASESTUDY_STATUS_RESUBMITTED
+        ) {
             return;
         }
 

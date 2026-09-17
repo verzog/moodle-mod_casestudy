@@ -74,7 +74,8 @@ class helper {
      * Get CSS class for submission status
      *
      * @param string $status Status string
-     * @return string CSS class
+     * @param string $type Optional status subtype selector
+     * @return array Status display info (class, statusclass, iconclass, ...)
      */
     public static function get_status_info($status, $type = '') {
 

@@ -44,7 +44,7 @@ class report_table extends \table_sql {
     /** @var int Group ID for filtering. */
     protected $groupid;
 
-    /** @var array<int,string[]> Map of user id => list of group names, preloaded per page. */
+    /** @var array Map of user id => list of group names, preloaded per page. */
     protected $groupmap = [];
 
     /** @var int[]|null Group ids the viewer may see, or null when all groups are visible. */
