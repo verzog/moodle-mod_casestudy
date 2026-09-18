@@ -79,6 +79,12 @@ class send_weekly_report extends \core\task\scheduled_task {
                 continue;
             }
 
+            // A hidden course sends no notifications.
+            if (empty($course->visible)) {
+                mtrace("  Course is hidden - skipping.");
+                continue;
+            }
+
             $context = \context_module::instance($cm->id);
 
             // Get all teachers/markers who can grade.
@@ -155,6 +161,19 @@ class send_weekly_report extends \core\task\scheduled_task {
                 $submissions = $DB->get_records_sql($sql, $params);
                 if (empty($submissions)) {
                     mtrace("  No submissions for marker " . fullname($marker) . " in the past week.");
+                    continue;
+                }
+
+                // Drop submissions from students for whom notifications are suppressed (they have
+                // completed the course with no current override). The hidden-course case is already
+                // handled above.
+                foreach ($submissions as $submissionid => $submission) {
+                    if (\mod_casestudy\notification_helper::notifications_suppressed($course, $casestudy, $submission->userid)) {
+                        unset($submissions[$submissionid]);
+                    }
+                }
+                if (empty($submissions)) {
+                    mtrace("  No reportable submissions for marker " . fullname($marker) . " after suppression.");
                     continue;
                 }
 
