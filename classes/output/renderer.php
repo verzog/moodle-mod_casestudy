@@ -783,6 +783,35 @@ class renderer extends plugin_renderer_base {
 
 
     /**
+     * Render the presenter view of a submission: just the answers, for showing to a class.
+     *
+     * Reuses the submission's field export, so rich text and images render exactly as in the
+     * normal view, but deliberately excludes grades, grader feedback, history and controls.
+     *
+     * @param submission $submission Submission object.
+     * @param string $casestudyname The activity name, already cleaned for output.
+     * @return string HTML output.
+     */
+    public function presenter_view(submission $submission, $casestudyname) {
+        $data = $submission->export_for_template($this);
+
+        $fields = [];
+        foreach ($data['fields'] as $field) {
+            if (empty($field['hasvalue'])) {
+                continue;
+            }
+            $field['issectionheading'] = ($field['type'] === 'sectionheading');
+            $fields[] = $field;
+        }
+
+        return $this->render_from_template('mod_casestudy/present', [
+            'casestudyname' => $casestudyname,
+            'student' => $data['casestudyinfo']['student'],
+            'fields' => $fields,
+        ]);
+    }
+
+    /**
      * Render individual submission view
      *
      * @param submission $submission Submission object
