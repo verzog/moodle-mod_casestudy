@@ -36,17 +36,14 @@ require_login($course, false, $cm);
 
 $context = context_module::instance($cm->id);
 
-// Access control: staff with viewsubmissions can view any student; a learner may only
-// view their own summary.
-$canviewall = has_capability('mod/casestudy:viewsubmissions', $context)
-    || has_capability('mod/casestudy:viewallsubmissions', $context);
-if ($userid != $USER->id && !$canviewall) {
-    throw new required_capability_exception($context, 'mod/casestudy:viewsubmissions', 'nopermissions', '');
-}
+// Access control. Viewing another student's summary requires the staff-only
+// viewallsubmissions capability - viewsubmissions is granted to students by default, so it
+// only entitles a learner to their own summary.
+if ($userid != $USER->id) {
+    require_capability('mod/casestudy:viewallsubmissions', $context);
 
-// In separate groups mode a staff member without accessallgroups may only view students
-// who share one of their groups.
-if ($userid != $USER->id && $canviewall) {
+    // In separate groups mode a staff member without accessallgroups may only view students
+    // who share one of their groups.
     $groupmode = groups_get_activity_groupmode($cm);
     if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $context)) {
         $sharesgroup = false;
@@ -61,6 +58,12 @@ if ($userid != $USER->id && $canviewall) {
             throw new moodle_exception('nopermissions', 'error', '', get_string('viewsummary', 'mod_casestudy'));
         }
     }
+}
+
+// The summary is only meaningful for activity participants; rejecting non-participants also
+// stops the page being used to enumerate unrelated user accounts.
+if (!is_enrolled($context, $userid, 'mod/casestudy:submit')) {
+    throw new moodle_exception('nopermissions', 'error', '', get_string('viewsummary', 'mod_casestudy'));
 }
 
 $student = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);

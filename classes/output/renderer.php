@@ -454,13 +454,31 @@ class renderer extends plugin_renderer_base {
         // Progress towards completion requirements (reuses the shared completion summary).
         $completionsummary = $this->format_completion_summary($casestudy, $student->id);
 
-        // The student's root cases (exclude resubmission attempts), newest first.
-        $records = $DB->get_records_select(
+        // One row per case, showing its latest attempt. A resubmission is stored as a child
+        // whose parentid points at the previous attempt, so the newest attempt in each chain is
+        // the leaf: a record that is not itself any other record's parent.
+        $all = $DB->get_records(
             'casestudy_submissions',
-            'casestudyid = :casestudyid AND userid = :userid AND (parentid IS NULL OR parentid = 0)',
             ['casestudyid' => $casestudy->id, 'userid' => $student->id],
-            'timemodified DESC'
+            '',
+            'id, parentid, status, timemodified'
         );
+        $isparent = [];
+        foreach ($all as $record) {
+            if (!empty($record->parentid)) {
+                $isparent[(int) $record->parentid] = true;
+            }
+        }
+        $records = [];
+        foreach ($all as $record) {
+            if (empty($isparent[(int) $record->id])) {
+                $records[] = $record;
+            }
+        }
+        // Newest-modified first.
+        usort($records, function ($a, $b) {
+            return $b->timemodified <=> $a->timemodified;
+        });
 
         $submissions = [];
         foreach ($records as $record) {
