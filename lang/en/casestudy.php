@@ -327,6 +327,7 @@ $string['overridesfor'] = 'Overrides for {$a}';
 $string['overrideuser'] = 'Student';
 $string['pluginadministration'] = 'Case Study administration';
 $string['pluginname'] = 'Case Study';
+$string['presenterview'] = 'Presenter view';
 $string['preview'] = 'Preview';
 $string['previoussubmission'] = 'Previous';
 $string['privacy:feedbackfiles'] = 'Files attached to grader feedback';

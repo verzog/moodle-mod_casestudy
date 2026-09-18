@@ -718,6 +718,31 @@ class submission_table extends table_sql {
             );
         }
 
+        // Presenter view: a clean, marks-and-comments-free rendering for showing to a class,
+        // opened in a new tab. Available to the owner and to staff who can view submissions.
+        if (
+            $isownsubmission
+            || has_capability('mod/casestudy:viewallsubmissions', $this->context)
+            || has_capability('mod/casestudy:grade', $this->context)
+        ) {
+            $presenturl = new moodle_url(
+                '/mod/casestudy/present.php',
+                ['id' => $this->cm->id, 'submissionid' => $row->id]
+            );
+            $ppticon = \html_writer::tag('i', '', ['class' => 'fa fa-file-powerpoint', 'aria-hidden' => 'true'])
+                . \html_writer::span(get_string('presenterview', 'mod_casestudy'), 'sr-only');
+            $actions[] = \html_writer::link(
+                $presenturl,
+                $ppticon,
+                [
+                    'title' => get_string('presenterview', 'mod_casestudy'),
+                    'class' => 'btn btn-sm btn-outline-info',
+                    'target' => '_blank',
+                    'rel' => 'noopener',
+                ]
+            );
+        }
+
         // Delete action - use submission_manager to check if user can delete.
         $submissionmanager = \mod_casestudy\local\submission_manager::instance(
             $this->cm->instance,
