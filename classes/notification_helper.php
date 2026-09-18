@@ -381,8 +381,10 @@ class notification_helper {
     /**
      * Whether the user has completed the whole course.
      *
-     * When course completion is not configured, no completion record exists and this returns false,
-     * so notifications continue exactly as before.
+     * Only counts when course completion is actually enabled (site-wide and for the course); a
+     * course with completion switched off is never treated as "completed", even if stale
+     * course_completions rows survive from when it was on, so such courses keep their previous
+     * notification behaviour.
      *
      * @param object $course Course record.
      * @param int $userid User id.
@@ -391,6 +393,12 @@ class notification_helper {
     protected static function user_has_completed_course($course, int $userid): bool {
         global $CFG;
         require_once($CFG->libdir . '/completionlib.php');
+
+        // Completion switched off (site-wide or for this course) means "not completed".
+        $completion = new \completion_info($course);
+        if (!$completion->is_enabled()) {
+            return false;
+        }
 
         $ccompletion = new \completion_completion(['course' => $course->id, 'userid' => $userid]);
         return $ccompletion->is_complete();
