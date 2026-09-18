@@ -235,6 +235,22 @@
 
 .casestudy-submission-view .right-section {
     width: 33.3333%;
+    /* Keep the marking block in view while the (usually longer) submission column
+       scrolls, so markers don't have to scroll up and down to reach the grading
+       controls.
+       - align-self keeps the column at its content height; flex items stretch by
+         default, which would stop position: sticky from taking effect.
+       - top clears Boost's fixed top navbar (about 50px) so the card heading and
+         first controls are not hidden underneath it.
+       - max-height plus overflow let a grading form taller than the viewport (the
+         10-row feedback editor, or an advanced-grading rubric) scroll within the
+         panel, so the action buttons stay reachable without scrolling the whole
+         submission. */
+    position: sticky;
+    top: 60px;
+    align-self: flex-start;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
 }
 
 /* Prevent any image inside a submission view / template card from overflowing
