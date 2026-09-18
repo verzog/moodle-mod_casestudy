@@ -365,6 +365,12 @@ class notification_helper {
      * @return bool True when the notification must not be sent.
      */
     public static function notifications_suppressed($course, $casestudy, $userid): bool {
+        // Per-activity switch (defaults on). When off, never suppress - notifications send as
+        // they did before this feature existed.
+        if (property_exists($casestudy, 'suppressnotifications') && empty($casestudy->suppressnotifications)) {
+            return false;
+        }
+
         // A hidden course always suppresses, with no override exception.
         if (empty($course->visible)) {
             return true;

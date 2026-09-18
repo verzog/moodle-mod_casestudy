@@ -25,6 +25,21 @@ use mod_casestudy\local\image_optimizer;
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading(
+        'mod_casestudy/notificationsheading',
+        get_string('notifications', 'mod_casestudy'),
+        ''
+    ));
+
+    // Site-wide default for the per-activity "suppress notifications for hidden/completed courses"
+    // switch. Each activity can override this on its own settings page.
+    $settings->add(new admin_setting_configcheckbox(
+        'mod_casestudy/suppressnotifications',
+        get_string('suppressnotificationsdefault', 'mod_casestudy'),
+        get_string('suppressnotificationsdefault_desc', 'mod_casestudy'),
+        1
+    ));
+
+    $settings->add(new admin_setting_heading(
         'mod_casestudy/optimizeheading',
         get_string('imageoptimisation', 'mod_casestudy'),
         get_string('imageoptimisation_desc', 'mod_casestudy')

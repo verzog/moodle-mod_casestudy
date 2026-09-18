@@ -39,7 +39,7 @@ class backup_casestudy_activity_structure_step extends backup_activity_structure
             'name', 'intro', 'introformat', 'timeopen', 'timeclose',
             'maxsubmissions', 'maxattempts', 'resubmissionbased', 'requiresubmit',
             'requireacceptance', 'grade', 'hidegrader', 'graderinfo', 'graderinfoformat',
-            'notifygraders', 'notifyemail', 'notifystudentdefault',
+            'notifygraders', 'notifyemail', 'notifystudentdefault', 'suppressnotifications',
             'completionaggr', 'completionsatisfactory', 'cmpsatisfactorysubmissions',
             'completioncategory', 'singletemplate', 'formtemplate', 'csstemplate',
             'timecreated', 'timemodified',
