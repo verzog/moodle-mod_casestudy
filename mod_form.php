@@ -105,6 +105,17 @@ class mod_casestudy_mod_form extends moodleform_mod {
         $mform->setDefault('notifystudentdefault', 1);
         $mform->addHelpButton('notifystudentdefault', 'notifystudentdefault', 'mod_casestudy');
 
+        // Suppress notifications for hidden or completed courses. New activities default to the
+        // site-wide admin default; existing activities keep their stored value.
+        $suppressdefault = get_config('mod_casestudy', 'suppressnotifications');
+        $mform->addElement(
+            'selectyesno',
+            'suppressnotifications',
+            get_string('suppressnotifications', 'mod_casestudy')
+        );
+        $mform->setDefault('suppressnotifications', ($suppressdefault === false) ? 1 : (int) $suppressdefault);
+        $mform->addHelpButton('suppressnotifications', 'suppressnotifications', 'mod_casestudy');
+
         // Submission settings section.
         $mform->addElement('header', 'submissionsettings', get_string('submissionsettings', 'mod_casestudy'));
 

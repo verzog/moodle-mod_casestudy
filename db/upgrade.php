@@ -76,5 +76,28 @@ function xmldb_casestudy_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026070340, 'casestudy');
     }
 
+    if ($oldversion < 2026091801) {
+        // Add the per-activity suppressnotifications flag. Default 1 so existing activities keep
+        // suppressing notifications for hidden/completed courses, matching the shipped behaviour.
+        $table = new xmldb_table('casestudy');
+        $field = new xmldb_field(
+            'suppressnotifications',
+            XMLDB_TYPE_INTEGER,
+            '2',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            '1',
+            'notifystudentdefault'
+        );
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Casestudy savepoint reached.
+        upgrade_mod_savepoint(true, 2026091801, 'casestudy');
+    }
+
     return true;
 }

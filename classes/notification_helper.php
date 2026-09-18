@@ -42,6 +42,12 @@ class notification_helper {
             return false;
         }
 
+        // Suppress when the course is hidden or the student has completed the course
+        // (unless they hold a current override).
+        if (self::notifications_suppressed($course, $casestudy, $submission->userid)) {
+            return false;
+        }
+
         // Get the student who submitted.
         $student = $DB->get_record('user', ['id' => $submission->userid]);
         if (!$student) {
@@ -157,6 +163,12 @@ class notification_helper {
     public static function send_submission_confirmation($casestudy, $submission, $cm, $course) {
         global $DB;
 
+        // Suppress when the course is hidden or the student has completed the course
+        // (unless they hold a current override).
+        if (self::notifications_suppressed($course, $casestudy, $submission->userid)) {
+            return false;
+        }
+
         // Get the student.
         $student = $DB->get_record('user', ['id' => $submission->userid]);
         if (!$student) {
@@ -226,6 +238,12 @@ class notification_helper {
 
         // Don't send if notification is disabled.
         if (!$notifystudent) {
+            return false;
+        }
+
+        // Suppress when the course is hidden or the student has completed the course
+        // (unless they hold a current override).
+        if (self::notifications_suppressed($course, $casestudy, $submission->userid)) {
             return false;
         }
 
@@ -334,6 +352,91 @@ class notification_helper {
     }
 
     /**
+     * Decide whether case study notifications should be suppressed for a user.
+     *
+     * Notifications are suppressed when the course is hidden, or when the user has completed the
+     * whole course - unless that user has a still-current per-user override (a granted extension),
+     * which keeps their notifications flowing. A hidden course always suppresses: an override cannot
+     * re-enable notifications for a course that is switched off for everyone.
+     *
+     * @param object $course Course record (must include the visible field).
+     * @param object $casestudy Case study instance.
+     * @param int $userid The user the notification concerns.
+     * @return bool True when the notification must not be sent.
+     */
+    public static function notifications_suppressed($course, $casestudy, $userid): bool {
+        // Per-activity switch (defaults on). When off, never suppress - notifications send as
+        // they did before this feature existed.
+        if (property_exists($casestudy, 'suppressnotifications') && empty($casestudy->suppressnotifications)) {
+            return false;
+        }
+
+        // A hidden course always suppresses, with no override exception.
+        if (empty($course->visible)) {
+            return true;
+        }
+
+        // A completed course suppresses unless the user has a current override.
+        if (self::user_has_completed_course($course, (int) $userid)) {
+            return !self::user_has_current_override((int) $casestudy->id, (int) $userid);
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the user has completed the whole course.
+     *
+     * Only counts when course completion is actually enabled (site-wide and for the course); a
+     * course with completion switched off is never treated as "completed", even if stale
+     * course_completions rows survive from when it was on, so such courses keep their previous
+     * notification behaviour.
+     *
+     * @param object $course Course record.
+     * @param int $userid User id.
+     * @return bool True when Moodle records the course as complete for the user.
+     */
+    protected static function user_has_completed_course($course, int $userid): bool {
+        global $CFG;
+        require_once($CFG->libdir . '/completionlib.php');
+
+        // Completion switched off (site-wide or for this course) means "not completed".
+        $completion = new \completion_info($course);
+        if (!$completion->is_enabled()) {
+            return false;
+        }
+
+        $ccompletion = new \completion_completion(['course' => $course->id, 'userid' => $userid]);
+        return $ccompletion->is_complete();
+    }
+
+    /**
+     * Whether the user has a still-current per-user override for this case study.
+     *
+     * An override with no close date has no expiry and is always current; one with a close date is
+     * current only until that date passes.
+     *
+     * @param int $casestudyid Case study instance id.
+     * @param int $userid User id.
+     * @return bool True when a current override is in place.
+     */
+    protected static function user_has_current_override(int $casestudyid, int $userid): bool {
+        global $DB;
+
+        $override = $DB->get_record('casestudy_overrides', ['casestudyid' => $casestudyid, 'userid' => $userid]);
+        if (!$override) {
+            return false;
+        }
+
+        // A missing close date means the override has no expiry.
+        if (empty($override->timeclose)) {
+            return true;
+        }
+
+        return $override->timeclose >= time();
+    }
+
+    /**
      * Check if status change warrants notification
      * Only send when graded or status changed to resubmit, NOT for comments
      *
@@ -363,6 +466,12 @@ class notification_helper {
      */
     public static function send_learner_report($casestudy, $user, $cm, $course) {
         global $DB;
+
+        // Suppress when the course is hidden or the learner has completed the course
+        // (unless they hold a current override).
+        if (self::notifications_suppressed($course, $casestudy, $user->id)) {
+            return false;
+        }
 
         // Get completion rules.
         $completionrules = $DB->get_records(

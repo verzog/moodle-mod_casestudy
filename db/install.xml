@@ -25,6 +25,7 @@
         <FIELD NAME="notifygraders" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="notifyemail" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="notifystudentdefault" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="suppressnotifications" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="completionaggr" TYPE="int" LENGTH="9" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="completionsatisfactory" TYPE="int" LENGTH="9" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="cmpsatisfactorysubmissions" TYPE="int" LENGTH="9" NOTNULL="false" SEQUENCE="false"/>

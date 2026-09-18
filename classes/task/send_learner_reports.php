@@ -76,6 +76,12 @@ class send_learner_reports extends \core\task\scheduled_task {
                 continue;
             }
 
+            // A hidden course sends no notifications.
+            if (empty($course->visible)) {
+                mtrace("  Course is hidden - skipping.");
+                continue;
+            }
+
             $context = \context_module::instance($cm->id);
 
             // Get all enrolled students (users with submit capability).
@@ -102,6 +108,12 @@ class send_learner_reports extends \core\task\scheduled_task {
             $failed = 0;
 
             foreach ($students as $student) {
+                // Skip learners for whom notifications are suppressed (they have completed the
+                // course with no current override). Not a failure, so do not count it as one.
+                if (\mod_casestudy\notification_helper::notifications_suppressed($course, $casestudy, $student->id)) {
+                    continue;
+                }
+
                 // Send learner report.
                 try {
                     $result = \mod_casestudy\notification_helper::send_learner_report($casestudy, $student, $cm, $course);

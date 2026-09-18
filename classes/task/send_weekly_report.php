@@ -79,6 +79,12 @@ class send_weekly_report extends \core\task\scheduled_task {
                 continue;
             }
 
+            // A hidden course sends no notifications.
+            if (empty($course->visible)) {
+                mtrace("  Course is hidden - skipping.");
+                continue;
+            }
+
             $context = \context_module::instance($cm->id);
 
             // Get all teachers/markers who can grade.
@@ -91,6 +97,9 @@ class send_weekly_report extends \core\task\scheduled_task {
 
             // Check if groups are being used in this course.
             $groupmode = groups_get_activity_groupmode($cm);
+
+            // Per-learner suppression cache, scoped to this course/activity (see the filter below).
+            $suppressedcache = [];
 
             // Send report to each marker about THEIR students' submissions.
             foreach ($markers as $marker) {
@@ -155,6 +164,29 @@ class send_weekly_report extends \core\task\scheduled_task {
                 $submissions = $DB->get_records_sql($sql, $params);
                 if (empty($submissions)) {
                     mtrace("  No submissions for marker " . fullname($marker) . " in the past week.");
+                    continue;
+                }
+
+                // Drop submissions from students for whom notifications are suppressed (they have
+                // completed the course with no current override). The hidden-course case is already
+                // handled above. Memoise per learner: the same student can have several submissions
+                // in the week and be visible to several markers, and the decision only depends on
+                // the course, activity and user - so a large report avoids redundant DB lookups.
+                foreach ($submissions as $submissionid => $submission) {
+                    if (!array_key_exists($submission->userid, $suppressedcache)) {
+                        $suppressedcache[$submission->userid] =
+                            \mod_casestudy\notification_helper::notifications_suppressed(
+                                $course,
+                                $casestudy,
+                                $submission->userid
+                            );
+                    }
+                    if ($suppressedcache[$submission->userid]) {
+                        unset($submissions[$submissionid]);
+                    }
+                }
+                if (empty($submissions)) {
+                    mtrace("  No reportable submissions for marker " . fullname($marker) . " after suppression.");
                     continue;
                 }
 
