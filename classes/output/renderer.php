@@ -436,6 +436,61 @@ class renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render the per-student case study summary page.
+     *
+     * Shows the student's progress towards the activity's completion requirements and a list of
+     * their case study submissions, each linking to the full submission view.
+     *
+     * @param object $cm Course module.
+     * @param object $casestudy Case study instance.
+     * @param object $course Course record.
+     * @param \context $context Module context.
+     * @param object $student Student user record.
+     * @return string HTML output.
+     */
+    public function student_summary($cm, $casestudy, $course, $context, $student) {
+        global $DB;
+
+        // Progress towards completion requirements (reuses the shared completion summary).
+        $completionsummary = $this->format_completion_summary($casestudy, $student->id);
+
+        // The student's root cases (exclude resubmission attempts), newest first.
+        $records = $DB->get_records_select(
+            'casestudy_submissions',
+            'casestudyid = :casestudyid AND userid = :userid AND (parentid IS NULL OR parentid = 0)',
+            ['casestudyid' => $casestudy->id, 'userid' => $student->id],
+            'timemodified DESC'
+        );
+
+        $submissions = [];
+        foreach ($records as $record) {
+            $info = \mod_casestudy\local\helper::get_status_info($record->status);
+            $viewurl = new \moodle_url(
+                '/mod/casestudy/view_casestudy.php',
+                ['id' => $cm->id, 'submissionid' => $record->id]
+            );
+            $submissions[] = [
+                'statuslabel' => get_string('status_' . $record->status, 'mod_casestudy'),
+                'statusclass' => $info['statusclass'],
+                'iconclass' => $info['iconclass'],
+                'timemodified' => userdate($record->timemodified, get_string('strftimedatetime')),
+                'viewurl' => $viewurl->out(false),
+            ];
+        }
+
+        $templatecontext = [
+            'studentname' => fullname($student),
+            'userpicture' => $this->output->user_picture($student, ['size' => 48, 'courseid' => $course->id]),
+            'completionsummary' => $completionsummary,
+            'submissions' => $submissions,
+            'hassubmissions' => !empty($submissions),
+            'backurl' => (new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]))->out(false),
+        ];
+
+        return $this->render_from_template('mod_casestudy/student_summary', $templatecontext);
+    }
+
+    /**
      * Format completion summary for template
      *
      * @param object $casestudy Case study instance (contains completion criteria directly)
