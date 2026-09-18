@@ -286,7 +286,7 @@ class submission_table extends table_sql {
      * @return string HTML output
      */
     public function col_fullname($row) {
-        global $OUTPUT, $COURSE;
+        global $OUTPUT;
 
         $name = fullname($row, has_capability('moodle/site:viewfullnames', $this->get_context()));
         if ($this->download) {
@@ -294,14 +294,11 @@ class submission_table extends table_sql {
         }
 
         $userid = $row->userid;
-        if ($COURSE->id == SITEID) {
-            $profileurl = new moodle_url('/user/profile.php', ['id' => $userid]);
-        } else {
-            $profileurl = new moodle_url(
-                '/user/view.php',
-                ['id' => $userid, 'course' => $COURSE->id]
-            );
-        }
+        // The name links to this student's case study summary page, not their site profile.
+        $summaryurl = new moodle_url(
+            '/mod/casestudy/view_student.php',
+            ['id' => $this->cm->id, 'userid' => $userid]
+        );
 
         $user = (object)[
             'id' => $row->userid,
@@ -318,7 +315,7 @@ class submission_table extends table_sql {
 
         $userpicture = $OUTPUT->user_picture($user, ['size' => 35, 'courseid' => $this->cm->course]);
 
-        $namelink = \html_writer::link($profileurl, $name);
+        $namelink = \html_writer::link($summaryurl, $name);
         return \html_writer::div(
             $userpicture . ' ' . $namelink,
             'user-info d-flex align-items-center'

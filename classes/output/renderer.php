@@ -436,6 +436,79 @@ class renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render the per-student case study summary page.
+     *
+     * Shows the student's progress towards the activity's completion requirements and a list of
+     * their case study submissions, each linking to the full submission view.
+     *
+     * @param object $cm Course module.
+     * @param object $casestudy Case study instance.
+     * @param object $course Course record.
+     * @param \context $context Module context.
+     * @param object $student Student user record.
+     * @return string HTML output.
+     */
+    public function student_summary($cm, $casestudy, $course, $context, $student) {
+        global $DB;
+
+        // Progress towards completion requirements (reuses the shared completion summary).
+        $completionsummary = $this->format_completion_summary($casestudy, $student->id);
+
+        // One row per case, showing its latest attempt. A resubmission is stored as a child
+        // whose parentid points at the previous attempt, so the newest attempt in each chain is
+        // the leaf: a record that is not itself any other record's parent.
+        $all = $DB->get_records(
+            'casestudy_submissions',
+            ['casestudyid' => $casestudy->id, 'userid' => $student->id],
+            '',
+            'id, parentid, status, timemodified'
+        );
+        $isparent = [];
+        foreach ($all as $record) {
+            if (!empty($record->parentid)) {
+                $isparent[(int) $record->parentid] = true;
+            }
+        }
+        $records = [];
+        foreach ($all as $record) {
+            if (empty($isparent[(int) $record->id])) {
+                $records[] = $record;
+            }
+        }
+        // Newest-modified first.
+        usort($records, function ($a, $b) {
+            return $b->timemodified <=> $a->timemodified;
+        });
+
+        $submissions = [];
+        foreach ($records as $record) {
+            $info = \mod_casestudy\local\helper::get_status_info($record->status);
+            $viewurl = new \moodle_url(
+                '/mod/casestudy/view_casestudy.php',
+                ['id' => $cm->id, 'submissionid' => $record->id]
+            );
+            $submissions[] = [
+                'statuslabel' => get_string('status_' . $record->status, 'mod_casestudy'),
+                'statusclass' => $info['statusclass'],
+                'iconclass' => $info['iconclass'],
+                'timemodified' => userdate($record->timemodified, get_string('strftimedatetime')),
+                'viewurl' => $viewurl->out(false),
+            ];
+        }
+
+        $templatecontext = [
+            'studentname' => fullname($student),
+            'userpicture' => $this->output->user_picture($student, ['size' => 48, 'courseid' => $course->id]),
+            'completionsummary' => $completionsummary,
+            'submissions' => $submissions,
+            'hassubmissions' => !empty($submissions),
+            'backurl' => (new \moodle_url('/mod/casestudy/view.php', ['id' => $cm->id]))->out(false),
+        ];
+
+        return $this->render_from_template('mod_casestudy/student_summary', $templatecontext);
+    }
+
+    /**
      * Format completion summary for template
      *
      * @param object $casestudy Case study instance (contains completion criteria directly)

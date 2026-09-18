@@ -1,0 +1,96 @@
+{{!
+    Copyright (c) Skin Cancer College Australasia.
+    All rights reserved.
+
+    This file is part of a proprietary plugin developed by Skin Cancer
+    College Australasia for use with Moodle. It is NOT free software and is
+    NOT released under the GNU General Public License.
+
+    Unauthorised copying, distribution, modification, or use of this file,
+    in whole or in part, via any medium, is strictly prohibited without the
+    prior written permission of Skin Cancer College Australasia. The software
+    is provided "as is", without warranty of any kind, express or implied.
+}}
+{{!
+    @template mod_casestudy/student_summary
+
+    Per-student case study summary page.
+
+    Context variables required for this template:
+    * studentname - The student's full name
+    * userpicture - Rendered user picture HTML
+    * completionsummary - Completion summary context (see mod_casestudy/completion_summary)
+    * submissions - Array of the student's cases (statuslabel, statusclass, iconclass, timemodified, viewurl)
+    * hassubmissions - Boolean, whether the student has any cases
+    * backurl - URL back to the submissions list
+
+    Example context (json):
+    {
+        "studentname": "Jane Doe",
+        "userpicture": "<img src='https://example.com/u.png' alt='Jane Doe'>",
+        "completionsummary": {"hascompletion": false},
+        "submissions": [
+            {"statuslabel": "Satisfactory", "statusclass": "badge-success", "iconclass": "fa-check",
+             "timemodified": "1 Jan 2026, 10:00", "viewurl": "#"}
+        ],
+        "hassubmissions": true,
+        "backurl": "#"
+    }
+}}
+<div class="casestudy-student-summary">
+
+    <div class="d-flex align-items-center mb-3">
+        <span class="mr-2">{{{userpicture}}}</span>
+        <h3 class="mb-0">{{studentname}}</h3>
+    </div>
+
+    <p>
+        <a href="{{backurl}}" class="btn btn-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> {{#str}}backtosubmissions, mod_casestudy{{/str}}
+        </a>
+    </p>
+
+    {{#completionsummary}}
+    {{> mod_casestudy/completion_summary}}
+    {{/completionsummary}}
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h4 class="card-title">{{#str}}casestudysubmissions, mod_casestudy{{/str}}</h4>
+
+            {{#hassubmissions}}
+            <table class="table generaltable">
+                <thead>
+                    <tr>
+                        <th scope="col">{{#str}}status, core{{/str}}</th>
+                        <th scope="col">{{#str}}timemodified, mod_casestudy{{/str}}</th>
+                        <th scope="col">{{#str}}actions, core{{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#submissions}}
+                    <tr>
+                        <td>
+                            <span class="badge {{statusclass}}">
+                                <i class="fa {{iconclass}}"></i> {{statuslabel}}
+                            </span>
+                        </td>
+                        <td>{{timemodified}}</td>
+                        <td>
+                            <a href="{{viewurl}}" class="btn btn-primary btn-sm">
+                                {{#str}}view, mod_casestudy{{/str}}
+                            </a>
+                        </td>
+                    </tr>
+                    {{/submissions}}
+                </tbody>
+            </table>
+            {{/hassubmissions}}
+
+            {{^hassubmissions}}
+            <p class="text-muted"><em>{{#str}}nosubmissionsyet, mod_casestudy{{/str}}</em></p>
+            {{/hassubmissions}}
+        </div>
+    </div>
+
+</div>
