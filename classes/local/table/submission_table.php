@@ -131,8 +131,8 @@ class submission_table extends table_sql {
         $this->no_sorting('status');
         $this->no_sorting('actions'); // Disable sorting on actions column.
 
-        // Configure table properties.
-        $this->sortable(true, 'timesubmitted', SORT_DESC);
+        // Configure table properties. Default to most-recently-modified first.
+        $this->sortable(true, 'timemodified', SORT_DESC);
         $this->collapsible(false);
         $this->set_attribute('class', 'casestudy-submissions-table table table-striped table-hover');
 

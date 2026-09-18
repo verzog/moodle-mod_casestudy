@@ -235,6 +235,13 @@
 
 .casestudy-submission-view .right-section {
     width: 33.3333%;
+    /* Keep the marking block in view while the (usually longer) submission column
+       scrolls, so markers don't have to scroll up and down to reach the grading
+       controls. align-self keeps the column at its content height - flex items
+       stretch by default, which would stop position: sticky from taking effect. */
+    position: sticky;
+    top: 1rem;
+    align-self: flex-start;
 }
 
 /* Prevent any image inside a submission view / template card from overflowing
