@@ -76,14 +76,59 @@ export default class User extends UserSearch {
     /**
      * Get the data we will be searching against in this component.
      *
+     * De-duplicate by user id so a participant never appears more than once in the dropdown.
+     *
      * @returns {Promise<*>}
      */
     fetchDataset() {
-        return Repository.userFetch(casestudyID, groupID).then((r) => r);
+        return Repository.userFetch(casestudyID, groupID).then((users) => {
+            const seen = new Set();
+            return users.filter((user) => {
+                if (seen.has(user.id)) {
+                    return false;
+                }
+                seen.add(user.id);
+                return true;
+            });
+        });
+    }
+
+    /**
+     * Handle a selection in the dropdown.
+     *
+     * The individual matching names are display-only: only the "view all results" entry
+     * (value 0) runs the search and filters the submissions list to all matching cases.
+     * Selecting a specific name does nothing.
+     *
+     * @param {Event} e The change event.
+     */
+    changeHandler(e) {
+        if (e.target.value === '0') {
+            this.toggleDropdown();
+            window.location = this.selectAllResultsLink();
+        }
+    }
+
+    /**
+     * Run the search when the user presses Enter, so typing a name and pressing Enter
+     * filters the submissions list without needing to click a dropdown entry.
+     *
+     * @param {KeyboardEvent} e The keydown event.
+     */
+    keyHandler(e) {
+        if (e.key === 'Enter' && this.getSearchTerm() !== '') {
+            e.preventDefault();
+            window.location = this.selectAllResultsLink();
+            return;
+        }
+        super.keyHandler(e);
     }
 
     /**
      * Build up the link that is dedicated to a particular result.
+     *
+     * Retained for API completeness; the dropdown names are no longer interactive so this
+     * is not used by the current flow.
      *
      * @param {Number} userID The ID of the user selected.
      * @returns {string|*}
