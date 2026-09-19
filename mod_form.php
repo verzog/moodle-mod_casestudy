@@ -429,7 +429,12 @@ class mod_casestudy_mod_form extends moodleform_mod {
 
         $mform = $this->_form;
 
-        $completionunlocked = $mform->getElementValue('completionunlocked');
+        // The completionunlocked element is only present when completion is available for this
+        // module; calling getElementValue() on a missing element raises a PEAR error (fatal under
+        // PHP 8). Guard it, defaulting to unlocked so the category-rule elements aren't frozen.
+        $completionunlocked = $mform->elementExists('completionunlocked')
+            ? $mform->getElementValue('completionunlocked')
+            : 1;
 
         // If completion is locked and we have category rule elements, disable the add button.
         if (empty($completionunlocked)) {
