@@ -153,9 +153,6 @@ class list_participants extends external_api {
             );
         }
 
-        // Only expose the email address to staff who are allowed to see user identity fields.
-        $showemail = has_capability('moodle/site:viewuseridentity', $context);
-
         // Optional server-side name filter. The client fetches the whole set once and filters in
         // the browser, so this is normally empty, but honour it when supplied.
         $needle = core_text::strtolower(trim($params['filter']));
@@ -186,9 +183,6 @@ class list_participants extends external_api {
                 // Name parts drive the combobox's search-as-you-type matching.
                 $userdetails['firstname'] = $record->firstname;
                 $userdetails['lastname'] = $record->lastname;
-                if ($showemail && !empty($record->email)) {
-                    $userdetails['email'] = $record->email;
-                }
 
                 // The avatar is optional in the dropdown; never let building it break the list.
                 try {
@@ -226,7 +220,6 @@ class list_participants extends external_api {
                     'fullname' => new external_value(PARAM_NOTAGS, 'The full name of the user'),
                     'firstname' => new external_value(PARAM_NOTAGS, 'The first name of the user', VALUE_OPTIONAL),
                     'lastname' => new external_value(PARAM_NOTAGS, 'The surname of the user', VALUE_OPTIONAL),
-                    'email' => new external_value(PARAM_NOTAGS, 'Email address', VALUE_OPTIONAL),
                     'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version', VALUE_OPTIONAL),
                     'profileimageurlsmall' => new external_value(
                         PARAM_URL,
