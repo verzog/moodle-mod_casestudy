@@ -53,6 +53,9 @@ class submission_table extends table_sql {
     /** @var int $userid User filter */
     protected $userid;
 
+    /** @var string $search Free-text participant name filter. */
+    protected $search;
+
     /** @var array Columns that should be sorted as text (used by {@see construct_order_by()}). */
     protected $columntextsort = [];
 
@@ -89,6 +92,7 @@ class submission_table extends table_sql {
         global $DB, $USER;
 
         $this->userid = optional_param('userid', null, PARAM_INT);
+        $this->search = trim(optional_param('search', '', PARAM_NOTAGS));
         if (empty($this->statusfilter)) {
             $this->statusfilter = optional_param('status', '', PARAM_ALPHAEXT);
             set_user_preference('casestudy_status_filter', $this->statusfilter);
@@ -201,6 +205,20 @@ class submission_table extends table_sql {
         if (!empty($this->userid)) {
             $where .= ' AND s.userid = :useridfilter';
             $params['useridfilter'] = $this->userid;
+        }
+
+        // Free-text name search from the participant picker: match the typed text against the
+        // participant's first name, surname or full name so typing a name narrows the list.
+        if ($this->search !== '') {
+            $searchparam = '%' . $DB->sql_like_escape($this->search) . '%';
+            $fullnamesql = $DB->sql_fullname('u.firstname', 'u.lastname');
+            $where .= ' AND (' .
+                $DB->sql_like('u.firstname', ':searchfirst', false) . ' OR ' .
+                $DB->sql_like('u.lastname', ':searchlast', false) . ' OR ' .
+                $DB->sql_like($fullnamesql, ':searchfull', false) . ')';
+            $params['searchfirst'] = $searchparam;
+            $params['searchlast'] = $searchparam;
+            $params['searchfull'] = $searchparam;
         }
 
         $this->set_sql($fields, $from, $where, $params);
