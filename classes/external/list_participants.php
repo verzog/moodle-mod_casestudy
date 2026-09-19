@@ -24,7 +24,7 @@ namespace mod_casestudy\external;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/externallib.php');
-require_once("$CFG->dirroot/user/externallib.php");
+require_once($CFG->dirroot . '/user/lib.php');
 
 
 use external_api;
@@ -32,10 +32,8 @@ use external_function_parameters;
 use external_value;
 use external_single_structure;
 use external_multiple_structure;
-
-use context_module;
-use mod_casestudy\local\field_manager;
-use core_user_external;
+use core_text;
+use user_picture;
 
 /**
  * External function for updating field order
@@ -117,99 +115,91 @@ class list_participants extends external_api {
         $includeenrolments,
         $tablesort
     ) {
-        global $DB, $CFG, $PAGE;
+        global $CFG, $PAGE;
 
-        require_once($CFG->dirroot . "/user/lib.php");
+        require_once($CFG->dirroot . '/user/lib.php');
         require_once($CFG->libdir . '/grouplib.php');
 
         $params = self::validate_parameters(
             self::execute_parameters(),
             [
-                            'casestudyid' => $casestudyid,
-                            'groupid' => $groupid,
-                            'filter' => $filter,
-                            'skip' => $skip,
-                            'limit' => $limit,
-                            'onlyids' => $onlyids,
-                            'includeenrolments' => $includeenrolments,
-                            'tablesort' => $tablesort,
+                'casestudyid' => $casestudyid,
+                'groupid' => $groupid,
+                'filter' => $filter,
+                'skip' => $skip,
+                'limit' => $limit,
+                'onlyids' => $onlyids,
+                'includeenrolments' => $includeenrolments,
+                'tablesort' => $tablesort,
             ]
         );
-        $warnings = [];
 
         [$casestudy, $course, $cm, $context] = self::validate_casestudy($params['casestudyid']);
 
-        require_capability('mod/casestudy:view', $context);
+        // This service backs the grading action bar's participant picker, so restrict it to staff
+        // who may view other learners' submissions. This also stops a learner enumerating the
+        // participant list and their identity fields.
+        if (!has_any_capability(['mod/casestudy:viewallsubmissions', 'mod/casestudy:grade'], $context)) {
+            require_capability('mod/casestudy:viewallsubmissions', $context);
+        }
 
         $PAGE->set_context($context);
 
         $participants = [];
-        $coursegroups = [];
         if (groups_group_visible($params['groupid'], $course, $cm)) {
-            $participants = $casestudy->list_participants_with_filter_status_and_group($params['groupid'], $params['tablesort']);
-            $coursegroups = groups_get_all_groups($course->id);
+            $participants = $casestudy->list_participants_with_filter_status_and_group(
+                $params['groupid'],
+                $params['tablesort']
+            );
         }
 
-        $userfields = user_get_default_fields();
-        if (!$params['includeenrolments']) {
-            // Remove enrolled courses from users fields to be returned.
-            $key = array_search('enrolledcourses', $userfields);
-            if ($key !== false) {
-                unset($userfields[$key]);
-            } else {
-                throw new moodle_exception('invaliduserfield', 'error', '', 'enrolledcourses');
-            }
-        }
+        // Optional server-side name filter. The client fetches the whole set once and filters in
+        // the browser, so this is normally empty, but honour it when supplied.
+        $needle = core_text::strtolower(trim($params['filter']));
 
         $result = [];
         $index = 0;
         foreach ($participants as $record) {
-            // Preserve the fullname set by the casestudyment.
             $fullname = $record->fullname;
-            $searchable = $fullname;
-            $match = false;
-            if (empty($filter)) {
-                $match = true;
-            } else {
-                $filter = core_text::strtolower($filter);
-                $value = core_text::strtolower($searchable);
-                if (is_string($value) && (core_text::strpos($value, $filter) !== false)) {
-                    $match = true;
+
+            if ($needle !== '' && core_text::strpos(core_text::strtolower($fullname), $needle) === false) {
+                continue;
+            }
+
+            $index++;
+            if ($index <= $params['skip']) {
+                continue;
+            }
+            if ($params['limit'] > 0 && ($index - $params['skip']) > $params['limit']) {
+                break;
+            }
+
+            $userdetails = [
+                'id' => (int) $record->id,
+                'fullname' => $fullname,
+            ];
+
+            if (empty($params['onlyids'])) {
+                // Name parts drive the combobox's search-as-you-type matching.
+                $userdetails['firstname'] = $record->firstname;
+                $userdetails['lastname'] = $record->lastname;
+
+                // The avatar is optional in the dropdown; never let building it break the list.
+                try {
+                    $userpicture = new user_picture($record);
+                    $userpicture->size = 100;
+                    $userdetails['profileimageurl'] = $userpicture->get_url($PAGE)->out(false);
+                    $userpicture->size = 35;
+                    $userdetails['profileimageurlsmall'] = $userpicture->get_url($PAGE)->out(false);
+                } catch (\Throwable $e) {
+                    // Leave the image out and let the template fall back to initials.
+                    debugging('casestudy: could not build user picture: ' . $e->getMessage(), DEBUG_DEVELOPER);
                 }
             }
-            if ($match) {
-                $index++;
-                if ($index <= $params['skip']) {
-                    continue;
-                }
-                if (($params['limit'] > 0) && (($index - $params['skip']) > $params['limit'])) {
-                    break;
-                }
 
-                $userdetails = user_get_user_details($record, $course, $userfields);
-                $userdetails['fullname'] = $fullname;
-                $userdetails['submitted'] = $record->submitted;
-                $userdetails['requiregrading'] = $record->requiregrading;
-                $userdetails['grantedextension'] = $record->grantedextension;
-                $userdetails['submissionstatus'] = $record->submissionstatus;
-                if (!empty($record->groupid)) {
-                    $userdetails['groupid'] = $record->groupid;
-
-                    if (!empty($coursegroups[$record->groupid])) {
-                        // Format properly the group name.
-                        $group = $coursegroups[$record->groupid];
-                        $userdetails['groupname'] = \core_external\util::format_string($group->name, $context);
-                    }
-                }
-                // Unique id is required for blind marking.
-                $userdetails['recordid'] = -1;
-                if (!empty($record->recordid)) {
-                    $userdetails['recordid'] = $record->recordid;
-                }
-
-                $result[] = $userdetails;
-            }
+            $result[] = $userdetails;
         }
+
         return $result;
     }
 
@@ -220,71 +210,24 @@ class list_participants extends external_api {
      * @since Moodle 3.1
      */
     public static function execute_returns() {
-        // Get user description.
-        $userdesc = core_user_external::user_description();
-        $unneededproperties = [
-            'auth', 'confirmed', 'lang', 'calendartype', 'theme', 'timezone', 'mailformat',
-        ];
-        // Remove unneeded properties for consistency with the previous version.
-        foreach ($unneededproperties as $prop) {
-            unset($userdesc->keys[$prop]);
-        }
-
-        // Override property attributes for consistency with the previous version.
-        $userdesc->keys['fullname']->type = PARAM_NOTAGS;
-        $userdesc->keys['profileimageurlsmall']->required = VALUE_OPTIONAL;
-        $userdesc->keys['profileimageurl']->required = VALUE_OPTIONAL;
-        $userdesc->keys['email']->desc = 'Email address';
-        $userdesc->keys['idnumber']->desc = 'The idnumber of the user';
-        $userdesc->keys['recordid'] = new external_value(PARAM_INT, 'record id');
-
-        // Define other keys.
-        $otherkeys = [
-            'groups' => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'id' => new external_value(PARAM_INT, 'group id'),
-                        'name' => new external_value(PARAM_RAW, 'group name'),
-                        'description' => new external_value(PARAM_RAW, 'group description'),
-                    ]
-                ),
-                'user groups',
-                VALUE_OPTIONAL
-            ),
-            'roles' => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'roleid' => new external_value(PARAM_INT, 'role id'),
-                        'name' => new external_value(PARAM_RAW, 'role name'),
-                        'shortname' => new external_value(PARAM_ALPHANUMEXT, 'role shortname'),
-                        'sortorder' => new external_value(PARAM_INT, 'role sortorder'),
-                    ]
-                ),
-                'user roles',
-                VALUE_OPTIONAL
-            ),
-            'enrolledcourses' => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'id' => new external_value(PARAM_INT, 'Id of the course'),
-                        'fullname' => new external_value(PARAM_RAW, 'Fullname of the course'),
-                        'shortname' => new external_value(PARAM_RAW, 'Shortname of the course'),
-                    ]
-                ),
-                'Courses where the user is enrolled - limited by which courses the user is able to see',
-                VALUE_OPTIONAL
-            ),
-            'submitted' => new external_value(PARAM_BOOL, 'have they submitted their casestudyment'),
-            'requiregrading' => new external_value(PARAM_BOOL, 'is their submission waiting for grading'),
-            'grantedextension' => new external_value(PARAM_BOOL, 'have they been granted an extension'),
-            'submissionstatus' => new external_value(PARAM_ALPHA, 'The submission status (new, draft, reopened or submitted).
-                Empty when not submitted.', VALUE_OPTIONAL),
-            'groupid' => new external_value(PARAM_INT, 'for group casestudyments this is the group id', VALUE_OPTIONAL),
-            'groupname' => new external_value(PARAM_TEXT, 'for group casestudyments this is the group name', VALUE_OPTIONAL),
-        ];
-
-        // Merge keys.
-        $userdesc->keys = array_merge($userdesc->keys, $otherkeys);
-        return new external_multiple_structure($userdesc);
+        // A lean, self-contained shape: just what the grading action bar's participant picker
+        // needs to search and render. Building this directly keeps the service resilient to
+        // core user-description changes across Moodle upgrades.
+        return new external_multiple_structure(
+            new external_single_structure(
+                [
+                    'id' => new external_value(PARAM_INT, 'ID of the user'),
+                    'fullname' => new external_value(PARAM_NOTAGS, 'The full name of the user'),
+                    'firstname' => new external_value(PARAM_NOTAGS, 'The first name of the user', VALUE_OPTIONAL),
+                    'lastname' => new external_value(PARAM_NOTAGS, 'The surname of the user', VALUE_OPTIONAL),
+                    'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version', VALUE_OPTIONAL),
+                    'profileimageurlsmall' => new external_value(
+                        PARAM_URL,
+                        'User image profile URL - small version',
+                        VALUE_OPTIONAL
+                    ),
+                ]
+            )
+        );
     }
 }
