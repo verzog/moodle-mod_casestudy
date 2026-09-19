@@ -102,6 +102,15 @@ class submission_table extends table_sql {
             $this->groupid = optional_param('group', 0, PARAM_INT);
         }
 
+        // Preserve the active participant filters on the paging links so moving between pages of a
+        // filtered list keeps the filter.
+        if (!empty($this->userid)) {
+            $this->baseurl->param('userid', $this->userid);
+        }
+        if ($this->search !== '') {
+            $this->baseurl->param('search', $this->search);
+        }
+
         // Get fields marked as "Show in List view".
         $listfields = $DB->get_records('casestudy_fields', [
             'casestudyid' => $this->cm->instance, 'showlistview' => 1], 'sortorder ASC');
@@ -207,18 +216,27 @@ class submission_table extends table_sql {
             $params['useridfilter'] = $this->userid;
         }
 
-        // Free-text name search from the participant picker: match the typed text against the
-        // participant's first name, surname or full name so typing a name narrows the list.
+        // Free-text name search from the participant picker. Match the typed text against every
+        // name field that can appear in a displayed full name (the same fields selected for
+        // fullname() rendering), plus the first+last combination, so any name a grader can see in
+        // the picker also matches here and never yields an empty list.
         if ($this->search !== '') {
             $searchparam = '%' . $DB->sql_like_escape($this->search) . '%';
-            $fullnamesql = $DB->sql_fullname('u.firstname', 'u.lastname');
-            $where .= ' AND (' .
-                $DB->sql_like('u.firstname', ':searchfirst', false) . ' OR ' .
-                $DB->sql_like('u.lastname', ':searchlast', false) . ' OR ' .
-                $DB->sql_like($fullnamesql, ':searchfull', false) . ')';
-            $params['searchfirst'] = $searchparam;
-            $params['searchlast'] = $searchparam;
+            $namefields = [
+                'firstname', 'lastname', 'middlename', 'alternatename',
+                'firstnamephonetic', 'lastnamephonetic',
+            ];
+            $likeclauses = [];
+            foreach ($namefields as $i => $namefield) {
+                $placeholder = 'search' . $i;
+                $likeclauses[] = $DB->sql_like('u.' . $namefield, ':' . $placeholder, false);
+                $params[$placeholder] = $searchparam;
+            }
+            // Also match the combined first + last name for "first last" style queries.
+            $likeclauses[] = $DB->sql_like($DB->sql_fullname('u.firstname', 'u.lastname'), ':searchfull', false);
             $params['searchfull'] = $searchparam;
+
+            $where .= ' AND (' . implode(' OR ', $likeclauses) . ')';
         }
 
         $this->set_sql($fields, $from, $where, $params);
