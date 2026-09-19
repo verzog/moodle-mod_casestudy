@@ -36,11 +36,11 @@ $functions = [
     'mod_casestudy_list_participants' => [
         'classname'   => 'mod_casestudy\external\list_participants',
         'methodname'  => 'execute',
-        'description' => 'Update the order of case study fields',
-        'type'        => 'write',
+        'description' => 'List participants for the grading participant search',
+        'type'        => 'read',
         'ajax'        => true,
         'loginrequired' => true,
-        'capabilities' => 'mod/casestudy:managefields',
+        'capabilities' => 'mod/casestudy:viewallsubmissions',
         'services'      => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 
